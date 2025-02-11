@@ -25,7 +25,10 @@ let project = Project(
                 "Fitculator/Sources/Utils/**",
             ],
             resources: ["Fitculator/Resources/**"],
-            dependencies: []
+            dependencies: [
+                .external(name: "Alamofire"),
+                .external(name: "Kingfisher")
+            ]
         ),
         .target(
             name: "FitculatorTests",

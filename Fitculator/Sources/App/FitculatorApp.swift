@@ -4,8 +4,7 @@ import SwiftUI
 struct FitculatorApp: App {
     var body: some Scene {
         WindowGroup {
-            
-            ContentView()
+            MainTabView()
         }
     }
 }
