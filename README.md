@@ -41,4 +41,5 @@ brew install tuist
 4. Tuist가 설치되었지만 command not found가 발생한다면, 환경 변수 문제일 수 있음 명령어 실행 후, tuist가 정상적으로 실행되는지 확인
 ```
 export PATH="$HOME/.tuist/bin:$PATH"
+tuist version
 ```
