@@ -6,7 +6,7 @@ let project = Project(
       automaticSchemesOptions: .disabled,
       defaultKnownRegions: ["en", "ko"],
       developmentRegion: "ko",
-      textSettings: .textSettings(usesTabs: false, indentWidth: 2, tabWidth: 2)
+      textSettings: .textSettings(usesTabs: false, indentWidth: 4, tabWidth: 4)
     ),
     targets: [
         .target(
