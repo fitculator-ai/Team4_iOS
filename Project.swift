@@ -2,12 +2,19 @@ import ProjectDescription
 
 let project = Project(
     name: "Fitculator",
+    options: .options(
+      automaticSchemesOptions: .disabled,
+      defaultKnownRegions: ["en", "ko"],
+      developmentRegion: "ko",
+      textSettings: .textSettings(usesTabs: false, indentWidth: 2, tabWidth: 2)
+    ),
     targets: [
         .target(
             name: "Fitculator",
             destinations: .iOS,
             product: .app,
             bundleId: "io.tuist.Fitculator",
+            deploymentTargets: .iOS("16.6"),
             infoPlist: .extendingDefault(
                 with: [
                     "UILaunchScreen": [
