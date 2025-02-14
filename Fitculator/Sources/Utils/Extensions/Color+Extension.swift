@@ -26,4 +26,16 @@ extension Color {
             return Color(uiColor: UIColor(red: red, green: green, blue: blue, alpha: 1.0))
         }
     }
+    
+    static var fatigueBackgroundColor: Color {
+        get {
+            return Color(uiColor: UIColor(red: 0.80, green: 0.80, blue: 0.80, alpha: 1.00))
+        }
+    }
+    
+    static var fatigueProgressColor: Color {
+        get {
+            return Color(uiColor: UIColor(red: 0.16, green: 0.82, blue: 0.25, alpha: 1.00))
+        }
+    }
 }
