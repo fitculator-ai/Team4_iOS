@@ -31,56 +31,96 @@ struct HomeView: View {
 }
 
 // TODO: - 서버 나오면 Domain/Entities에 정의될 User에 맞춰
-struct MockData {
+// https://nilcoalescing.com/blog/UsingMeasurementsFromFoundationAsValuesInSwiftCharts/
+struct MockData: Codable, Identifiable {
+    
     // MARK: - MockData
-    static let workoutData = [
-        (name: "테니스", pct: 10),
-        (name: "HIIT", pct: 22.3),
-        (name: "러닝", pct: 5)
-    ]
+    var id = UUID()
+    var name: String
+    var pct: Double
+    
+    static func dummyData() -> [MockData] {
+        return [
+            MockData(name: "테니스", pct: 10),
+            MockData(name: "HIIT", pct: 22.3),
+            MockData(name: "러닝", pct: 5)
+        ]
+    }
 }
 
 /// 운동량 도넛 차트
 struct WorkoutDonutChart: View {
 
+    @State var selectedIndex: Int?
+    @State private var chartSize: CGSize = .zero
+    
     var body: some View {
         GeometryReader { geometry in
             
-            let totalPct = Double(MockData.workoutData.reduce(0) { $0 + $1.pct })
+            let totalPct = Double(MockData.dummyData().reduce(0) { $0 + $1.pct })
             let remainingPct = max(100 - totalPct, 0)
                         
             let chartData = totalPct < 100
-            ? MockData.workoutData + [(name: "남은 운동량", pct: remainingPct)]
-            : MockData.workoutData
+            ? MockData.dummyData() + [MockData(name: "남은 운동량", pct: remainingPct)]
+            : MockData.dummyData()
             
-            Chart(chartData, id: \.name) { element in
-                    if #available(iOS 17.0, *) {
-                        SectorMark(
-                            angle: .value("Pct", element.pct),
-                            innerRadius: .ratio(0.6),
-                            angularInset: 1
-                        )
-                        .cornerRadius(10)
-                        .foregroundStyle(element.name == "남은 운동량" ? Color.gray.opacity(0.3) : Color.blue)
-
-                    } else {
-                        //TODO: - iOS 17.0보다 낮은 버전 차트 ...
-                    }
+            Chart(chartData, id: \.id) { element in
+                SectorMark(
+                    angle: .value("Pct", element.pct),
+                    innerRadius: .ratio(0.6),
+                    angularInset: 1
+                )
+                .cornerRadius(10)
+                .foregroundStyle(element.name == "남은 운동량" ? Color.gray.opacity(0.3) : Color.blue)
+            }
+            .frame(
+                width: geometry.size.width,
+                height: geometry.size.width * 0.6,
+                alignment: .center
+            )
+            .onAppear {
+                chartSize = geometry.size
+            }
+            .chartBackground { chartProxy in
+                // TODO: - 포스언래핑 제거해야함
+                let frame = geometry[chartProxy.plotFrame!]
+                VStack {
+                    Text("\(totalPct, specifier: "%.1f") %")
+                        .font(.system(size: geometry.size.width * 0.06))
+                        .foregroundStyle(Color.white)
+                        .fontWeight(.bold)
                 }
-                .frame(width: geometry.size.width, height: geometry.size.width * 0.6, alignment: .center)
-                .chartBackground { chartProxy in
-                    let frame = geometry[chartProxy.plotAreaFrame]
-                    VStack {
-                        Text("\(totalPct, specifier: "%.1f") %")
-                            .font(.system(size: geometry.size.width * 0.06))
-                            .foregroundStyle(Color.white)
-                            .fontWeight(.bold)
-                    }
-                    .position(x: frame.midX, y: frame.midY)
-                }
-                .chartLegend(.hidden)
-                .chartXAxis(.hidden)
-                .chartYAxis(.hidden)
+                .position(x: frame.midX, y: frame.midY)
+            }
+            .chartOverlay { chart in
+                Rectangle()
+                    .fill(.primary.opacity(0.01))
+                    .containerShape(.rect)
+                    .gesture(
+                        DragGesture()
+                            .onEnded { _ in
+                                selectedIndex = nil
+                            }
+                            .onChanged { value in
+                                
+                                guard let plotFrame = chart.plotFrame else {
+                                    return
+                                }
+                                let frame = geometry[plotFrame]
+                                let startX = frame.origin.x
+                                let currentX = value.location.x - startX
+                                                    
+                                if let index: Int = chart.value(
+                                    atX: currentX
+                                ) {
+                                    selectedIndex = index
+                                }
+                            }
+                    )
+            }
+            .chartLegend(.hidden)
+            .chartXAxis(.hidden)
+            .chartYAxis(.hidden)
         }
     }
 }
@@ -88,7 +128,7 @@ struct WorkoutDonutChart: View {
 /// 포인트 합계(피로도) 차트
 struct FatigueChart: View {
     // TODO: - value 운동량 합산으로 변경
-    private let fatigueValue = 0.5
+    private let fatigueValue = 3.1
     private var maxFatigue: Int {
         let intFatigue = Int(fatigueValue * 100)
         switch intFatigue {
@@ -98,31 +138,43 @@ struct FatigueChart: View {
             return 200
         case 201 ..< 301:
             return 300
+        case 301 ..< 401:
+            return 400
         default:
             return 100
         }
     }
     
     var body: some View {
+        
         ZStack {
+            Text("\(Int(fatigueValue * 100))포인트 운동 과다!🔥")
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .offset(y: -40)
+            
             WorkoutPointBackgroundLine()
                 .trim(from: 0, to: 1)
                 .stroke(Color.fatigueBackgroundColor, style: StrokeStyle(lineWidth: 40, lineCap: .round, lineJoin: .round))
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
             
-            ProgressView(value: fatigueValue)
+            ProgressView(value: fatigueValue / 4.0)
                 .progressViewStyle(WorkoutPointProgressStyle())
             
-            // TODO: - Axis 생각 ...
-//            HStack {
-//                ForEach(
-//                    Array(stride(from: 0, to: maxFatigue + 100, by: 100)), id: \.self ) { fatigueValue in
-//                    Text("\(fatigueValue)")
-//                        .font(.caption)
-//                        .frame(maxWidth: .infinity, alignment: .center)
-//                }
-//            }
+            HStack {
+                Text("0")
+                    .font(.caption)
+                    .frame(alignment: .leading)
+                    .padding(.leading, 10)
+                        
+                Spacer()
+                Text("\(maxFatigue)") // 100, 200, 300 단위 표시
+                    .font(.caption)
+                    .frame(alignment: .trailing)
+                    .padding(.trailing, 10)
+            }
         }
     }
 }
@@ -141,7 +193,7 @@ struct WorkoutPointProgressStyle: ProgressViewStyle {
                         
             ZStack {
                 LineWithRunner()
-                    .trim(from: 0, to: fractionCompleted - 0.05)
+                    .trim(from: 0, to: fractionCompleted)
                     .stroke(
                         strokeColor,
                         style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round)
