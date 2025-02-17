@@ -32,18 +32,26 @@ struct HomeView: View {
 
 // TODO: - 서버 나오면 Domain/Entities에 정의될 User에 맞춰
 // https://nilcoalescing.com/blog/UsingMeasurementsFromFoundationAsValuesInSwiftCharts/
-struct MockData: Codable, Identifiable {
+
+enum WorkoutType {
+    case cardio
+    case weight
+    case none
+}
+
+struct MockData: Identifiable {
     
     // MARK: - MockData
     var id = UUID()
     var name: String
     var pct: Double
+    var type: WorkoutType
     
     static func dummyData() -> [MockData] {
         return [
-            MockData(name: "테니스", pct: 10),
-            MockData(name: "HIIT", pct: 22.3),
-            MockData(name: "러닝", pct: 5)
+            MockData(name: "테니스", pct: 10, type: .weight),
+            MockData(name: "HIIT", pct: 22.3, type: .weight),
+            MockData(name: "러닝", pct: 5, type: .cardio)
         ]
     }
 }
@@ -61,7 +69,7 @@ struct WorkoutDonutChart: View {
             let remainingPct = max(100 - totalPct, 0)
                         
             let chartData = totalPct < 100
-            ? MockData.dummyData() + [MockData(name: "남은 운동량", pct: remainingPct)]
+            ? MockData.dummyData() + [MockData(name: "남은 운동량", pct: remainingPct, type: .none)]
             : MockData.dummyData()
             
             Chart(chartData, id: \.id) { element in
@@ -166,15 +174,18 @@ struct FatigueChart: View {
             HStack {
                 Text("0")
                     .font(.caption)
+                    .foregroundStyle(Color.white)
                     .frame(alignment: .leading)
                     .padding(.leading, 10)
                         
                 Spacer()
                 Text("\(maxFatigue)") // 100, 200, 300 단위 표시
                     .font(.caption)
+                    .foregroundStyle(Color.white)
                     .frame(alignment: .trailing)
                     .padding(.trailing, 10)
             }
+            .offset(y: 30)
         }
     }
 }
@@ -231,12 +242,91 @@ struct WorkoutPointBackgroundLine: Shape {
     }
 }
 
+struct WorkoutCountLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        return path
+    }
+}
+
 /// 근력 횟수 차트
 struct WeeklyStrengthReps: View {
-    // MARK: - ForEach사용, 근력 횟수 2회, 운동량에서 근력운도인경우 배경색 변경.
+    
+    let weightCount = MockData.dummyData().filter { $0.type == .weight }.count
+    
     var body: some View {
-        Text("WeeklyStrengthReps")
-            .foregroundStyle(Color.white)
+        ZStack {
+            HStack {
+                Text("근력")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .offset(y: -40)
+                Spacer()
+                Text("\(weightCount) / 2")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .offset(y: -40)
+            }
+            WorkoutPointBackgroundLine()
+                .trim(from: 0, to: 1)
+                .stroke(
+                    Color.fatigueBackgroundColor,
+                    style: StrokeStyle(
+                        lineWidth: 40,
+                        lineCap: .round,
+                        lineJoin: .round
+                    )
+                )
+                .padding(.leading, 20)
+                .padding(.trailing, 20)
+            HStack{
+                WorkoutCountLine()
+                    .trim(from: 0, to: 1)
+                    .stroke(
+                        Color.gray,
+                        style: StrokeStyle(
+                            lineWidth: 25,
+                            lineCap: .round,
+                            lineJoin: .round
+                        )
+                    )
+                    .padding(.leading, 20)
+                    .padding(.trailing, 20)
+                WorkoutCountLine()
+                    .trim(from: 0, to: 1)
+                    .stroke(
+                        Color.gray,
+                        style: StrokeStyle(
+                            lineWidth: 25,
+                            lineCap: .round,
+                            lineJoin: .round
+                        )
+                    )
+                    .padding(.leading, 20)
+                    .padding(.trailing, 20)
+                
+            }
+            HStack {
+                ForEach(0..<2, id: \.self) { index in
+                    WorkoutCountLine()
+                        .trim(from: 0, to: 1)
+                        .stroke(
+                            index < weightCount ? Color.blue : Color.gray,
+                            style: StrokeStyle(
+                                lineWidth: 25,
+                                lineCap: .round,
+                                lineJoin: .round
+                            )
+                        )
+                        .padding(.leading, 20)
+                        .padding(.trailing, 20)
+                }
+            }
+        }
     }
 }
 
