@@ -20,7 +20,7 @@ struct HomeView: View {
                         .frame(width: viewWidth - 20, height: viewHeight * 0.1)
                     
                     WorkoutHistory()
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.3)
+                        .frame(width: viewWidth - 20)
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
@@ -61,6 +61,8 @@ struct WorkoutDonutChart: View {
 
     @State var selectedIndex: Int?
     @State private var chartSize: CGSize = .zero
+    @State private var selectedAngle: Double?
+    @State var selectedData: MockData?
     
     var body: some View {
         GeometryReader { geometry in
@@ -73,6 +75,7 @@ struct WorkoutDonutChart: View {
             : MockData.dummyData()
             
             Chart(chartData, id: \.id) { element in
+                let index = chartData.firstIndex(where: { $0.id == element.id }) ?? 0
                 SectorMark(
                     angle: .value("Pct", element.pct),
                     innerRadius: .ratio(0.6),
@@ -80,7 +83,8 @@ struct WorkoutDonutChart: View {
                 )
                 .cornerRadius(10)
                 .foregroundStyle(element.name == "남은 운동량" ? Color.gray.opacity(0.3) : Color.blue)
-            }
+                .opacity(selectedIndex == nil || selectedIndex == index ? 1.0 : 0.4)            }
+            .chartAngleSelection(value: $selectedAngle)
             .frame(
                 width: geometry.size.width,
                 height: geometry.size.width * 0.6,
@@ -90,40 +94,74 @@ struct WorkoutDonutChart: View {
                 chartSize = geometry.size
             }
             .chartBackground { chartProxy in
-                // TODO: - 포스언래핑 제거해야함
-                let frame = geometry[chartProxy.plotFrame!]
-                VStack {
-                    Text("\(totalPct, specifier: "%.1f") %")
-                        .font(.system(size: geometry.size.width * 0.06))
-                        .foregroundStyle(Color.white)
-                        .fontWeight(.bold)
+                if let plotFrame = chartProxy.plotFrame {
+                    let frame = geometry[plotFrame]
+                    VStack {
+                        if let index = selectedIndex {
+                            let selectedData = chartData[index]
+                            Text("\(selectedData.name) \n \(selectedData.pct, specifier: "%.0f")%")
+                                .font(.system(size: geometry.size.width * 0.05))
+                                .foregroundStyle(Color.white)
+                                .fontWeight(.bold)
+                        } else {
+                            Text("\(totalPct, specifier: "%.0f") %")
+                                .font(.system(size: geometry.size.width * 0.06))
+                                .foregroundStyle(Color.white)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    .position(x: frame.midX, y: frame.midY)
                 }
-                .position(x: frame.midX, y: frame.midY)
+                
             }
             .chartOverlay { chart in
-                Rectangle()
-                    .fill(.primary.opacity(0.01))
-                    .containerShape(.rect)
+                Rectangle() // 투명한 오버레이를 추가해 터치 이벤트 감지
+                    .fill(Color.clear)
+                    .contentShape(Rectangle())
                     .gesture(
-                        DragGesture()
-                            .onEnded { _ in
-                                selectedIndex = nil
-                            }
+                        DragGesture(minimumDistance: 0)
                             .onChanged { value in
+                                guard let plotFrame = chart.plotFrame else { return }
+                                let frame = geometry[plotFrame]
+                                let center = CGPoint(x: frame.midX, y: frame.midY)
                                 
-                                guard let plotFrame = chart.plotFrame else {
+                                // 터치 위치와 중심 사이의 벡터 계산
+                                let dx = value.location.x - center.x
+                                let dy = value.location.y - center.y
+                                let distance = sqrt(dx * dx + dy * dy)
+                                
+                                // 차트 내에서 실제 도넛 영역의 외부 반지름
+                                let outerRadius = min(frame.width, frame.height) / 2
+                                let innerRadius = outerRadius * 0.6
+                                
+                                guard distance >= innerRadius && distance <= outerRadius else {
+                                    // 도넛 외부 터치 시 선택 해제
+                                    selectedIndex = nil
                                     return
                                 }
-                                let frame = geometry[plotFrame]
-                                let startX = frame.origin.x
-                                let currentX = value.location.x - startX
-                                                    
-                                if let index: Int = chart.value(
-                                    atX: currentX
-                                ) {
-                                    selectedIndex = index
+                                
+                                // 각도 계산 (atan2: 오른쪽 0도, 위쪽 -90도)
+                                var angleInRadians = atan2(dy, dx)
+                                if angleInRadians < 0 {
+                                    angleInRadians += 2 * .pi
+                                }
+                                let angleInDegrees = angleInRadians * 180 / .pi
+                                
+                                // +90도를 하여 12시 0도 시작
+                                let normalizedAngle = (angleInDegrees + 90).truncatingRemainder(dividingBy: 360)
+                                
+                                // 각 섹터의 누적 각도를 계산하여 터치한 섹터 결정
+                                var cumulativeAngle: Double = 0
+                                for (index, data) in chartData.enumerated() {
+                                    let sectorAngle = (data.pct / 100) * 360
+                                    if normalizedAngle >= cumulativeAngle && normalizedAngle < cumulativeAngle + sectorAngle {
+                                        selectedIndex = index
+                                        break
+                                    }
+                                    cumulativeAngle += sectorAngle
                                 }
                             }
+                            .onEnded { _ in selectedIndex = nil }
                     )
             }
             .chartLegend(.hidden)
@@ -332,12 +370,156 @@ struct WeeklyStrengthReps: View {
 
 /// 나의 운동 기록 뷰
 struct WorkoutHistory: View {
-    // MARK: - List사용 (아직 생각 X)
+    
+    let workouts = [
+        WorkoutListCell(
+            workoutType: "달리기",
+            workoutDate: "11.18 오후 6:41",
+            workoutPoints: 12,
+            averageHeartRate: 90,
+            calories: 90,
+            duration: 30,
+            intensity: "매우낮음",
+            intensityColor: Color.yellow,
+            iconName: "figure.run"
+        ),
+        WorkoutListCell(
+            workoutType: "자전거",
+            workoutDate: "11.20 오전 7:30",
+            workoutPoints: 18,
+            averageHeartRate: 105,
+            calories: 150,
+            duration: 40,
+            intensity: "보통",
+            intensityColor: Color.green,
+            iconName: "bicycle"
+        ),
+        WorkoutListCell(
+            workoutType: "자전거",
+            workoutDate: "11.20 오전 7:30",
+            workoutPoints: 18,
+            averageHeartRate: 105,
+            calories: 150,
+            duration: 40,
+            intensity: "보통",
+            intensityColor: Color.green,
+            iconName: "bicycle"
+        )
+    ]
+    
     var body: some View {
-        Text("WorkoutHistory")
-            .foregroundStyle(Color.white)
+        ScrollView{
+            VStack(spacing: 10) {
+                ForEach(workouts, id: \.workoutType) { workout in
+                    workout
+                }
+            }
+        }
     }
 }
+
+// 운동 리스트 Cell
+struct WorkoutListCell: View {
+    var workoutType: String
+    var workoutDate: String
+    var workoutPoints: Int
+    var averageHeartRate: Int
+    var calories: Int
+    var duration: Int
+    var intensity: String
+    var intensityColor: Color
+    var iconName: String 
+    
+    var body: some View {
+        VStack {
+            HStack {
+                HStack {
+                    Image(systemName: iconName)
+                        .font(.title2)
+                        .frame(width: 40, height: 40)
+                        .background(Color.purple.opacity(0.8))
+                        .clipShape(Circle())
+                        .foregroundColor(.white)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(workoutType)
+                                .font(.headline)
+                                .bold()
+                                .foregroundColor(.white)
+                            Spacer()
+                            Text("\(workoutPoints) pt")
+                                .font(.title3)
+                                .bold()
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        Text(workoutDate)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            
+            Divider()
+                .background(Color.gray.opacity(0.5))
+            
+            HStack {
+                WorkoutDetailView(
+                    title: "평균 심박",
+                    value: "\(averageHeartRate) bpm"
+                )
+                Spacer()
+                WorkoutDetailView(title: "칼로리", value: "\(calories) kcal")
+                Spacer()
+                WorkoutDetailView(title: "시간", value: "\(duration) min")
+                Spacer()
+                WorkoutDetailView(
+                    title: "강도",
+                    value: intensity,
+                    textColor: intensityColor
+                )
+            }
+            .padding(.top, 5)
+        }
+        .padding()
+        .background(Color.purple.opacity(0.6))
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+    }
+}
+
+/// 운동 리스트 Cell 서브 뷰
+struct WorkoutDetailView: View {
+    var title: String
+    var value: String
+    var textColor: Color = .white
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.gray)
+                
+            Text(value)
+                .font(.subheadline)
+                .bold()
+                .foregroundColor(textColor)
+        }
+    }
+}
+
+//#Preview {
+//    WorkoutListCell(
+//        workoutType: "달리기",
+//        workoutDate: "11.18 오후 6:41",
+//        workoutPoints: 12,
+//        averageHeartRate: 90,
+//        calories: 90,
+//        duration: 30,
+//        intensity: "매우낮음",
+//        intensityColor: Color.yellow,
+//        iconName: "figure.run"
+//    )
+//}
 
 #Preview {
     HomeView()
