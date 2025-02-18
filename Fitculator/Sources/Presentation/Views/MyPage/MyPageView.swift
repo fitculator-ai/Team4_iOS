@@ -46,9 +46,6 @@ struct MyPageView: View {
                         }
                     }
                 }
-                .onAppear {
-                    
-                }
                 .navigationTitle("My") // TODO: title 색상 흰색으로 변경
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
