@@ -99,15 +99,17 @@ struct WorkoutDonutChart: View {
                     VStack {
                         if let index = selectedIndex {
                             let selectedData = chartData[index]
-                            Text("\(selectedData.name) \n \(selectedData.pct, specifier: "%.0f")%")
-                                .font(.system(size: geometry.size.width * 0.05))
+                            Text("\(selectedData.name) \n \(selectedData.pct, specifier: "%.0f")P")
+                                .font(.system(size: geometry.size.width * 0.07))
                                 .foregroundStyle(Color.white)
                                 .fontWeight(.bold)
+                                .multilineTextAlignment(.center)
                         } else {
-                            Text("\(totalPct, specifier: "%.0f") %")
-                                .font(.system(size: geometry.size.width * 0.06))
+                            Text("\(totalPct, specifier: "%.0f")P")
+                                .font(.system(size: geometry.size.width * 0.07))
                                 .foregroundStyle(Color.white)
                                 .fontWeight(.bold)
+                                .multilineTextAlignment(.center)
                         }
                     }
                     .position(x: frame.midX, y: frame.midY)
@@ -360,8 +362,8 @@ struct WeeklyStrengthReps: View {
                                 lineJoin: .round
                             )
                         )
-                        .padding(.leading, 20)
-                        .padding(.trailing, 20)
+                        .padding(.leading, index == 0 ? 20: 10)
+                        .padding(.trailing, index == 0 ? 10 : 20)
                 }
             }
         }
