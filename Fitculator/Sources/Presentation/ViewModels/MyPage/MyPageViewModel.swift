@@ -24,27 +24,3 @@ class MyPageViewModel: ObservableObject {
         }
     }
 }
-
-//enum WorkoutType {
-//    case cardio
-//    case weight
-//    case none
-//}
-//
-//struct MockData: Identifiable {
-//    
-//    // MARK: - MockData
-//    var id = UUID()
-//    var name: String
-//    var pct: Double
-//    var type: WorkoutType
-//    
-//    static func dummyData() -> [MockData] {
-//        let nameArr: [String] = ["테니스", "HIIT", "러닝", "축구", "배드민턴", "수영", "탁구", "크로스핏", "줄넘기", "야구", "코딩", "Swift", "풋살", "스쿼트", "헬스", "런닝", "경보", "걷기", "베어워크"]
-//        return [
-//            MockData(name: nameArr.randomElement()!, pct: Double.random(in: 5...50), type: .weight),
-//            MockData(name: nameArr.randomElement()!, pct: Double.random(in: 5...50), type: .weight),
-//            MockData(name: nameArr.randomElement()!, pct: 5, type: .cardio)
-//        ]
-//    }
-//}

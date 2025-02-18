@@ -19,12 +19,12 @@ extension Date {
     }
     
     /// Date() 타입을 각 format에 맞는 String으로 변환
-    /// year: "yyyy"
-    /// month: "yyyy.MM"
-    /// monthDay: "MM.dd"
-    /// day: "yyyy.MM.dd"
-    /// dayOfWeek: "yyyy.MM.dd EEEE"
-    /// time: "yyyy.MM.dd HH:MM"
+    /// - year: "yyyy"
+    /// - month: "yyyy.MM"
+    /// - monthDay: "MM.dd"
+    /// - day: "yyyy.MM.dd"
+    /// - dayOfWeek: "yyyy.MM.dd EEEE"
+    /// - time: "yyyy.MM.dd HH:MM"
     func dateToString(includeDay: IncludeDay = .dayOfWeek) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ko_KR")
