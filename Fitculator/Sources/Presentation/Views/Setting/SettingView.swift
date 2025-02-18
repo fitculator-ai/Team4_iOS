@@ -2,7 +2,14 @@ import SwiftUI
 
 struct SettingView: View {
     @State private var selectedGoal: String = ""
-    @AppStorage("selectedLang") private var selectedLang: String = Locale.current.language.languageCode?.identifier == "ko" ? "한국어" : "영어" // 언어 설정 필요
+    @AppStorage("selectedLang") private var selectedLang: String = {
+        let deviceLang = Locale.preferredLanguages.first ?? "en"
+        if deviceLang.hasPrefix("ko") {
+            return "한국어"
+        } else {
+            return "영어"
+        }
+    }()
     
     var body: some View {
         NavigationStack {
