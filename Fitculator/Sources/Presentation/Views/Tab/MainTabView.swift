@@ -31,7 +31,7 @@ struct MainTabView: View {
                 }
                 Tab("", systemImage: "plus.circle") {
                     BackgroundView {
-                        AddView()
+                        AddView(text: "입력")
                     }
                 }
                 Tab("커뮤니티", systemImage: "person.2.fill") {
@@ -56,7 +56,7 @@ struct MainTabView: View {
                         .tabItem {
                             Label("피드", systemImage: "message.fill")
                         }
-                    AddView()
+                    AddView(text: "입력")
                         .tabItem {
                             Label("+", systemImage: "plus.circle")
                         }
