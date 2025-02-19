@@ -11,10 +11,10 @@ struct HomeView: View {
             ScrollView(.vertical) {
                 VStack(spacing: 10) {
                     WorkoutDonutChart()
-                        .frame(height: viewHeight * 0.3)
+                        .frame(height: viewHeight * 0.4)
                     
                     FatigueChart()
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.2)
+                        .frame(width: viewWidth - 20, height: viewHeight * 0.13)
                     
                     WeeklyStrengthReps()
                         .frame(width: viewWidth - 20, height: viewHeight * 0.1)
@@ -78,16 +78,16 @@ struct WorkoutDonutChart: View {
                 let index = chartData.firstIndex(where: { $0.id == element.id }) ?? 0
                 SectorMark(
                     angle: .value("Pct", element.pct),
-                    innerRadius: .ratio(0.6),
+                    innerRadius: .ratio(0.5),
                     angularInset: 1
                 )
-                .cornerRadius(10)
+                .cornerRadius(40)
                 .foregroundStyle(element.name == "남은 운동량" ? Color.gray.opacity(0.3) : Color.blue)
                 .opacity(selectedIndex == nil || selectedIndex == index ? 1.0 : 0.4)            }
             .chartAngleSelection(value: $selectedAngle)
             .frame(
                 width: geometry.size.width,
-                height: geometry.size.width * 0.6,
+                height: geometry.size.width * 0.8,
                 alignment: .center
             )
             .onAppear {
@@ -134,7 +134,7 @@ struct WorkoutDonutChart: View {
                                 
                                 // 차트 내에서 실제 도넛 영역의 외부 반지름
                                 let outerRadius = min(frame.width, frame.height) / 2
-                                let innerRadius = outerRadius * 0.6
+                                let innerRadius = outerRadius * 0.5
                                 
                                 guard distance >= innerRadius && distance <= outerRadius else {
                                     // 도넛 외부 터치 시 선택 해제
