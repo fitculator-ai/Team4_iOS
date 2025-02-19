@@ -1,44 +1,7 @@
 import SwiftUI
 import Charts
 
-struct HomeView: View {
-    
-    var body: some View {
-        GeometryReader { geometry in
-            let viewWidth = geometry.size.width
-            let viewHeight = geometry.size.height
-            
-            ScrollView(.vertical) {
-                VStack(spacing: 10) {
-                    WorkoutDonutChart()
-                        .frame(height: viewHeight * 0.4)
-                    
-                    FatigueChart()
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.13)
-                    
-                    WeeklyStrengthReps()
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.1)
-                    
-                    WorkoutHistory()
-                        .frame(width: viewWidth - 20)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-            }
-            .background(Color.fitculatorBackgroundColor)
-        }
-    }
-}
-
-// TODO: - 서버 나오면 Domain/Entities에 정의될 User에 맞춰
-// https://nilcoalescing.com/blog/UsingMeasurementsFromFoundationAsValuesInSwiftCharts/
-
-enum WorkoutType {
-    case cardio
-    case weight
-    case none
-}
-
+// TODO: - MyPageView 완성되면 지우기
 struct MockData: Identifiable {
     
     // MARK: - MockData
@@ -56,26 +19,85 @@ struct MockData: Identifiable {
     }
 }
 
+enum WorkoutType {
+    case cardio
+    case weight
+    case none
+}
+
+struct WorkoutData: Identifiable {
+    let id = UUID()
+    let name: String
+    let pct: Double
+    let type: WorkoutType
+}
+
+struct HomeView: View {
+    
+    @StateObject var viewModel: HomeViewModel
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let viewWidth = geometry.size.width
+            let viewHeight = geometry.size.height
+            
+            ScrollView(.vertical) {
+                VStack(spacing: 10) {
+                    WorkoutDonutChart(user: viewModel.user)
+                        .frame(height: viewHeight * 0.4)
+                    
+                    FatigueChart()
+                        .frame(width: viewWidth - 20, height: viewHeight * 0.13)
+                    
+                    WeeklyStrengthReps(user: viewModel.user)
+                        .frame(width: viewWidth - 20, height: viewHeight * 0.1)
+                    
+                    WorkoutHistory()
+                        .frame(width: viewWidth - 20)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 10)
+            }
+            .background(Color.fitculatorBackgroundColor)
+        }
+    }
+}
+
 /// 운동량 도넛 차트
 struct WorkoutDonutChart: View {
 
     @State var selectedIndex: Int?
     @State private var chartSize: CGSize = .zero
     @State private var selectedAngle: Double?
-    @State var selectedData: MockData?
+    @State var user: User
+    
+    var traningRecords: [[Date: [TrainingRecord]]]
+    var changedTraningRecordsData: [WorkoutData]
+    var totalPct: Double // 차트 운동량을 100을 기준으로 저장되는 변수
+    let originalTotal: Double // 전체 운동량 저장 변수
+    let remainingPct: Double
+    let activeChartData: [WorkoutData]
+        
+    init(user: User) {
+        self.user = user
+        self.traningRecords = user.getTrainingRecords(for: .oneWeek)
+        let result = changeTrainingDataForChart(traningRecords)
+        self.changedTraningRecordsData = result.data
+        self.originalTotal = result.originalTotal
+        print("😇 진짜 총운동량 \(originalTotal)")
+        self.totalPct = changedTraningRecordsData.reduce(0) { $0 + $1.pct }
+        self.remainingPct = max(100 - totalPct, 0)
+        self.activeChartData = totalPct < 100
+                ? changedTraningRecordsData + [WorkoutData(name: "남은 운동량_", pct: remainingPct, type: .none)]
+                : changedTraningRecordsData
+    }
     
     var body: some View {
         GeometryReader { geometry in
             
-            let totalPct = Double(MockData.dummyData().reduce(0) { $0 + $1.pct })
-            let remainingPct = max(100 - totalPct, 0)
-                        
-            let chartData = totalPct < 100
-            ? MockData.dummyData() + [MockData(name: "남은 운동량", pct: remainingPct, type: .none)]
-            : MockData.dummyData()
-            
-            Chart(chartData, id: \.id) { element in
-                let index = chartData.firstIndex(where: { $0.id == element.id }) ?? 0
+            Chart(activeChartData, id: \.id) { element in
+                let index = activeChartData.firstIndex(where: { $0.id == element.id })
+
                 SectorMark(
                     angle: .value("Pct", element.pct),
                     innerRadius: .ratio(0.5),
@@ -83,7 +105,8 @@ struct WorkoutDonutChart: View {
                 )
                 .cornerRadius(40)
                 .foregroundStyle(element.name == "남은 운동량" ? Color.gray.opacity(0.3) : Color.blue)
-                .opacity(selectedIndex == nil || selectedIndex == index ? 1.0 : 0.4)            }
+                .opacity(selectedIndex == nil || selectedIndex == index ? 1.0 : 0.4)
+            }
             .chartAngleSelection(value: $selectedAngle)
             .frame(
                 width: geometry.size.width,
@@ -98,14 +121,13 @@ struct WorkoutDonutChart: View {
                     let frame = geometry[plotFrame]
                     VStack {
                         if let index = selectedIndex {
-                            let selectedData = chartData[index]
-                            Text("\(selectedData.name) \n \(selectedData.pct, specifier: "%.0f")P")
-                                .font(.system(size: geometry.size.width * 0.07))
+                            let selectedData = activeChartData[index]
+                            Text("\(String(selectedData.name.split(separator: "_").first ?? "")) \n \(selectedData.pct, specifier: "%.1f")P")                                .font(.system(size: geometry.size.width * 0.07))
                                 .foregroundStyle(Color.white)
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.center)
                         } else {
-                            Text("\(totalPct, specifier: "%.0f")P")
+                            Text("\(originalTotal, specifier: "%.1f")P")
                                 .font(.system(size: geometry.size.width * 0.07))
                                 .foregroundStyle(Color.white)
                                 .fontWeight(.bold)
@@ -117,61 +139,96 @@ struct WorkoutDonutChart: View {
                 
             }
             .chartOverlay { chart in
-                Rectangle() // 투명한 오버레이를 추가해 터치 이벤트 감지
-                    .fill(Color.clear)
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                guard let plotFrame = chart.plotFrame else { return }
-                                let frame = geometry[plotFrame]
-                                let center = CGPoint(x: frame.midX, y: frame.midY)
-                                
-                                // 터치 위치와 중심 사이의 벡터 계산
-                                let dx = value.location.x - center.x
-                                let dy = value.location.y - center.y
-                                let distance = sqrt(dx * dx + dy * dy)
-                                
-                                // 차트 내에서 실제 도넛 영역의 외부 반지름
-                                let outerRadius = min(frame.width, frame.height) / 2
-                                let innerRadius = outerRadius * 0.5
-                                
-                                guard distance >= innerRadius && distance <= outerRadius else {
-                                    // 도넛 외부 터치 시 선택 해제
-                                    selectedIndex = nil
-                                    return
-                                }
-                                
-                                // 각도 계산 (atan2: 오른쪽 0도, 위쪽 -90도)
-                                var angleInRadians = atan2(dy, dx)
-                                if angleInRadians < 0 {
-                                    angleInRadians += 2 * .pi
-                                }
-                                let angleInDegrees = angleInRadians * 180 / .pi
-                                
-                                // +90도를 하여 12시 0도 시작
-                                let normalizedAngle = (angleInDegrees + 90).truncatingRemainder(dividingBy: 360)
-                                
-                                // 각 섹터의 누적 각도를 계산하여 터치한 섹터 결정
-                                var cumulativeAngle: Double = 0
-                                for (index, data) in chartData.enumerated() {
-                                    let sectorAngle = (data.pct / 100) * 360
-                                    if normalizedAngle >= cumulativeAngle && normalizedAngle < cumulativeAngle + sectorAngle {
-                                        selectedIndex = index
-                                        break
-                                    }
-                                    cumulativeAngle += sectorAngle
-                                }
-                            }
-                            .onEnded { _ in selectedIndex = nil }
-                    )
+                getChartOverlay(chart: chart, geometry: geometry, data: activeChartData)
             }
             .chartLegend(.hidden)
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
         }
     }
+    
+    func getChartOverlay(chart: ChartProxy, geometry: GeometryProxy, data: [WorkoutData]) -> some View {
+        Rectangle()
+            .fill(Color.clear)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        guard let plotFrame = chart.plotFrame else { return }
+                        let frame = geometry[plotFrame]
+                        let center = CGPoint(x: frame.midX, y: frame.midY)
+                        
+                        // 터치 위치와 중심 사이의 벡터 계산
+                        let dx = value.location.x - center.x
+                        let dy = value.location.y - center.y
+                        let distance = sqrt(dx * dx + dy * dy)
+                        
+                        // 차트의 반지름 계산
+                        let outerRadius = min(frame.width, frame.height) / 2
+                        let innerRadius = outerRadius * 0.5
+                        
+                        // 도넛 영역 확인
+                        guard distance >= innerRadius && distance <= outerRadius else {
+                            selectedIndex = nil
+                            return
+                        }
+                        
+                        // 각도 계산 (12시 방향이 0도, 시계방향으로 증가)
+                        var angleInRadians = atan2(dx, -dy) // x와 -y를 사용하여 12시 방향을 0도로 설정
+                        if angleInRadians < 0 {
+                            angleInRadians += 2 * .pi
+                        }
+                        
+                        // 각도를 0-360도로 변환
+                        let angleInDegrees = angleInRadians * 180 / .pi
+                        
+                        // 섹터 찾기
+                        var cumulativeAngle: Double = 0
+                        for (index, element) in activeChartData.enumerated() {
+//                            let sectorAngle = (element.pct / 100) * 360
+                            let sectorAngle = (element.pct / 100) * 360
+                            let nextAngle = cumulativeAngle + sectorAngle
+                            
+                            // 각도가 현재 섹터 범위 내에 있는지 확인
+                            if angleInDegrees >= cumulativeAngle && angleInDegrees < nextAngle {
+                                selectedIndex = index
+                                break
+                            }
+                            cumulativeAngle = nextAngle
+                        }
+                    }
+                    .onEnded { _ in
+                        selectedIndex = nil
+                    }
+            )
+    }
 }
+
+/// [[Date: [TrainingRecord]]] -> [WorkoutData]
+func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data: [WorkoutData], originalTotal: Double) {
+    var dataDict: [String: Double] = [:]
+    
+    for week in records {
+        for (_, dailyRecords) in week {
+            for record in dailyRecords {
+                let key = "\(record.trainingName)_\(record.gained_point)"
+                dataDict[key, default: 0] += record.gained_point
+            }
+        }
+    }
+    
+    let originalTotal = dataDict.values.reduce(0, +) // 전체 운동량의 총합
+    let total = dataDict.values.reduce(0, +) // 비율 조정을 위한 totalPct
+    
+    // 전체 합이 100을 넘는 경우, 100을 기준으로 비율 조정
+    let result = dataDict.map { (key, value) -> WorkoutData in
+        let adjustedPct = value / total * 100  // 전체 합이 100을 초과하면 비율을 조정
+        return WorkoutData(name: key, pct: adjustedPct, type: .weight)
+    }
+    
+    return (result, originalTotal)
+}
+
 
 /// 포인트 합계(피로도) 차트
 struct FatigueChart: View {
@@ -294,9 +351,24 @@ struct WorkoutCountLine: Shape {
 /// 근력 횟수 차트
 struct WeeklyStrengthReps: View {
     
-    let weightCount = MockData.dummyData().filter { $0.type == .weight }.count
+    @State var user: User
+    
+    var traningRecords: [[Date: [TrainingRecord]]]
+    // traningRecords 데이터 변환
+    var changedTraningRecordsData: [WorkoutData]
+    var weightCount: Int
+    
+    init(user: User) {
+        self.user = user
+        self.traningRecords = user.getTrainingRecords(for: .oneWeek)
+        let result = changeTrainingDataForChart(traningRecords)
+        self.changedTraningRecordsData = result.data
+        self.weightCount = changedTraningRecordsData.filter { $0.type == WorkoutType.weight }.count
+        
+    }
     
     var body: some View {
+       
         ZStack {
             HStack {
                 Text("근력")
@@ -524,5 +596,5 @@ struct WorkoutDetailView: View {
 //}
 
 #Preview {
-    HomeView()
+    HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
 }
