@@ -46,7 +46,10 @@ struct MyPageView: View {
                         }
                     }
                 }
-                .navigationTitle("My")
+                .onAppear {
+                    
+                }
+                .navigationTitle("My") // TODO: title 색상 흰색으로 변경
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -109,7 +112,7 @@ struct SelectCalendarView: View {
                         // MARK: TODO - 선택하면 달력 선택
                     } label : {
                         HStack {
-                            Text(Date().dateToString(includeDay: .month))
+                            Text(Date().dateToString(includeDay: .fullMonth))
                                 .foregroundStyle(Color.white)
                             Spacer()
                             Image(systemName: "chevron.down")
@@ -143,9 +146,9 @@ struct FatigueView: View {
             Rectangle()
                 .fill(Color.brightBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                .frame(width: width * 3, height: height / 3)
+                .frame(width: width * 3, height: height / 2.5)
                 .overlay(alignment: .center, content: {
-                    FatigueChartView(viewModel: viewModel)
+                    WeeklyWorkoutGraphView(viewModel: viewModel)
                 })
         }
     }
@@ -173,71 +176,6 @@ struct WorkOutRecordView: View {
                 .overlay(alignment: .center) {
                     WorkoutRecordChartView(viewModel: viewModel)
                 }
-        }
-    }
-}
-
-struct FatigueChartView: View {
-    @ObservedObject var viewModel: MyPageViewModel
-    
-    var body: some View {
-        VStack {
-            Chart(viewModel.lineGraphMockDatas, id: \.title) { data in
-                LineMark(
-                    x: .value("Title", data.title),
-                    y: .value("Value", data.value)
-                )
-                .foregroundStyle(.orange)
-                .lineStyle(StrokeStyle(lineWidth: 3))
-                .interpolationMethod(.catmullRom)
-                .symbol() {
-                    ZStack {
-                        Circle()
-                            .fill(Color.orange)
-                            .frame(width: 10)
-
-                        if data.title == viewModel.selectedTitle {
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(Color.orange)
-                                .overlay {
-                                    Text("\(data.value) %")
-                                        .foregroundStyle(Color.white)
-                                        .font(.system(size: 12, weight: .bold))
-                                }
-                                .frame(width: 50, height: 25)
-                                .offset(y: data.value < 5 ? -20 : data.value > 95 ? 20 : 0)
-                        }
-                    }
-                }
-            }
-            .padding()
-            .chartXAxis {
-                AxisMarks { value in
-                    AxisValueLabel()
-                        
-                        .foregroundStyle(Color.white)
-                }
-            }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisValueLabel()
-                        .foregroundStyle(Color.white)
-                }
-            }
-            .chartOverlay { proxy in
-                Rectangle()
-                    .fill(Color.clear)
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                let location = value.location
-                                if let selectedDateStr: String = proxy.value(atX: location.x) {
-                                    viewModel.selectedTitle = selectedDateStr
-                                }
-                            }
-                    )
-            }
         }
     }
 }
@@ -304,3 +242,70 @@ struct WorkoutRecordChartView: View {
 #Preview {
     MyPageView()
 }
+
+/*
+ struct FatigueChartView: View {
+     @ObservedObject var viewModel: MyPageViewModel
+     
+     var body: some View {
+         VStack {
+             Chart(viewModel.lineGraphMockDatas, id: \.title) { data in
+                 LineMark(
+                     x: .value("Title", data.title),
+                     y: .value("Value", data.value)
+                 )
+                 .foregroundStyle(.orange)
+                 .lineStyle(StrokeStyle(lineWidth: 3))
+                 .interpolationMethod(.catmullRom)
+                 .symbol() {
+                     ZStack {
+                         Circle()
+                             .fill(Color.orange)
+                             .frame(width: 10)
+
+                         if data.title == viewModel.selectedTitle {
+                             RoundedRectangle(cornerRadius: 20)
+                                 .fill(Color.orange)
+                                 .overlay {
+                                     Text("\(data.value) %")
+                                         .foregroundStyle(Color.white)
+                                         .font(.system(size: 12, weight: .bold))
+                                 }
+                                 .frame(width: 50, height: 25)
+                                 .offset(y: data.value < 5 ? -20 : data.value > 95 ? 20 : 0)
+                         }
+                     }
+                 }
+             }
+             .padding()
+             .chartXAxis {
+                 AxisMarks { value in
+                     AxisValueLabel()
+                         
+                         .foregroundStyle(Color.white)
+                 }
+             }
+             .chartYAxis {
+                 AxisMarks { value in
+                     AxisValueLabel()
+                         .foregroundStyle(Color.white)
+                 }
+             }
+             .chartOverlay { proxy in
+                 Rectangle()
+                     .fill(Color.clear)
+                     .contentShape(Rectangle())
+                     .gesture(
+                         DragGesture()
+                             .onChanged { value in
+                                 let location = value.location
+                                 if let selectedDateStr: String = proxy.value(atX: location.x) {
+                                     viewModel.selectedTitle = selectedDateStr
+                                 }
+                             }
+                     )
+             }
+         }
+     }
+ }
+ */
