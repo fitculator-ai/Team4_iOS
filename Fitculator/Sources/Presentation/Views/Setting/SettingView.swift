@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SettingView: View {
+    @StateObject private var viewModel = SettingViewModel()
     @State private var selectedGoal: String = ""
     @AppStorage("selectedLang") private var selectedLang: String = {
         let deviceLang = Locale.preferredLanguages.first ?? "en"
@@ -32,28 +33,29 @@ struct SettingView: View {
                                 .foregroundStyle(.gray)
                         }
                     }
-                    NavigationLink("계정 정보", destination: AccountInfoView())
                 }
-                .listRowBackground(Color.gray.opacity(0.2))
+                .listRowBackground(Color.brightBackgroundColor)
                 
                 Section {
                     NavigationLink("공지사항", destination: NoticeView())
                     Link(destination: URL(string: "https://airtable.com/apprBZkCTk4gpMmSW/pagWPcKsiuiwaS8zs/form")!) {
                         HStack {
                             Text("문의하기")
-                        }.foregroundColor(.white)
+                        }
+                        .foregroundColor(.white)
                     }
                     Link(destination: URL(string: "https://www.fitculator.io/privacy-policy")!) {
                         HStack {
                             Text("개인정보 처리방침")
-                        }.foregroundColor(.white)
+                        }
+                        .foregroundColor(.white)
                     }
                 }
-                .listRowBackground(Color.gray.opacity(0.2))
+                .listRowBackground(Color.brightBackgroundColor)
                 
                 Section {
                     VStack(alignment: .leading, spacing: 8, content: {
-                        Text("Plus")
+                        Text("\(viewModel.user.subscriptionPlan.title)")
                             .font(.title3)
                             .fontWeight(.semibold)
                         Text("2025.02.13 - 2025.03.13")
@@ -67,7 +69,7 @@ struct SettingView: View {
                         .font(.title2)
                         .foregroundStyle(Color.white)
                 }
-                .listRowBackground(Color.gray.opacity(0.2))
+                .listRowBackground(Color.brightBackgroundColor)
             }
             .scrollContentBackground(.hidden)
             .background(Color.fitculatorBackgroundColor.opacity(1))
@@ -98,7 +100,7 @@ struct WorkoutGoalView: View {
                     selectedGoal = goal
                 }
             }
-            .listRowBackground(Color.gray.opacity(0.2))
+            .listRowBackground(Color.brightBackgroundColor)
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
@@ -127,42 +129,12 @@ struct LanguageSelectionView: View {
                     selectedLang = language
                 }
             }
-            .listRowBackground(Color.gray.opacity(0.2))
+            .listRowBackground(Color.brightBackgroundColor)
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
         .navigationTitle("언어 설정")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct AccountInfoView: View {
-    var body: some View {
-        Spacer()
-        Text("이메일: test@test.com")
-        Spacer()
-        HStack(spacing: 15) {
-            Button("로그아웃") {
-                userLogout()
-            }
-            .foregroundStyle(.red)
-            Button("회원탈퇴") {
-                userWithdraw()
-            }
-            .foregroundStyle(.gray)
-        }
-        .scrollContentBackground(.hidden)
-        .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("계정 정보")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private func userLogout() {
-        //viewModel.userLogout()
-    }
-    
-    private func userWithdraw() {
-        // viewModel.userWithdraw()
     }
 }
 
@@ -174,7 +146,7 @@ struct NoticeView: View {
     }
 }
 
-// 구독 플랜 모델
+// MARK: 구독 서비스
 struct SubscriptionPlan: Identifiable {
     let id = UUID()
     let title: String
@@ -215,7 +187,7 @@ struct PayInfoView: View {
             ForEach(subscriptionPlans) { plan in
                 SubscriptionView(plan: plan)
             }
-            .listRowBackground(Color.gray.opacity(0.2))
+            .listRowBackground(Color.brightBackgroundColor)
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor)
