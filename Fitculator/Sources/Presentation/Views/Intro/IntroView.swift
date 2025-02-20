@@ -20,7 +20,7 @@ struct IntroView: View {
                 hasLaunched = true
                 navigateToHome = true
             }) {
-                Text("로그인 하기")
+                Text("login".localized)
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()

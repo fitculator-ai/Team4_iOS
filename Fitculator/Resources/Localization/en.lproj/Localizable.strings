@@ -3,5 +3,64 @@
 "nickname" = "Nickname";
 "nickname_placeholder" = "Enter nickname";
 "gender" = "Gender";
+"male" = "Male";
+"female" = "Female";
 "height" = "Height (cm)";
 "birthdate" = "Birth Date";
+
+// IntroView
+"login" = "Log in";
+
+// AccountInfoView
+"email" = "Email";
+"logout" = "Log out";
+"withdraw" = "Withdraw account";
+"accountInfo" = "Account Info";
+
+// DeviceView
+"connectedDevice" = "Connected Device";
+"noDevice" = "No connected Bluetooth devices.";
+"gotoBluetooth" = "Go to Bluetooth Settings";
+"device" = "Device";
+"enableBluetooth" = "Please enable Bluetooth.";
+
+// EditInfoView
+"resting_heart_rate" = "Resting Heart Rate";
+"my_info" = "My Info";
+"cancel" = "Cancel";
+"save" = "Save";
+"edit" = "Edit";
+"unsaved_changes" = "Changes have not been saved.";
+"exit" = "Exit";
+"exit_without_saving" = "Exit without saving?";
+"change_profile_picture" = "Change Profile Picture";
+"take_photo" = "Take Photo";
+"choose_from_album" = "Choose from Album";
+"reset_default_image" = "Reset to Default Image";
+
+// SettingView
+"korean" = "Korean";
+"english" = "English";
+"fitness_goal" = "Fitness Goal";
+"language_setting" = "Language Setting";
+"notice" = "Notice";
+"contact_us" = "Contact Us";
+"privacy_policy" = "Privacy Policy";
+"next_billing_date" = "Next Billing Date:";
+"subscription_type" = "Subscription Type";
+"subscription_info" = "Subscription Info";
+"settings" = "Settings";
+"diet" = "Diet";
+"muscle_gain" = "Muscle Gain";
+"maintain_weight" = "Maintain Weight";
+"other_goals" = "Other Goals";
+"workout_analysis" = "Workout Calculation & Analysis";
+"fatigue_management" = "Fatigue Management";
+"fitness_chatbot" = "Fitness Chatbot (Q&A, Program Feedback, etc.)";
+"community" = "Community";
+"basic_plan" = "Includes Basic Plan Features";
+"weekly_coach_feedback" = "Weekly Coach Feedback & Monitoring";
+"plus_plan" = "Includes Plus Plan Features";
+"personal_coach" = "Assigned Personal Coach";
+"custom_workout_program" = "Personalized Workout Program (Strength, Hyrox)";
+"program_feedback" = "Program Feedback";

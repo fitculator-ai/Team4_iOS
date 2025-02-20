@@ -3,6 +3,8 @@
 "nickname" = "닉네임";
 "nickname_placeholder" = "닉네임 입력";
 "gender" = "성별";
+"male" = "남성";
+"female" = "여성";
 "height" = "키(cm)";
 "birthdate" = "생년월일";
 
@@ -14,7 +16,51 @@
 "logout" = "로그아웃";
 "withdraw" = "회원탈퇴";
 "accountInfo" = "계정 정보";
+
+// DeviceView
 "connectedDevice" = "연결된 기기";
-"nodevice" = "연결된 블루투스 기기가 없습니다.";
-"gotoSetting" = "블루투스 설정으로 이동";
+"noDevice" = "연결된 블루투스 기기가 없습니다.";
+"gotoBluetooth" = "블루투스 설정으로 이동";
 "device" = "디바이스";
+"enableBluetooth" = "블루투스를 활성화하세요.";
+
+// EditInfoView
+"resting_heart_rate" = "안정시 심박수";
+"my_info" = "내 정보";
+"cancel" = "취소";
+"save" = "저장";
+"edit" = "수정";
+"unsaved_changes" = "변경사항이 저장되지 않았습니다";
+"exit" = "나가기";
+"exit_without_saving" = "저장하지 않고 나가시겠습니까?";
+"change_profile_picture" = "프로필 사진 변경";
+"take_photo" = "사진 찍기";
+"choose_from_album" = "앨범에서 선택";
+"reset_default_image" = "기본 이미지로 변경";
+
+// SettingView
+"korean" = "한국어";
+"english" = "영어";
+"fitness_goal" = "운동 목표";
+"language_setting" = "언어 설정";
+"notice" = "공지사항";
+"contact_us" = "문의하기";
+"privacy_policy" = "개인정보 처리방침";
+"next_billing_date" = "다음 결제 예정일:";
+"subscription_type" = "구독 서비스 종류";
+"subscription_info" = "구독 정보";
+"settings" = "설정";
+"diet" = "다이어트";
+"muscle_gain" = "근육 증량";
+"maintain_weight" = "체중 유지";
+"other_goals" = "기타 목표";
+"workout_analysis" = "운동량 계산 및 분석";
+"fatigue_management" = "피로도 관리";
+"fitness_chatbot" = "피트니스 특화 챗봇 (질문 답변, 프로그램 피드백 등)";
+"community" = "커뮤니티 활동";
+"basic_plan" = "Basic 플랜 기능 포함";
+"weekly_coach_feedback" = "코치님의 위클리 피드백 & 모니터링";
+"plus_plan" = "Plus 플랜 기능 포함";
+"personal_coach" = "전담 코치 배정";
+"custom_workout_program" = "개별 운동 프로그램 제공 (근력, Hyrox)";
+"program_feedback" = "프로그램 피드백";

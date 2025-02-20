@@ -6,9 +6,9 @@ struct SettingView: View {
     @AppStorage("selectedLang") private var selectedLang: String = {
         let deviceLang = Locale.preferredLanguages.first ?? "en"
         if deviceLang.hasPrefix("ko") {
-            return "한국어"
+            return "korean".localized
         } else {
-            return "영어"
+            return "english".localized
         }
     }()
     
@@ -18,16 +18,16 @@ struct SettingView: View {
                 Section {
                     NavigationLink(destination: WorkoutGoalView(selectedGoal: $selectedGoal)) {
                         HStack {
-                            Text("운동 목표")
+                            Text("fitness_goal".localized)
                             Spacer()
                             Text(selectedGoal)
                                 .foregroundStyle(.gray)
                         }
                     }
-                    NavigationLink("디바이스", destination: DeviceView())
+                    NavigationLink("device".localized, destination: DeviceView())
                     NavigationLink(destination: LanguageSelectionView(selectedLang: $selectedLang)) {
                         HStack {
-                            Text("언어 설정")
+                            Text("language_setting".localized)
                             Spacer()
                             Text(selectedLang)
                                 .foregroundStyle(.gray)
@@ -37,16 +37,16 @@ struct SettingView: View {
                 .listRowBackground(Color.brightBackgroundColor)
                 
                 Section {
-                    NavigationLink("공지사항", destination: NoticeView())
+                    NavigationLink("notice".localized, destination: NoticeView())
                     Link(destination: URL(string: "https://airtable.com/apprBZkCTk4gpMmSW/pagWPcKsiuiwaS8zs/form")!) {
                         HStack {
-                            Text("문의하기")
+                            Text("contact_us".localized)
                         }
                         .foregroundColor(.white)
                     }
                     Link(destination: URL(string: "https://www.fitculator.io/privacy-policy")!) {
                         HStack {
-                            Text("개인정보 처리방침")
+                            Text("privacy_policy".localized)
                         }
                         .foregroundColor(.white)
                     }
@@ -60,12 +60,16 @@ struct SettingView: View {
                             .font(.title3)
                             .fontWeight(.semibold)
                         Text("2025.02.13 - 2025.03.13")
-                        Text("다음 결제 예정일: 2025.03.14")
+                        HStack {
+                            Text("next_billing_date".localized)
+                            Spacer()
+                            Text("2025.03.14")
+                        }
                             .foregroundStyle(Color.gray)
                     })
-                    NavigationLink("구독 서비스 종류", destination: PayInfoView())
+                    NavigationLink("subscription_type".localized, destination: PayInfoView())
                 } header: {
-                    Text("구독 정보")
+                    Text("subscription_info".localized)
                         .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                         .font(.title2)
                         .foregroundStyle(Color.white)
@@ -75,7 +79,7 @@ struct SettingView: View {
             .scrollContentBackground(.hidden)
             .background(Color.fitculatorBackgroundColor.opacity(1))
         }
-        .navigationTitle("설정")
+        .navigationTitle("settings".localized)
         .navigationBarTitleDisplayMode(.inline)
         .preferredColorScheme(.dark)
     }
@@ -83,7 +87,7 @@ struct SettingView: View {
 
 struct WorkoutGoalView: View {
     @Binding var selectedGoal: String
-    let goals = ["다이어트", "근육 증량", "체중 유지", "기타목표"]
+    let goals = ["diet".localized, "muscle_gain".localized, "maintain_weight".localized, "other_goals".localized]
     
     var body: some View {
         List {
@@ -105,14 +109,14 @@ struct WorkoutGoalView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("운동 목표")
+        .navigationTitle("fitness_goal".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 struct LanguageSelectionView: View {
     @Binding var selectedLang: String
-    let languages = ["한국어", "영어"]
+    let languages = ["korean".localized, "english".localized]
     
     var body: some View {
         List {
@@ -134,7 +138,7 @@ struct LanguageSelectionView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("언어 설정")
+        .navigationTitle("language_setting".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -142,7 +146,7 @@ struct LanguageSelectionView: View {
 struct NoticeView: View {
     var body: some View {
         Text("공지사항입니다~")
-            .navigationTitle("공지사항")
+            .navigationTitle("notice".localized)
             .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -158,26 +162,26 @@ let subscriptionPlans: [SubscriptionPlan] = [
     SubscriptionPlan(
         title: "Basic",
         features: [
-            "운동량 계산 및 분석",
-            "피로도 관리",
-            "피트니스 특화 챗봇 (질문 답변, 프로그램 피드백 등)",
-            "커뮤니티 활동"
+            "workout_analysis".localized,
+            "fatigue_management".localized,
+            "fitness_chatbot".localized,
+            "community".localized
         ]
     ),
     SubscriptionPlan(
         title: "Plus",
         features: [
-            "Basic 플랜 기능 포함",
-            "코치님의 위클리 피드백 & 모니터링"
+            "basic_plan".localized,
+            "weekly_coach_feedback".localized
         ]
     ),
     SubscriptionPlan(
         title: "Pro",
         features: [
-            "Plus 플랜 기능 포함",
-            "전담 코치 배정",
-            "개별 운동 프로그램 제공 (근력, Hyrox)",
-            "프로그램 피드백"
+            "plus_plan".localized,
+            "personal_coach".localized,
+            "custom_workout_program".localized,
+            "program_feedback".localized
         ]
     )
 ]
@@ -193,7 +197,7 @@ struct PayInfoView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor)
-        .navigationTitle("구독 서비스 종류")
+        .navigationTitle("subscription_type".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

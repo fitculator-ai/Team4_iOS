@@ -17,7 +17,7 @@ struct EditInfoView: View {
             // MARK: 안정시 심박수(운동고민, 운동목표 추가 고려중)
             Section {
                 HStack {
-                    Text("안정시 심박수")
+                    Text("resting_heart_rate".localized)
                     Spacer()
                     if viewModel.isEditing {
                         Picker("", selection: $viewModel.tempUser.restHR) {
@@ -35,19 +35,19 @@ struct EditInfoView: View {
             }
             
             // MARK: 계정 정보
-            NavigationLink("계정 정보", destination: AccountInfoView())
+            NavigationLink("accountInfo".localized, destination: AccountInfoView())
                 .listRowBackground(Color.brightBackgroundColor)
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("내 정보")
+        .navigationTitle("my_info".localized)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(viewModel.isEditing)
         .preferredColorScheme(.dark)
         .toolbar {
             if viewModel.isEditing {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("취소") {
+                    Button("cancel".localized) {
                         if viewModel.hasChanges() {
                             showDiscardAlert = true
                         } else {
@@ -58,7 +58,7 @@ struct EditInfoView: View {
             }
             
             ToolbarItem(placement: .topBarTrailing) {
-                Button(viewModel.isEditing ? "저장" : "수정") {
+                Button(viewModel.isEditing ? "save".localized : "edit".localized) {
                     if viewModel.isEditing {
                         viewModel.updateUserInfo()
                     }
@@ -67,13 +67,13 @@ struct EditInfoView: View {
                 .disabled(viewModel.tempUser.nickName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
-        .alert("변경사항이 저장되지 않았습니다.", isPresented: $showDiscardAlert) {
-            Button("나가기", role: .destructive) {
+        .alert("unsaved_changes".localized, isPresented: $showDiscardAlert) {
+            Button("exit".localized, role: .destructive) {
                 cancelEditing()
             }
-            Button("취소", role: .cancel) {}
+            Button("cancel".localized, role: .cancel) {}
         } message: {
-            Text("저장하지 않고 나가시겠습니까?")
+            Text("exit_without_saving".localized)
         }
         .sheet(isPresented: $viewModel.showImagePicker) {
             ImagePicker(image: $viewModel.tempUIImage, sourceType: .photoLibrary)
@@ -173,14 +173,14 @@ struct ProfileImageSection: View {
                     }
                 }
                 .actionSheet(isPresented: $viewModel.showActionSheet) {
-                    ActionSheet(title: Text("프로필 사진 변경"), buttons: [
-                        .default(Text("사진 찍기")) {
+                    ActionSheet(title: Text("change_profile_picture".localized), buttons: [
+                        .default(Text("take_photo".localized)) {
                             viewModel.checkPermissions(for: .camera)
                         },
-                        .default(Text("앨범에서 선택")) {
+                        .default(Text("choose_from_album".localized)) {
                             viewModel.checkPermissions(for: .photoLibrary)
                         },
-                        .destructive(Text("기본 이미지로 변경")) {
+                        .destructive(Text("reset_default_image".localized)) {
                             viewModel.tempUIImage = nil
                         },
                         .cancel()

@@ -14,8 +14,16 @@ struct User {
     var subscriptionPlan: SubscriptionPlan
 
     enum Gender: String {
-        case M = "남성"
-        case F = "여성"
+        case M
+        case F
+        var localized: String {
+            switch self {
+            case .M:
+                return "male".localized
+            case .F:
+                return "female".localized
+            }
+        }
     }
     
     init() {
