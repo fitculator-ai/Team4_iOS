@@ -22,7 +22,7 @@ struct MainTabView: View {
             TabView {
                 Tab("홈", systemImage: "house.fill") {
                     BackgroundView {
-                        HomeView()
+                        HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
                     }
                 }
                 Tab("피드", systemImage: "message.fill") {
