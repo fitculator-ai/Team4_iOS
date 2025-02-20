@@ -20,7 +20,7 @@ struct MainTabView: View {
         if #available(iOS 18.0, *) {
             ZStack {
                 TabView {
-                    Tab("홈", systemImage: "house.fill") {
+                    Tab("home".localized, systemImage: "house.fill") {
                         BackgroundView {
                             HomeView(
                                 viewModel: HomeViewModel(
@@ -31,7 +31,7 @@ struct MainTabView: View {
                             )
                         }
                     }
-                    Tab("피드", systemImage: "message.fill") {
+                    Tab("feed".localized, systemImage: "message.fill") {
                         BackgroundView {
                             FeedView()
                         }
@@ -41,12 +41,12 @@ struct MainTabView: View {
 
                     }
                 
-                    Tab("커뮤니티", systemImage: "person.2.fill") {
+                    Tab("community".localized, systemImage: "person.2.fill") {
                         BackgroundView {
                             CommunityView()
                         }
                     }
-                    Tab("마이페이지", systemImage: "person.fill") {
+                    Tab("myPage".localized, systemImage: "person.fill") {
                         BackgroundView {
                             MyPageView()
                         }

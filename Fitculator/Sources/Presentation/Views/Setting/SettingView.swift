@@ -3,14 +3,7 @@ import SwiftUI
 struct SettingView: View {
     @StateObject private var viewModel = SettingViewModel()
     @State private var selectedGoal: String = ""
-    @AppStorage("selectedLang") private var selectedLang: String = {
-        let deviceLang = Locale.preferredLanguages.first ?? "en"
-        if deviceLang.hasPrefix("ko") {
-            return "korean".localized
-        } else {
-            return "english".localized
-        }
-    }()
+    @State private var showLanguageAlert = false
     
     var body: some View {
         NavigationStack {
@@ -25,11 +18,11 @@ struct SettingView: View {
                         }
                     }
                     NavigationLink("device".localized, destination: DeviceView())
-                    NavigationLink(destination: LanguageSelectionView(selectedLang: $selectedLang)) {
+                    NavigationLink(destination: LanguageSelectionView(viewModel: viewModel, showLanguageAlert: $showLanguageAlert)) {
                         HStack {
                             Text("language_setting".localized)
                             Spacer()
-                            Text(selectedLang)
+                            Text(viewModel.selectedLanguage)
                                 .foregroundStyle(.gray)
                         }
                     }
@@ -82,6 +75,9 @@ struct SettingView: View {
         .navigationTitle("settings".localized)
         .navigationBarTitleDisplayMode(.inline)
         .preferredColorScheme(.dark)
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LanguageChanged"))) { _ in
+            showLanguageAlert = true
+        }
     }
 }
 
@@ -115,8 +111,11 @@ struct WorkoutGoalView: View {
 }
 
 struct LanguageSelectionView: View {
-    @Binding var selectedLang: String
-    let languages = ["korean".localized, "english".localized]
+    @ObservedObject var viewModel: SettingViewModel
+    @Binding var showLanguageAlert: Bool
+    @Environment(\.presentationMode) var presentationMode
+    
+    let languages = ["한국어", "English"]
     
     var body: some View {
         List {
@@ -124,14 +123,14 @@ struct LanguageSelectionView: View {
                 HStack {
                     Text("\(language)")
                     Spacer()
-                    if selectedLang == language {
+                    if viewModel.selectedLanguage == language {
                         Image(systemName: "checkmark")
                             .foregroundStyle(Color.tabButtonColor)
                     }
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    selectedLang = language
+                    viewModel.changeLanguage(to: language)
                 }
             }
             .listRowBackground(Color.brightBackgroundColor)
@@ -140,6 +139,13 @@ struct LanguageSelectionView: View {
         .background(Color.fitculatorBackgroundColor.opacity(1))
         .navigationTitle("language_setting".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .alert("language_changed_title".localized, isPresented: $showLanguageAlert) {
+                    Button("ok".localized, role: .cancel) {
+                        exit(0)
+                    }
+        } message: {
+            Text("restart_app_message".localized)
+        }
     }
 }
 
@@ -165,7 +171,7 @@ let subscriptionPlans: [SubscriptionPlan] = [
             "workout_analysis".localized,
             "fatigue_management".localized,
             "fitness_chatbot".localized,
-            "community".localized
+            "communityAct".localized
         ]
     ),
     SubscriptionPlan(

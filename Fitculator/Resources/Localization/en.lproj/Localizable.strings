@@ -39,8 +39,6 @@
 "reset_default_image" = "Reset to Default Image";
 
 // SettingView
-"korean" = "Korean";
-"english" = "English";
 "fitness_goal" = "Fitness Goal";
 "language_setting" = "Language Setting";
 "notice" = "Notice";
@@ -64,3 +62,19 @@
 "personal_coach" = "Assigned Personal Coach";
 "custom_workout_program" = "Personalized Workout Program (Strength, Hyrox)";
 "program_feedback" = "Program Feedback";
+"language_changed_title" = "Language Changed";
+"restart_app_message" = "Please restart the app to apply changes";
+"ok" = "OK";
+
+// MainTab
+"home" = "HOME";
+"feed" = "FEED";
+"community" = "COMMUNITY";
+"myPage" = "MY";
+
+//SettingViewModel
+"camera_permission_needed" = "Camera Permission Needed";
+"camera_permission_message" = "Please allow access in Settings to use the camera.";
+"photo_permission_needed" = "Photo Access Permission Needed";
+"photo_permission_message" = "Please allow access in Settings to select a photo.";
+"go_to_settings" = "Go to Settings";

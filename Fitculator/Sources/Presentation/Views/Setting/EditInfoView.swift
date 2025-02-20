@@ -186,6 +186,16 @@ struct ProfileImageSection: View {
                         .cancel()
                     ])
                 }
+                .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
+                    Button("go_to_settings".localized) {
+                        if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(settingsURL)
+                        }
+                    }
+                    Button("cancel".localized, role: .cancel) { }
+                } message: {
+                    Text(viewModel.alertMessage)
+                }
             }
             .frame(maxWidth: .infinity)
             .listRowBackground(Color.clear)

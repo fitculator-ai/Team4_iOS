@@ -14,7 +14,14 @@ class SettingViewModel: ObservableObject {
     @Published var profileUIImage: UIImage?
     @Published var tempUIImage: UIImage?
     
+    @Published var languageCode: String
+    @Published var showAlert: Bool = false
+    @Published var alertTitle: String = ""
+    @Published var alertMessage: String = ""
+    
     init() {
+        let savedLanguageCode = SettingViewModel.getSavedLanguageCode()
+        self.languageCode = savedLanguageCode
         loadProfileImage()
     }
     
@@ -109,6 +116,7 @@ class SettingViewModel: ObservableObject {
         }
     }
     
+    // 카메라 권한 확인
     private func checkCameraPermission() {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         switch status {
@@ -126,13 +134,14 @@ class SettingViewModel: ObservableObject {
             }
         case .denied, .restricted:
             DispatchQueue.main.async {
-                self.showSettingsAlert(title: "카메라 권한 필요", message: "카메라를 사용하려면 설정에서 권한을 허용해주세요.")
+                self.showSettingsAlert(title: "camera_permission_needed".localized, message: "camera_permission_message".localized)
             }
         @unknown default:
             break
         }
     }
     
+    // 라이브러리 권한 확인
     private func checkPhotoLibraryPermission() {
         let status = PHPhotoLibrary.authorizationStatus()
         switch status {
@@ -150,30 +159,56 @@ class SettingViewModel: ObservableObject {
             }
         case .denied, .restricted:
             DispatchQueue.main.async {
-                self.showSettingsAlert(title: "사진 접근 권한 필요", message: "사진을 선택하려면 설정에서 권한을 허용해주세요.")
+                self.showSettingsAlert(title: "photo_permission_needed".localized, message: "photo_permission_message".localized)
             }
         @unknown default:
             break
         }
     }
     
+    // 권한 설정을 위한 이동 alert
     private func showSettingsAlert(title: String, message: String) {
-        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
-        
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "설정으로 이동", style: .default) { _ in
-            UIApplication.shared.open(settingsURL)
-        })
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-        
-        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let topVC = scene.windows.first?.rootViewController {
-            topVC.present(alert, animated: true)
-        }
+        self.alertTitle = title.localized
+        self.alertMessage = message.localized
+        self.showAlert = true
     }
     
+    // 닉네임 필터링
     func filterNickname(_ input: String) -> String {
         let filtered = input.filter { $0.isLetter || $0.isNumber } // 영문 & 숫자만 허용
         return String(filtered.prefix(10)) // 최대 10자 제한
+    }
+    
+    // MARK: 언어 변경
+    var selectedLanguage: String {
+        return languageCode == "ko" ? "한국어" : "English"
+    }
+    
+    func changeLanguage(to language: String) {
+        if language == "한국어" {
+            languageCode = "ko"
+        } else {
+            languageCode = "en"
+        }
+        
+        // 시스템에 언어 변경 적용
+        UserDefaults.standard.set(languageCode, forKey: "languageCode")
+        UserDefaults.standard.set([languageCode], forKey: "AppleLanguages")
+        UserDefaults.standard.synchronize()
+        
+        // 언어 변경 alert 띄우기 위한 노티
+        NotificationCenter.default.post(name: NSNotification.Name("LanguageChanged"), object: nil)
+    }
+    
+    // 언어 받아오기
+    private static func getSavedLanguageCode() -> String {
+        if let savedLanguageCode = UserDefaults.standard.string(forKey: "languageCode") {
+            return savedLanguageCode
+        } else {
+            let deviceLang = Locale.preferredLanguages.first ?? "en"
+            let defaultLang = deviceLang.hasPrefix("ko") ? "ko" : "en"
+            UserDefaults.standard.set(defaultLang, forKey: "languageCode")
+            return defaultLang
+        }
     }
 }

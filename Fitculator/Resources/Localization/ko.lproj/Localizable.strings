@@ -39,8 +39,6 @@
 "reset_default_image" = "기본 이미지로 변경";
 
 // SettingView
-"korean" = "한국어";
-"english" = "영어";
 "fitness_goal" = "운동 목표";
 "language_setting" = "언어 설정";
 "notice" = "공지사항";
@@ -57,10 +55,26 @@
 "workout_analysis" = "운동량 계산 및 분석";
 "fatigue_management" = "피로도 관리";
 "fitness_chatbot" = "피트니스 특화 챗봇 (질문 답변, 프로그램 피드백 등)";
-"community" = "커뮤니티 활동";
+"communityAct" = "커뮤니티 활동";
 "basic_plan" = "Basic 플랜 기능 포함";
 "weekly_coach_feedback" = "코치님의 위클리 피드백 & 모니터링";
 "plus_plan" = "Plus 플랜 기능 포함";
 "personal_coach" = "전담 코치 배정";
 "custom_workout_program" = "개별 운동 프로그램 제공 (근력, Hyrox)";
 "program_feedback" = "프로그램 피드백";
+"language_changed_title" = "언어 설정 변경";
+"restart_app_message" = "변경사항을 적용하려면 앱을 재시작하세요";
+"ok" = "확인";
+
+// MainTab
+"home" = "홈";
+"feed" = "피드";
+"community" = "커뮤니티";
+"myPage" = "마이페이지";
+
+//SettingViewModel
+"camera_permission_needed" = "카메라 권한 필요";
+"camera_permission_message" = "카메라를 사용하려면 설정에서 권한을 허용해주세요.";
+"photo_permission_needed" = "사진 접근 권한 필요";
+"photo_permission_message" = "사진을 선택하려면 설정에서 권한을 허용해주세요.";
+"go_to_settings" = "설정으로 이동";
