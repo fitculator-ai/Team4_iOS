@@ -62,9 +62,10 @@
 "personal_coach" = "Assigned Personal Coach";
 "custom_workout_program" = "Personalized Workout Program (Strength, Hyrox)";
 "program_feedback" = "Program Feedback";
-"language_changed_title" = "Language Changed";
-"restart_app_message" = "Please restart the app to apply changes";
-"ok" = "OK";
+
+"language_changed_title" = "언어 설정 변경";
+"restart_app_message" = "변경사항을 적용하려면 앱을 재시작하세요";
+"ok" = "확인";
 
 // MainTab
 "home" = "HOME";

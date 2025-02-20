@@ -55,7 +55,6 @@ struct SettingView: View {
                         Text("2025.02.13 - 2025.03.13")
                         HStack {
                             Text("next_billing_date".localized)
-                            Spacer()
                             Text("2025.03.14")
                         }
                             .foregroundStyle(Color.gray)
