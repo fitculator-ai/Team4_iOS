@@ -27,6 +27,9 @@ struct UserInfoView: View {
                         .textFieldStyle(DefaultTextFieldStyle())
                         .frame(width: 150)
                         .multilineTextAlignment(.trailing)
+                        .onChange(of: viewModel.tempUser.nickName) {
+                            viewModel.tempUser.nickName = viewModel.filterNickname(viewModel.tempUser.nickName)
+                        }
                 } else {
                     Text(viewModel.user.nickName)
                         .foregroundStyle(.gray)
