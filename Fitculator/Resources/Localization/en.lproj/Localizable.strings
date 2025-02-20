@@ -1,0 +1,7 @@
+// User Info Section
+"name" = "Name";
+"nickname" = "Nickname";
+"nickname_placeholder" = "Enter nickname";
+"gender" = "Gender";
+"height" = "Height (cm)";
+"birthdate" = "Birth Date";

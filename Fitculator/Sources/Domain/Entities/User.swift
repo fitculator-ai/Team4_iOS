@@ -1,23 +1,34 @@
 import Foundation
+import SwiftUI
 
 struct User {
     var name: String
     var nickName: String
     var gender: Gender
+    var height: Int
+    var birthDate: Date
+    var restHR: Int
+    var userEmail: String
     var profileImage: String?
     var trainingHistory: [Date: [TrainingRecord]]
+    var subscriptionPlan: SubscriptionPlan
 
-    enum Gender {
-        case M
-        case F
+    enum Gender: String {
+        case M = "남성"
+        case F = "여성"
     }
     
     init() {
         self.name = "Fitculator"
         self.nickName = "Fitculator"
         self.gender = .M
-        self.profileImage = ""
+        self.height = 175
+        self.birthDate = Date()
+        self.restHR = 60
+        self.userEmail = "test@test.com"
+        self.profileImage = nil
         self.trainingHistory = User.generateTrainingHistory()
+        self.subscriptionPlan = subscriptionPlans[0]
     }
     
     static func generateTrainingHistory() -> [Date: [TrainingRecord]] {
@@ -87,6 +98,7 @@ struct User {
 }
 
 struct TrainingRecord {
+    var id = UUID()
     let trainingDate: Date
     let trainingName: String
     var avg_bpm: Int
