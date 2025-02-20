@@ -1,13 +1,13 @@
 import Foundation
 
 class MyPageViewModel: ObservableObject {
-    @Published var weekGraphMockDatas: [Int: [MockData]] = [:]
     @Published var selectedTitle: String? = nil
     @Published var user = UserService.shared.user
     @Published var weeklyTrainingData: [[TrainingRecord]] = []
     @Published var weeklyMaxPoint: Double = 0
     @Published var trainingFatigueDatas: [[TrainingRecord]] = []
     @Published var selectedWeek: Int? = nil
+    @Published var filteredTrainingCount: [Int] = []
 
     func fetchWeeklyData(period: RecordPeriod) {
         let trainingRecords = user.getTrainingRecords(for: period)
@@ -22,6 +22,11 @@ class MyPageViewModel: ObservableObject {
             }
         }
         
+        filteredTrainingCount = datas.map {
+            return $0.filter { $0.trainingName == "근력운동" }.count
+        }
+        
+        print(filteredTrainingCount)
         weeklyTrainingData = datas
     }
     

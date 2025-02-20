@@ -28,10 +28,12 @@ struct MyPageView: View {
                             }
                             
                             // MARK: 달력 선택
+                            /*
                             VStack {
                                 SelectCalendarView(viewModel: viewModel, width: width)
                             }
                             .padding()
+                            */
                             
                             // MARK: 피로도 그래프
                             VStack {
