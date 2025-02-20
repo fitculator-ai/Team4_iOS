@@ -158,10 +158,10 @@ struct ProfileImageSection: View {
                 .actionSheet(isPresented: $viewModel.showActionSheet) {
                     ActionSheet(title: Text("프로필 사진 변경"), buttons: [
                         .default(Text("사진 찍기")) {
-                            viewModel.showCameraPicker = true
+                            viewModel.checkPermissions(for: .camera)
                         },
                         .default(Text("앨범에서 선택")) {
-                            viewModel.showImagePicker = true
+                            viewModel.checkPermissions(for: .photoLibrary)
                         },
                         .destructive(Text("기본 이미지로 변경")) {
                             viewModel.tempUIImage = nil
