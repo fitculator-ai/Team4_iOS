@@ -1,0 +1,20 @@
+// User Info Section
+"name" = "이름";
+"nickname" = "닉네임";
+"nickname_placeholder" = "닉네임 입력";
+"gender" = "성별";
+"height" = "키(cm)";
+"birthdate" = "생년월일";
+
+// IntroView
+"login" = "로그인 하기";
+
+// AccountInfoVIew
+"email" = "이메일";
+"logout" = "로그아웃";
+"withdraw" = "회원탈퇴";
+"accountInfo" = "계정 정보";
+"connectedDevice" = "연결된 기기";
+"nodevice" = "연결된 블루투스 기기가 없습니다.";
+"gotoSetting" = "블루투스 설정으로 이동";
+"device" = "디바이스";

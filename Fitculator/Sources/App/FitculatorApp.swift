@@ -2,9 +2,17 @@ import SwiftUI
 
 @main
 struct FitculatorApp: App {
+    @AppStorage("hasLaunched") private var hasLaunched = false
+    
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            NavigationView {
+                if hasLaunched {
+                    MainTabView()
+                } else {
+                    IntroView()
+                }
+            }
         }
     }
 }

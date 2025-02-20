@@ -16,7 +16,7 @@ struct MyPageView: View {
                             // MARK: 프로필 사진
                             VStack(spacing: 0) {
                                 NavigationLink {
-                                    EditInfoView()
+                                    EditInfoView(viewModel: SettingViewModel())
                                 } label: {
                                     ProfileImageView(viewModel: viewModel, width: width)
                                 }
@@ -28,10 +28,12 @@ struct MyPageView: View {
                             }
                             
                             // MARK: 달력 선택
+                            /*
                             VStack {
                                 SelectCalendarView(viewModel: viewModel, width: width)
                             }
                             .padding()
+                            */
                             
                             // MARK: 피로도 그래프
                             VStack {
@@ -133,13 +135,20 @@ struct FatigueView: View {
     var height: CGFloat
     
     var body: some View {
-        VStack {
+        VStack(spacing: 5) {
             HStack {
                 Text("피로도")
                     .font(.largeTitle)
                     .bold()
                     .foregroundStyle(Color.white)
+                
                 Spacer()
+                
+                Text("\(viewModel.weekDateStr)")
+                    .font(.subheadline)
+                    .bold()
+                    .foregroundStyle(Color.white)
+                    .padding(.top, 10)
             }
             .padding([.leading, .trailing])
             
@@ -159,7 +168,7 @@ struct WorkOutRecordView: View {
     var height: CGFloat
     
     var body: some View {
-        VStack {
+        VStack(spacing: 5) {
             HStack {
                 Text("운동량 기록")
                     .font(.largeTitle)
@@ -172,140 +181,10 @@ struct WorkOutRecordView: View {
             Rectangle()
                 .fill(Color.brightBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                .frame(height: height / 5)
+                .frame(height: height / 2.5)
                 .overlay(alignment: .center) {
-                    WorkoutRecordChartView(viewModel: viewModel)
+                    WorkoutWeeklyChartView(viewModel: viewModel)
                 }
         }
     }
 }
-
-struct WorkoutRecordChartView: View {
-    @ObservedObject var viewModel: MyPageViewModel
-    @State var selectedIndex: Int?
-    @State private var chartSize: CGSize = .zero
-    
-    var body: some View {
-        GeometryReader { geometry in
-            HStack(alignment: .center) {
-                ForEach(0..<viewModel.weekGraphMockDatas.count, id: \.self) { idx in
-                    
-                    let totalPct = Double(viewModel.weekGraphMockDatas[idx]!.reduce(0) { $0 + $1.pct })
-                    let remainingPct = max(100 - totalPct, 0)
-                    
-                    let chartData = totalPct < 100
-                    ? viewModel.weekGraphMockDatas[idx]! + [MockData(name: "남은 운동량", pct: remainingPct, type: .none)]
-                    : viewModel.weekGraphMockDatas[idx]!
-                    
-                    HStack(alignment: .center) {
-                        VStack {
-                            Chart(chartData, id: \.id) { element in
-                                SectorMark(
-                                    angle: .value("Pct", element.pct),
-                                    innerRadius: .ratio(0.6),
-                                    angularInset: 1
-                                )
-                                .cornerRadius(10)
-                                .foregroundStyle(element.name == "남은 운동량" ? Color.gray.opacity(0.3) : Color.blue)
-                            }
-                            .chartBackground { chartProxy in
-                                let chartFrame = geometry[chartProxy.plotFrame!]
-                                
-                                VStack {
-                                    Text("\(totalPct, specifier: "%.1f") %")
-                                        .font(.system(size: chartFrame.width * 0.15))
-                                        .foregroundStyle(Color.white)
-                                        .fontWeight(.bold)
-                                        .frame(width: chartFrame.width, height: chartFrame.height, alignment: .center)
-                                }
-                                .position(x: chartFrame.width / 2, y: chartFrame.height / 2 + 2)
-                            }
-                            .frame(maxWidth: geometry.size.width / 4, maxHeight: geometry.size.width / 3)
-                            .chartLegend(.hidden)
-                            .chartXAxis(.hidden)
-                            .chartYAxis(.hidden)
-                            
-                            // TODO: n월 n주차 이런식으로 표시
-                            Text(Date().dateToString(includeDay: .day))
-                                .font(.caption)
-                                .bold()
-                                .foregroundStyle(Color.white)
-                        }
-                    }
-                }
-            }
-            .padding()
-        }
-    }
-}
-
-#Preview {
-    MyPageView()
-}
-
-/*
- struct FatigueChartView: View {
-     @ObservedObject var viewModel: MyPageViewModel
-     
-     var body: some View {
-         VStack {
-             Chart(viewModel.lineGraphMockDatas, id: \.title) { data in
-                 LineMark(
-                     x: .value("Title", data.title),
-                     y: .value("Value", data.value)
-                 )
-                 .foregroundStyle(.orange)
-                 .lineStyle(StrokeStyle(lineWidth: 3))
-                 .interpolationMethod(.catmullRom)
-                 .symbol() {
-                     ZStack {
-                         Circle()
-                             .fill(Color.orange)
-                             .frame(width: 10)
-
-                         if data.title == viewModel.selectedTitle {
-                             RoundedRectangle(cornerRadius: 20)
-                                 .fill(Color.orange)
-                                 .overlay {
-                                     Text("\(data.value) %")
-                                         .foregroundStyle(Color.white)
-                                         .font(.system(size: 12, weight: .bold))
-                                 }
-                                 .frame(width: 50, height: 25)
-                                 .offset(y: data.value < 5 ? -20 : data.value > 95 ? 20 : 0)
-                         }
-                     }
-                 }
-             }
-             .padding()
-             .chartXAxis {
-                 AxisMarks { value in
-                     AxisValueLabel()
-                         
-                         .foregroundStyle(Color.white)
-                 }
-             }
-             .chartYAxis {
-                 AxisMarks { value in
-                     AxisValueLabel()
-                         .foregroundStyle(Color.white)
-                 }
-             }
-             .chartOverlay { proxy in
-                 Rectangle()
-                     .fill(Color.clear)
-                     .contentShape(Rectangle())
-                     .gesture(
-                         DragGesture()
-                             .onChanged { value in
-                                 let location = value.location
-                                 if let selectedDateStr: String = proxy.value(atX: location.x) {
-                                     viewModel.selectedTitle = selectedDateStr
-                                 }
-                             }
-                     )
-             }
-         }
-     }
- }
- */
