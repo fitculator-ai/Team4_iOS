@@ -21,7 +21,7 @@ struct MainTabView: View {
             TabView {
                 Tab("홈", systemImage: "house.fill") {
                     BackgroundView {
-                        HomeView()
+                        HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
                     }
                 }
                 Tab("피드", systemImage: "message.fill") {
@@ -48,7 +48,7 @@ struct MainTabView: View {
         } else {
             BackgroundView {
                 TabView {
-                    HomeView()
+                    HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
                         .tabItem {
                             Label("홈", systemImage: "house.fill")
                         }
