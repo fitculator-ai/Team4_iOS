@@ -1,131 +1,58 @@
 import SwiftUI
 import PhotosUI
-import UIKit
 
 struct EditInfoView: View {
-    @StateObject private var viewModel = SettingViewModel()
+    @ObservedObject var viewModel: SettingViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var showDiscardAlert = false
     
     var body: some View {
         List {
-            Section {
-                VStack {
-                    Button(action: {
-                        viewModel.showActionSheet = true
-                    }) {
-                        if let image = viewModel.profileImage {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 200, height: 200)
-                                .clipShape(Circle())
-                        } else {
-                            Circle()
-                                .frame(width: 200, height: 200)
-                                .foregroundColor(.gray.opacity(0.2))
-                                .overlay(
-                                    Image(systemName: "camera.fill")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 40))
-                                )
-                        }
-                    }
-                    .actionSheet(isPresented: $viewModel.showActionSheet) {
-                        ActionSheet(title: Text("프로필 사진 선택"), buttons: [
-                            .default(Text("사진 찍기")) {
-                                viewModel.showCameraPicker = true
-                            },
-                            .default(Text("라이브러리에서 선택")) {
-                                viewModel.showImagePicker = true
-                            },
-                            .cancel() // 현재 사진 없애는 거 추가
-                        ])
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .listRowBackground(Color.clear)
-            }
+            // MARK: 프로필 이미지
+            ProfileImageSection(viewModel: viewModel)
             
+            // MARK: 유저 정보
+            UserInfoView(viewModel: viewModel)
+            
+            // MARK: 안정시 심박수(운동고민, 운동목표 추가 고려중)
             Section {
                 HStack {
-                    Text("이름")
-                    Spacer()
-                    Text(viewModel.name)
-                        .foregroundStyle(.gray)
-                }
-                .listRowBackground(Color.gray.opacity(0.2))
-                
-                HStack {
-                    Text("닉네임")
+                    Text("안정시 심박수")
                     Spacer()
                     if viewModel.isEditing {
-                        TextField("닉네임 입력", text: $viewModel.tempNickname)
-                            .textFieldStyle(DefaultTextFieldStyle())
-                            .frame(width: 150)
-                            .multilineTextAlignment(.trailing)
-                    } else {
-                        Text(viewModel.nickname)
-                            .foregroundStyle(.gray)
-                    }
-                }
-                .listRowBackground(Color.gray.opacity(0.2))
-                
-                HStack {
-                    Text("성별")
-                    Spacer()
-                    if viewModel.isEditing {
-                        Picker("", selection: $viewModel.tempGender) {
-                            Text("남자").tag("남자")
-                            Text("여자").tag("여자")
-                        }
-                        .pickerStyle(DefaultPickerStyle())
-                    } else {
-                        Text(viewModel.gender)
-                            .foregroundStyle(.gray)
-                    }
-                }
-                .listRowBackground(Color.gray.opacity(0.2))
-                
-                HStack {
-                    Text("키(cm)")
-                    Spacer()
-                    if viewModel.isEditing {
-                        Picker("", selection: $viewModel.tempHeight) {
-                            ForEach(130...250, id: \.self) { height in
-                                Text("\(height) cm").tag(height)
+                        Picker("", selection: $viewModel.tempUser.restHR) {
+                            ForEach(10...100, id: \.self) { restHR in
+                                Text("\(restHR) bpm").tag(restHR)
                             }
                         }
                         .pickerStyle(DefaultPickerStyle())
                     } else {
-                        Text("\(viewModel.height)cm")
+                        Text("\(viewModel.user.restHR)bpm")
                             .foregroundStyle(.gray)
                     }
                 }
-                .listRowBackground(Color.gray.opacity(0.2))
-                
-                HStack {
-                    Text("생년월일")
-                    Spacer()
-                    if viewModel.isEditing {
-                        DatePicker("", selection: $viewModel.tempBirthDate, displayedComponents: .date)
-                    } else {
-                        Text(viewModel.formatDate(viewModel.birthDate))
-                            .foregroundStyle(.gray)
-                    }
-                }
+                .listRowBackground(Color.brightBackgroundColor)
             }
-            .listRowBackground(Color.gray.opacity(0.2))
+            
+            // MARK: 계정 정보
+            NavigationLink("계정 정보", destination: AccountInfoView())
+                .listRowBackground(Color.brightBackgroundColor)
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
         .navigationTitle("내 정보")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(viewModel.isEditing)
         .preferredColorScheme(.dark)
         .toolbar {
             if viewModel.isEditing {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("취소") {
-                        viewModel.useExInfo()
-                        viewModel.isEditing = false
+                        if viewModel.hasChanges() {
+                            showDiscardAlert = true
+                        } else {
+                            cancelEditing()
+                        }
                     }
                 }
             }
@@ -133,23 +60,35 @@ struct EditInfoView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(viewModel.isEditing ? "저장" : "수정") {
                     if viewModel.isEditing {
-                        viewModel.saveUserInfo()
-                    } else {
-                        viewModel.useExInfo()
+                        viewModel.updateUserInfo()
                     }
                     viewModel.isEditing.toggle()
                 }
-                .foregroundStyle(.white)
+                .disabled(viewModel.tempUser.nickName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
+        .alert("변경사항이 저장되지 않았습니다.", isPresented: $showDiscardAlert) {
+            Button("나가기", role: .destructive) {
+                cancelEditing()
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("저장하지 않고 나가시겠습니까?")
+        }
         .sheet(isPresented: $viewModel.showImagePicker) {
-            ImagePicker(image: $viewModel.profileImage, sourceType: .photoLibrary)
+            ImagePicker(image: $viewModel.tempUIImage, sourceType: .photoLibrary)
         }
         .sheet(isPresented: $viewModel.showCameraPicker) {
-            ImagePicker(image: $viewModel.profileImage, sourceType: .camera)
+            ImagePicker(image: $viewModel.tempUIImage, sourceType: .camera)
         }
     }
     
+    private func cancelEditing() {
+        viewModel.backToExInfo()
+        viewModel.isEditing = false
+    }
+    
+    // MARK: 사진 설정
     struct ImagePicker: UIViewControllerRepresentable {
         @Binding var image: UIImage?
         var sourceType: UIImagePickerController.SourceType
@@ -158,7 +97,7 @@ struct EditInfoView: View {
             let picker = UIImagePickerController()
             picker.sourceType = sourceType
             picker.delegate = context.coordinator
-            picker.allowsEditing = true // 사진 편집 가능
+            picker.allowsEditing = true
             return picker
         }
         
@@ -187,8 +126,75 @@ struct EditInfoView: View {
     }
 }
 
+struct ProfileImageSection: View {
+    @ObservedObject var viewModel: SettingViewModel
+    
+    var body: some View {
+        Section {
+            VStack {
+                ZStack {
+                    if let profileImage = viewModel.tempUIImage {
+                        Image(uiImage: profileImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 150, height: 150)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                            .overlay(alignment: .bottomTrailing) {
+                                if viewModel.isEditing {
+                                    Image(systemName: "camera.fill")
+                                        .foregroundColor(.white)
+                                        .padding(12)
+                                        .background(Circle().fill(Color.black.opacity(0.5)))
+                                }
+                            }
+                    } else {
+                        Circle()
+                            .frame(width: 150, height: 150)
+                            .foregroundColor(Color.brightBackgroundColor)
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 40))
+                            )
+                            .overlay(alignment: .bottomTrailing) {
+                                if viewModel.isEditing {
+                                    Image(systemName: "camera.fill")
+                                        .foregroundColor(.white)
+                                        .padding(12)
+                                        .background(Circle().fill(Color.black.opacity(0.5)))
+                                }
+                            }
+                    }
+                }
+                .onTapGesture {
+                    if viewModel.isEditing {
+                        viewModel.showActionSheet = true
+                    }
+                }
+                .actionSheet(isPresented: $viewModel.showActionSheet) {
+                    ActionSheet(title: Text("프로필 사진 변경"), buttons: [
+                        .default(Text("사진 찍기")) {
+                            viewModel.checkPermissions(for: .camera)
+                        },
+                        .default(Text("앨범에서 선택")) {
+                            viewModel.checkPermissions(for: .photoLibrary)
+                        },
+                        .destructive(Text("기본 이미지로 변경")) {
+                            viewModel.tempUIImage = nil
+                        },
+                        .cancel()
+                    ])
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .listRowBackground(Color.clear)
+        }
+    }
+}
+
 #Preview {
     NavigationStack {
-        EditInfoView()
+        EditInfoView(viewModel: SettingViewModel())
     }
 }
