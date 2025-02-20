@@ -6,3 +6,16 @@
 //
 
 import Foundation
+import Combine
+
+class UseCase {
+    private let dataSource: DataSource
+    
+    init(dataSource: DataSource) {
+        self.dataSource = dataSource
+    }
+
+    func execute() -> AnyPublisher<User, Error> {
+        return dataSource.fetchUsers()
+    }
+}
