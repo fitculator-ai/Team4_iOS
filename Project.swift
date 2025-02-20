@@ -20,6 +20,12 @@ let project = Project(
                     "UILaunchScreen": [
                         "UIColorName": "",
                         "UIImageName": "",
+                        "NSCameraUsageDescription": "프로필 사진을 촬영하려면 카메라 접근이 필요합니다.",
+                        "NSPhotoLibraryUsageDescription": "프로필 사진을 선택하려면 사진 접근 권한이 필요합니다.",
+                        
+                        "NSCameraUsageDescription~en": "The camera access is required to take profile photos.",
+                        "NSPhotoLibraryUsageDescription~en": "Photo library access is required to select profile photos."
+                        
                     ],
                 ]
             ),
