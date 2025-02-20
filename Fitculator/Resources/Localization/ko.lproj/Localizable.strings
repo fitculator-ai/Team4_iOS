@@ -17,4 +17,4 @@
 "connectedDevice" = "연결된 기기";
 "nodevice" = "연결된 블루투스 기기가 없습니다.";
 "gotoSetting" = "블루투스 설정으로 이동";
-"device" = "디바이스"
+"device" = "디바이스";
