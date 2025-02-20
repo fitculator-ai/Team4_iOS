@@ -135,13 +135,20 @@ struct FatigueView: View {
     var height: CGFloat
     
     var body: some View {
-        VStack {
+        VStack(spacing: 5) {
             HStack {
                 Text("피로도")
                     .font(.largeTitle)
                     .bold()
                     .foregroundStyle(Color.white)
+                
                 Spacer()
+                
+                Text("\(viewModel.weekDateStr)")
+                    .font(.subheadline)
+                    .bold()
+                    .foregroundStyle(Color.white)
+                    .padding(.top, 10)
             }
             .padding([.leading, .trailing])
             
@@ -161,7 +168,7 @@ struct WorkOutRecordView: View {
     var height: CGFloat
     
     var body: some View {
-        VStack {
+        VStack(spacing: 5) {
             HStack {
                 Text("운동량 기록")
                     .font(.largeTitle)
