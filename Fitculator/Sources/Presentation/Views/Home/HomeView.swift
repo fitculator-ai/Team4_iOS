@@ -25,10 +25,11 @@ enum WorkoutType {
     case none
 }
 
-struct WorkoutData: Identifiable {
+struct WorkoutData: Identifiable, Equatable {
     let id = UUID()
     let name: String
-    let pct: Double
+    let pct: Double // 보정된 운동포인트 값
+    let actualPoints: Double // 실제 운동 포인트 값
     let type: WorkoutType
 }
 
@@ -70,13 +71,13 @@ struct WorkoutDonutChart: View {
     @State private var chartSize: CGSize = .zero
     @State private var selectedAngle: Double?
     @State var user: User
-    
+    @State var activeChartData: [WorkoutData] = []
+    @State var originalTotal: Double = 0.0 // 전체 운동량 저장 변수
+    @State var totalPct: Double = 0.0 // 차트 운동량을 100을 기준으로 저장되는 변수
+    @State var remainingPct: Double = 0.0
+    @State var changedTraningRecordsData: [WorkoutData] = []
+
     var traningRecords: [[Date: [TrainingRecord]]]
-    var changedTraningRecordsData: [WorkoutData]
-    var totalPct: Double // 차트 운동량을 100을 기준으로 저장되는 변수
-    let originalTotal: Double // 전체 운동량 저장 변수
-    let remainingPct: Double
-    let activeChartData: [WorkoutData]
         
     init(user: User) {
         self.user = user
@@ -84,11 +85,10 @@ struct WorkoutDonutChart: View {
         let result = changeTrainingDataForChart(traningRecords)
         self.changedTraningRecordsData = result.data
         self.originalTotal = result.originalTotal
-        print("😇 진짜 총운동량 \(originalTotal)")
         self.totalPct = changedTraningRecordsData.reduce(0) { $0 + $1.pct }
         self.remainingPct = max(100 - totalPct, 0)
         self.activeChartData = totalPct < 100
-                ? changedTraningRecordsData + [WorkoutData(name: "남은 운동량_", pct: remainingPct, type: .none)]
+        ? changedTraningRecordsData + [WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, type: .none)]
                 : changedTraningRecordsData
     }
     
@@ -104,7 +104,7 @@ struct WorkoutDonutChart: View {
                     angularInset: 1
                 )
                 .cornerRadius(40)
-                .foregroundStyle(element.name == "남은 운동량" ? Color.gray.opacity(0.3) : Color.blue)
+                .foregroundStyle(element.name == "남은 운동량_" ? Color.gray.opacity(0.3) : Color.blue)
                 .opacity(selectedIndex == nil || selectedIndex == index ? 1.0 : 0.4)
             }
             .chartAngleSelection(value: $selectedAngle)
@@ -115,6 +115,7 @@ struct WorkoutDonutChart: View {
             )
             .onAppear {
                 chartSize = geometry.size
+                updateActiveChartData()
             }
             .chartBackground { chartProxy in
                 if let plotFrame = chartProxy.plotFrame {
@@ -122,10 +123,14 @@ struct WorkoutDonutChart: View {
                     VStack {
                         if let index = selectedIndex {
                             let selectedData = activeChartData[index]
-                            Text("\(String(selectedData.name.split(separator: "_").first ?? "")) \n \(selectedData.pct, specifier: "%.1f")P")                                .font(.system(size: geometry.size.width * 0.07))
+                            
+                            // 운동량 총합이 100이 넘으면 100을 기준으로 각 운동 포인트가 보정된 값이 나와 분기 처리.
+                            let _ = print("선택된 운동: \(selectedData.name) 운동량: \(selectedData.actualPoints) \n")
+                            Text("\(String(selectedData.name.split(separator: "_").first ?? "")) \n \(selectedData.actualPoints, specifier: "%.1f")P")                                .font(.system(size: geometry.size.width * 0.07))
                                 .foregroundStyle(Color.white)
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.center)
+                            
                         } else {
                             Text("\(originalTotal, specifier: "%.1f")P")
                                 .font(.system(size: geometry.size.width * 0.07))
@@ -136,14 +141,35 @@ struct WorkoutDonutChart: View {
                     }
                     .position(x: frame.midX, y: frame.midY)
                 }
-                
             }
             .chartOverlay { chart in
                 getChartOverlay(chart: chart, geometry: geometry, data: activeChartData)
             }
+            .onAppear() {
+                updateActiveChartData()
+            }
+            .onChange(of: activeChartData) {
+                updateActiveChartData()
+            }
             .chartLegend(.hidden)
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
+        }
+    }
+    
+    func updateActiveChartData() {
+        let result = changeTrainingDataForChart(traningRecords)
+        self.changedTraningRecordsData = result.data
+        self.originalTotal = result.originalTotal
+        self.totalPct = changedTraningRecordsData.reduce(0) { $0 + $1.pct }
+        self.remainingPct = max(100 - totalPct, 0)
+
+        if totalPct < 100 {
+            self.activeChartData = changedTraningRecordsData + [
+                WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, type: .none)
+            ]
+        } else {
+            self.activeChartData = changedTraningRecordsData
         }
     }
     
@@ -185,7 +211,6 @@ struct WorkoutDonutChart: View {
                         // 섹터 찾기
                         var cumulativeAngle: Double = 0
                         for (index, element) in activeChartData.enumerated() {
-//                            let sectorAngle = (element.pct / 100) * 360
                             let sectorAngle = (element.pct / 100) * 360
                             let nextAngle = cumulativeAngle + sectorAngle
                             
@@ -221,9 +246,20 @@ func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data:
     let total = dataDict.values.reduce(0, +) // 비율 조정을 위한 totalPct
     
     // 전체 합이 100을 넘는 경우, 100을 기준으로 비율 조정
-    let result = dataDict.map { (key, value) -> WorkoutData in
-        let adjustedPct = value / total * 100  // 전체 합이 100을 초과하면 비율을 조정
-        return WorkoutData(name: key, pct: adjustedPct, type: .weight)
+    var result: [WorkoutData] = []
+    if originalTotal > 100 {
+        result = dataDict.map { (key, value) -> WorkoutData in
+            let adjustedPct = value / total * 100  // 전체 합이 100을 초과하면 비율을 조정
+            return WorkoutData(name: key, pct: adjustedPct, actualPoints: value, type: .weight)
+        }
+    } else {
+        result = dataDict.map { (key, value) -> WorkoutData in
+            return WorkoutData(
+                name: key,
+                pct: value, actualPoints: value,
+                type: .weight
+            )
+        }
     }
     
     return (result, originalTotal)
