@@ -16,7 +16,7 @@ struct MyPageView: View {
                             // MARK: 프로필 사진
                             VStack(spacing: 0) {
                                 NavigationLink {
-                                    EditInfoView()
+                                    EditInfoView(viewModel: SettingViewModel())
                                 } label: {
                                     ProfileImageView(viewModel: viewModel, width: width)
                                 }

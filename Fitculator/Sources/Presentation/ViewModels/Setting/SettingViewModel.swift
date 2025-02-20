@@ -24,6 +24,16 @@ class SettingViewModel: ObservableObject {
         return formatter.string(from: date)
     }
     
+    func hasChanges() -> Bool {
+        let isSameDate = Calendar.current.isDate(tempUser.birthDate, inSameDayAs: user.birthDate)
+        
+        return tempUser.nickName != user.nickName ||
+        tempUser.height != user.height ||
+        !isSameDate ||
+        tempUser.restHR != user.restHR ||
+        tempUIImage != profileUIImage
+    }
+    
     // TODO: 서버 연결 시 전체적으로 다 수정해야 함
     func backToExInfo() {
         tempUser.nickName = user.nickName

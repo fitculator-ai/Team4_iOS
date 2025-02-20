@@ -53,6 +53,7 @@ struct SettingView: View {
                 }
                 .listRowBackground(Color.brightBackgroundColor)
                 
+                // TODO: 유저의 구독 정보 연결 필요
                 Section {
                     VStack(alignment: .leading, spacing: 8, content: {
                         Text("\(viewModel.user.subscriptionPlan.title)")
@@ -181,6 +182,7 @@ let subscriptionPlans: [SubscriptionPlan] = [
     )
 ]
 
+// MARK: 구독 서비스 종류 소개
 struct PayInfoView: View {
     var body: some View {
         List {

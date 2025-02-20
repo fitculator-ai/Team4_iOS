@@ -2,8 +2,9 @@ import SwiftUI
 import PhotosUI
 
 struct EditInfoView: View {
-    @StateObject private var viewModel = SettingViewModel()
+    @ObservedObject var viewModel: SettingViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showDiscardAlert = false
     
     var body: some View {
         List {
@@ -47,8 +48,11 @@ struct EditInfoView: View {
             if viewModel.isEditing {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("취소") {
-                        viewModel.backToExInfo()
-                        viewModel.isEditing = false
+                        if viewModel.hasChanges() {
+                            showDiscardAlert = true
+                        } else {
+                            cancelEditing()
+                        }
                     }
                 }
             }
@@ -60,8 +64,16 @@ struct EditInfoView: View {
                     }
                     viewModel.isEditing.toggle()
                 }
-                .foregroundStyle(.white)
+                .disabled(viewModel.tempUser.nickName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
+        }
+        .alert("변경사항이 저장되지 않았습니다.", isPresented: $showDiscardAlert) {
+            Button("나가기", role: .destructive) {
+                cancelEditing()
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("저장하지 않고 나가시겠습니까?")
         }
         .sheet(isPresented: $viewModel.showImagePicker) {
             ImagePicker(image: $viewModel.tempUIImage, sourceType: .photoLibrary)
@@ -69,6 +81,11 @@ struct EditInfoView: View {
         .sheet(isPresented: $viewModel.showCameraPicker) {
             ImagePicker(image: $viewModel.tempUIImage, sourceType: .camera)
         }
+    }
+    
+    private func cancelEditing() {
+        viewModel.backToExInfo()
+        viewModel.isEditing = false
     }
     
     // MARK: 사진 설정
@@ -178,6 +195,6 @@ struct ProfileImageSection: View {
 
 #Preview {
     NavigationStack {
-        EditInfoView()
+        EditInfoView(viewModel: SettingViewModel())
     }
 }
