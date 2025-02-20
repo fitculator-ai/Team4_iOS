@@ -70,6 +70,7 @@ struct WorkoutWeeklyChartView: View {
                                         viewModel.getMaxPoint(records: $0)
                                     }
                                     
+                                    viewModel.filteredTrainingCount = sortedGroupedRecords.map { $0.filter { $0.trainingName == "근력운동" }.count }
                                     viewModel.weeklyTrainingData = sortedGroupedRecords
                                 }
                             }
@@ -83,6 +84,6 @@ struct WorkoutWeeklyChartView: View {
     }
 }
 
-#Preview {
-    WorkoutWeeklyChartView(viewModel: MyPageViewModel())
-}
+//#Preview {
+//    WorkoutWeeklyChartView(viewModel: MyPageViewModel())
+//}
