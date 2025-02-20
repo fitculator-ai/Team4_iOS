@@ -36,7 +36,7 @@ struct HomeView: View {
                     WeeklyStrengthReps(user: viewModel.user)
                         .frame(width: viewWidth - 20, height: viewHeight * 0.1)
                     
-                    WorkoutHistory()
+                    WorkoutHistory(user: viewModel.user)
                         .frame(width: viewWidth - 20)
                 }
                 .padding(.horizontal, 10)
