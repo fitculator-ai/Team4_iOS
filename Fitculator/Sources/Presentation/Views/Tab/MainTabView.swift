@@ -19,60 +19,66 @@ struct MainTabView: View {
         // MARK: .tabItem은 나중에 deprecate된다고 해서 Tab을 사용했지만 Tab은 iOS 버전 18이상에서만 사용 가능해서 일단 분기처리함
         if #available(iOS 18.0, *) {
             ZStack {
-            TabView {
-                Tab("홈", systemImage: "house.fill") {
-                    BackgroundView {
-                        HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
+                TabView {
+                    Tab("홈", systemImage: "house.fill") {
+                        BackgroundView {
+                            HomeView(
+                                viewModel: HomeViewModel(
+                                    fetchUseCase: UseCase(
+                                        dataSource: DataSource()
+                                    )
+                                )
+                            )
+                        }
                     }
-                }
-                Tab("피드", systemImage: "message.fill") {
-                    BackgroundView {
-                        FeedView()
+                    Tab("피드", systemImage: "message.fill") {
+                        BackgroundView {
+                            FeedView()
+                        }
                     }
-                }
                 
-                Tab("", systemImage: "") {
+                    Tab("", systemImage: "") {
 
-                }
+                    }
                 
-                Tab("커뮤니티", systemImage: "person.2.fill") {
-                    BackgroundView {
-                        CommunityView()
+                    Tab("커뮤니티", systemImage: "person.2.fill") {
+                        BackgroundView {
+                            CommunityView()
+                        }
+                    }
+                    Tab("마이페이지", systemImage: "person.fill") {
+                        BackgroundView {
+                            MyPageView()
+                        }
                     }
                 }
-                Tab("마이페이지", systemImage: "person.fill") {
-                    BackgroundView {
-                        MyPageView()
-                    }
-                }
-            }
             
-            Button(action: {
-                self.isModalPresented.toggle()
-            }) {
-                Image(systemName: "plus.circle.fill")
-                    .resizable()
-                    .frame(width: 35, height: 35)
-                    .background(Color.white.opacity(0.8))
-                    .clipShape(Circle())
-                    .shadow(radius: 4)
-                    .padding(30)
-            }
-            .fullScreenCover(isPresented: $isModalPresented) {
-                AddView()
-                    .ignoresSafeArea()
+                Button(action: {
+                    self.isModalPresented = true
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .resizable()
+                        .frame(width: 35, height: 35)
+                        .background(Color.white.opacity(0.8))
+                        .clipShape(Circle())
+                        .shadow(radius: 4)
+                        .padding(30)
+                }
+                .fullScreenCover(isPresented: $isModalPresented) {
+                    AddView()
+                        .ignoresSafeArea()
                 
-            }
-            .offset(x: 0, y: (UIScreen.main.bounds.height/2)-74)
+                }
+                .offset(x: 0, y: (UIScreen.main.bounds.height/2)-74)
             }
         } else {
             BackgroundView {
                 ZStack {
                     TabView {
-                        HomeView()
-                            .tabItem {
-                                Label("홈", systemImage: "house.fill")
-                            }
+                        HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
+                        .tabItem {
+                            Label("홈", systemImage: "house.fill")
+                        }
                         FeedView()
                             .tabItem {
                                 Label("피드", systemImage: "message.fill")
@@ -91,7 +97,7 @@ struct MainTabView: View {
                             }
                     }
                     Button(action: {
-                        self.isModalPresented.toggle()
+                        self.isModalPresented = true
                     }) {
                         Image(systemName: "plus.circle.fill")
                             .resizable()

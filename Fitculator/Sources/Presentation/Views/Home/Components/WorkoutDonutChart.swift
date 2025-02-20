@@ -85,9 +85,10 @@ struct WorkoutDonutChart: View {
             .onAppear() {
                 updateActiveChartData()
             }
-            .onChange(of: activeChartData) {
-                updateActiveChartData()
-            }
+            // MARK: 에러나서 다른 탭 갔다가 홈으로 돌아오면 화면이 안나와서 임시 주석처리
+//            .onChange(of: activeChartData) {
+//                updateActiveChartData()
+//            }
             .chartLegend(.hidden)
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
