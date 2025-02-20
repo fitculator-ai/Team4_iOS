@@ -94,7 +94,7 @@ struct User {
     }
 }
 
-struct TrainingRecord {
+struct TrainingRecord: Equatable {
     var id = UUID()
     let trainingDate: Date
     let trainingName: String
@@ -127,7 +127,8 @@ struct TrainingRecord {
             let avg_bpm = Int.random(in: 90...160)
             let max_bpm = avg_bpm + Int.random(in: 5...20)
             let intensity: Intensity = [.verLow, .low, .normal, .high].randomElement()!
-            let gained_point = Double.random(in: 10...100)
+//            let gained_point = Double.random(in: 10...100)
+            let gained_point = Double.random(in: 10...11)
             
             let record = TrainingRecord(
                 trainingDate: date,
