@@ -98,6 +98,7 @@ struct User {
 }
 
 struct TrainingRecord {
+    var id = UUID()
     let trainingDate: Date
     let trainingName: String
     var avg_bpm: Int
