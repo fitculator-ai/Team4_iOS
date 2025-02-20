@@ -16,7 +16,7 @@ struct WorkoutHistory: View {
             iconName: "figure.run"
         ),
         WorkoutListCell(
-            workoutType: "자전거",
+            workoutType: "자전거2",
             workoutDate: "11.20 오전 7:30",
             workoutPoints: 18,
             averageHeartRate: 105,
