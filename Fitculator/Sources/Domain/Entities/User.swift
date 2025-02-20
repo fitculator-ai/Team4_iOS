@@ -37,7 +37,7 @@ struct User {
         let today = Date()
         
         // 최근 15주 동안의 월요일을 구함
-        for weekOffset in 0..<15 {
+        for weekOffset in 0..<35 {
             if let weekStart = calendar.date(byAdding: .weekOfYear, value: -weekOffset, to: today)?.startOfWeek(using: calendar) {
                 for dayOffset in 0..<7 {
                     if let date = calendar.date(byAdding: .day, value: dayOffset, to: weekStart) {
@@ -68,7 +68,7 @@ struct User {
         case .threeMonth:
             weeksToFetch = 12
         case .all:
-            weeksToFetch = 15
+            weeksToFetch = 35
         }
 
         // ✅ 이번 주의 정확한 월요일 찾기
@@ -84,15 +84,12 @@ struct User {
                         }
                     }
 
-                    // ✅ 월요일 ~ 일요일 순으로 정렬 (딕셔너리 변환 없이 배열 유지)
                     weekData.sort { $0.0 < $1.0 }
-                    
-                    // ✅ 배열을 그대로 추가하여 정렬 유지
                     result.append(Dictionary(uniqueKeysWithValues: weekData))
                 }
             }
         }
-
+        
         return result.reversed() // 과거 -> 현재 순으로 정렬
     }
 }
@@ -120,7 +117,7 @@ struct TrainingRecord {
     }
     
     static func generateDummyRecords(for date: Date) -> [TrainingRecord] {
-        let trainingNames = ["Running", "Cycling", "Swimming", "Strength Training"]
+        let trainingNames = ["러닝", "싸이클", "수영", "근력운동"]
         var records: [TrainingRecord] = []
         
         let count = Int.random(in: 1...3)
@@ -151,13 +148,13 @@ struct TrainingRecord {
     static func createEmptyRecord(for date: Date) -> TrainingRecord {
         return TrainingRecord(
             trainingDate: date,
-            trainingName: "No Data",
+            trainingName: "",
             avg_bpm: 0,
             duration: 0,
             end_at: date,
             training_intensity: .verLow,
             gained_point: 0.0,
-            training_detail: "No Data Available",
+            training_detail: "",
             max_bpm: 0
         )
     }
