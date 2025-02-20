@@ -8,6 +8,7 @@ class MyPageViewModel: ObservableObject {
     @Published var trainingFatigueDatas: [[TrainingRecord]] = []
     @Published var selectedWeek: Int? = nil
     @Published var filteredTrainingCount: [Int] = []
+    @Published var weekDateStr: String = ""
 
     func fetchWeeklyData(period: RecordPeriod) {
         let trainingRecords = user.getTrainingRecords(for: period)
@@ -25,9 +26,8 @@ class MyPageViewModel: ObservableObject {
         filteredTrainingCount = datas.map {
             return $0.filter { $0.trainingName == "근력운동" }.count
         }
-        
-        print(filteredTrainingCount)
         weeklyTrainingData = datas
+        setWeekDateStr()
     }
     
     func fetchAllData(period: RecordPeriod) {
@@ -56,6 +56,10 @@ class MyPageViewModel: ObservableObject {
         if weeklyMaxPoint < pointSum {
             weeklyMaxPoint = pointSum + 40
         }
+    }
+    
+    func setWeekDateStr() {
+        weekDateStr = "\(weeklyTrainingData.first?.first?.trainingDate.dateToString(includeDay: .fullDay) ?? "") ~ \(weeklyTrainingData.last?.last?.trainingDate.dateToString(includeDay: .fullDay) ?? "")"
     }
     
     init() {}
