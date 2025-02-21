@@ -14,7 +14,7 @@ struct WorkoutDonutChart: View {
     @State var remainingPct: Double = 0.0
     @State var changedTraningRecordsData: [WorkoutData] = []
 
-    @State var traningRecords: [[Date: [TrainingRecord]]]
+    var traningRecords: [[Date: [TrainingRecord]]]
         
     init(user: User) {
         self.user = user

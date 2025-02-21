@@ -63,6 +63,8 @@ struct HomeView: View {
                 .refreshable {
                     viewModel.fetchUser()
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 10)
             }
             .background(Color.fitculatorBackgroundColor)
         }

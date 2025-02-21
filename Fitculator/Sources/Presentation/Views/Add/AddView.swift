@@ -16,70 +16,57 @@ struct AddView: View {
     @State private var currentField: Field?
     @State private var selectedExerciseType: String? = nil
     @State private var showDropdown: Bool = false
-    @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationStack {
+        ZStack(alignment: .top) {
+            Color.clear
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    hideKeyboard()
+                }
             
-            ZStack(alignment: .top) {
-                Color.clear
-                    .ignoresSafeArea()
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        hideKeyboard()
-                    }
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        DateTimeSection(
-                            selectedDate: $selectedDate,
-                            showDatePicker: $showDatePicker
-                        )
-                        .padding(.top, 100)
-                        
-                        TimeInputSection()
-                            .padding(.top, 16)
-                        
-                        ExerciseTypeSection(
-                            selectedExerciseType: $selectedExerciseType,
-                            showDropdown: $showDropdown
-                        )
-                        .zIndex(1)
-                        
-                        ExerciseTimeSection(currentField: $currentField)
-                            .onChange(of: currentField) { field in
-                                focusedField = field
-                            }
-                            .padding(.top, showDropdown ? -4: 8)
-                            .onChange(of: focusedField) { field in
-                                currentField = field
-                            }
-                            .zIndex(0)
-                            .padding(.top, -25)
-                        
-                        HeartRateSection(currentField: $currentField)
-                            .zIndex(0)
-                        
-                        MemoSection(currentField: $currentField)
-                        
-                        ButtonSection()
-                            .padding(.bottom, 30)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .background(Color.fitculatorBackgroundColor)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    DateTimeSection(
+                        selectedDate: $selectedDate,
+                        showDatePicker: $showDatePicker
+                    )
+                    .padding(.top, 100)
+                    
+                    TimeInputSection()
+                        .padding(.top, 16)
+                    
+                    ExerciseTypeSection(
+                        selectedExerciseType: $selectedExerciseType,
+                        showDropdown: $showDropdown
+                    )
+                    .zIndex(1)
+                    
+                    ExerciseTimeSection(currentField: $currentField)
+                        .onChange(of: currentField) { field in
+                            focusedField = field
+                        }
+                        .padding(.top, showDropdown ? -4: 8)
+                        .onChange(of: focusedField) { field in
+                            currentField = field
+                        }
+                        .zIndex(0)
+                        .padding(.top, -25)
+                    
+                    HeartRateSection(currentField: $currentField)
+                        .zIndex(0)
+                    
+                    MemoSection(currentField: $currentField)
+                    
+                    ButtonSection()
+                        .padding(.bottom, 30)
                 }
+                .frame(maxWidth: .infinity)
                 .background(Color.fitculatorBackgroundColor)
-                .offset(y: -offset)
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("X")
-                    }
-                }
-            }
+            .background(Color.fitculatorBackgroundColor)
+            .offset(y: -offset)
         }
         .onTapGesture {
             hideKeyboard()
