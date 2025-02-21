@@ -517,7 +517,7 @@ struct ButtonSection: View {
     var body: some View {
         HStack {
             Button {
-                print("git test")
+                print("git test2")
             } label: {
                 Text("메모")
                     .font(.system(size: 16, weight: .semibold))
