@@ -33,7 +33,8 @@ struct WorkoutHistory: View {
                                             describing: record.training_intensity
                                         ),
                                         intensityColor: getIntensityColor(for: record.training_intensity),
-                                        iconName: getIconName(for: record.trainingName)
+                                        iconName: getIconData(for: record.trainingName).iconName,
+                                        iconBackgroundColor: getIconData(for: record.trainingName).backgroundColor
                                     )
                                 }
                             }
@@ -54,19 +55,15 @@ struct WorkoutHistory: View {
         traningRecords = user.getTrainingRecords(for: .oneWeek)
     }
     
-    private func getIconName(for trainingName: String) -> String {
-        switch trainingName {
-        case "러닝":
-            return "figure.run"
-        case "싸이클":
-            return "bicycle"
-        case "수영":
-            return "figure.pool.swim"
-        case "근력운동":
-            return "dumbbell"
-        default:
-            return "questionmark.circle"
-        }
+    private func getIconData(for trainingName: String) -> (iconName: String, backgroundColor: Color) {
+        let iconData: [String: (String, Color)] = [
+            "러닝": ("figure.run", Color.green),
+            "싸이클": ("bicycle", Color.gray),
+            "수영": ("figure.pool.swim", Color.blue),
+            "근력운동": ("dumbbell", Color.black)
+        ]
+        
+        return iconData[trainingName] ?? ("questionmark.circle", Color.gray)
     }
     
     private func getIntensityColor(for intensity: TrainingRecord.Intensity) -> Color {
@@ -95,6 +92,7 @@ struct WorkoutListCell: View {
     var intensity: String
     var intensityColor: Color
     var iconName: String
+    var iconBackgroundColor: Color
     
     var body: some View {
         VStack {
@@ -103,7 +101,7 @@ struct WorkoutListCell: View {
                     Image(systemName: iconName)
                         .font(.title2)
                         .frame(width: 40, height: 40)
-                        .background(Color.gray.opacity(0.8))
+                        .background(iconBackgroundColor.opacity(0.8))
                         .clipShape(Circle())
                         .foregroundColor(.white)
                     
@@ -142,13 +140,13 @@ struct WorkoutListCell: View {
                 WorkoutDetailView(
                     title: "강도",
                     value: intensity,
-                    textColor: Color.white
+                    textColor: intensityColor
                 )
             }
             .padding(.top, 5)
         }
         .padding()
-        .background(intensityColor.opacity(0.3))
+        .background(Color.brightBackgroundColor.opacity(0.6))
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
 }

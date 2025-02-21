@@ -65,16 +65,24 @@ func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data:
     
     // 전체 합이 100을 넘는 경우, 100을 기준으로 비율 조정
     var result: [WorkoutData] = []
+    
     if originalTotal > 100 {
         result = dataDict.map { (key, value) -> WorkoutData in
-            let adjustedPct = value / total * 100  // 전체 합이 100을 초과하면 비율을 조정
-            return WorkoutData(name: key, pct: adjustedPct, actualPoints: value, type: .weight)
+            let adjustedPct = value / total * 100
+
+            return WorkoutData(
+                name: key,
+                pct: adjustedPct,
+                actualPoints: value,
+                type: .weight
+            )
         }
     } else {
         result = dataDict.map { (key, value) -> WorkoutData in
             return WorkoutData(
                 name: key,
-                pct: value, actualPoints: value,
+                pct: value,
+                actualPoints: value,
                 type: .weight
             )
         }
