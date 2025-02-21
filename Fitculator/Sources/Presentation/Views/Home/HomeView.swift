@@ -12,6 +12,7 @@ struct WorkoutData: Identifiable, Equatable {
     let name: String
     let pct: Double // 보정된 운동포인트 값
     let actualPoints: Double // 실제 운동 포인트 값
+    let duration: Int
     let type: WorkoutType
 }
 
@@ -24,6 +25,7 @@ struct HomeView: View {
             let viewWidth = geometry.size.width
             let viewHeight = geometry.size.height
             
+            // TODO: - "<"누르면 저번주, 한번더 누를시 기간으로 나오게 + 네비게이션 바 추가
             ScrollView(.vertical) {
                 VStack(spacing: 16) {
                     WorkoutDonutChart(user: viewModel.user)
@@ -49,41 +51,51 @@ struct HomeView: View {
 
 /// [[Date: [TrainingRecord]]] -> [WorkoutData]
 func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data: [WorkoutData], originalTotal: Double) {
-    var dataDict: [String: Double] = [:]
-    
+    var dataDict: [String: (points: Double, duration: Int,  type: WorkoutType)] = [:]
     for week in records {
         for (_, dailyRecords) in week {
             for record in dailyRecords {
                 let key = "\(record.trainingName)_\(record.gained_point)"
-                dataDict[key, default: 0] += record.gained_point
+                let workoutType: WorkoutType = (record.trainingName == "근력운동") ? .weight : .cardio
+
+                if var existing = dataDict[key] {
+                    existing.points += record.gained_point
+                    existing.duration += record.duration
+                    dataDict[key] = existing
+                } else {
+                    dataDict[key] = (record.gained_point, record.duration, workoutType)
+                }
+
             }
         }
     }
     
-    let originalTotal = dataDict.values.reduce(0, +) // 전체 운동량의 총합
-    let total = dataDict.values.reduce(0, +) // 비율 조정을 위한 totalPct
+    let originalTotal = dataDict.values.reduce(0) { $0 + $1.points } // 전체 운동량의 총합
+    let total = dataDict.values.reduce(0) { $0 + $1.points } // 비율 조정을 위한 totalPct
     
     // 전체 합이 100을 넘는 경우, 100을 기준으로 비율 조정
     var result: [WorkoutData] = []
     
     if originalTotal > 100 {
         result = dataDict.map { (key, value) -> WorkoutData in
-            let adjustedPct = value / total * 100
+            let adjustedPct = value.points / total * 100
 
             return WorkoutData(
                 name: key,
                 pct: adjustedPct,
-                actualPoints: value,
-                type: .weight
+                actualPoints: value.points,
+                duration: value.duration,
+                type: value.type
             )
         }
     } else {
         result = dataDict.map { (key, value) -> WorkoutData in
             return WorkoutData(
                 name: key,
-                pct: value,
-                actualPoints: value,
-                type: .weight
+                pct: value.points,
+                actualPoints: value.points,
+                duration: value.duration,
+                type: value.type
             )
         }
     }

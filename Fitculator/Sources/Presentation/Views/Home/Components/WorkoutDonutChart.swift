@@ -25,7 +25,7 @@ struct WorkoutDonutChart: View {
         self.totalPct = changedTraningRecordsData.reduce(0) { $0 + $1.pct }
         self.remainingPct = max(100 - totalPct, 0)
         self.activeChartData = totalPct < 100
-        ? changedTraningRecordsData + [WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, type: .none)]
+        ? changedTraningRecordsData + [WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, duration: 0, type: .none)]
                 : changedTraningRecordsData
     }
     
@@ -62,7 +62,7 @@ struct WorkoutDonutChart: View {
                             let selectedData = activeChartData[index]
                             
                             // 운동량 총합이 100이 넘으면 100을 기준으로 각 운동 포인트가 보정된 값이 나와 분기 처리.
-                            let _ = print("선택된 운동: \(selectedData.name) 운동량: \(selectedData.actualPoints) \n")
+                            let _ = print("선택된 운동: \(selectedData.name) 운동량: \(selectedData.actualPoints) 운동시간: \(selectedData.duration) \n")
                             Text("\(String(selectedData.name.split(separator: "_").first ?? "")) \n \(selectedData.actualPoints, specifier: "%.1f")P")                                .font(.system(size: geometry.size.width * 0.07))
                                 .foregroundStyle(Color.white)
                                 .fontWeight(.bold)
@@ -104,7 +104,7 @@ struct WorkoutDonutChart: View {
 
         if totalPct < 100 {
             self.activeChartData = changedTraningRecordsData + [
-                WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, type: .none)
+                WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, duration: 0, type: .none)
             ]
         } else {
             self.activeChartData = changedTraningRecordsData
