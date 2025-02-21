@@ -4,6 +4,7 @@ import Combine
 class HomeViewModel: ObservableObject {
     @Published var user: User = User()
     @Published var errorMessage: String? = nil
+    @Published var currentWeekState: CurrentDateState = .thisWeek
     
     private let fetchUseCase: UseCase
     private var cancellables = Set<AnyCancellable>()
@@ -23,5 +24,13 @@ class HomeViewModel: ObservableObject {
                 self?.user = user
             })
             .store(in: &cancellables)
+    }
+    
+    func getPrevWeek() -> [[Date: [TrainingRecord]]] {
+        user.getTrainingRecords(for: .oneWeek, prev: true)
+    }
+    
+    func getNextWeek() -> [[Date: [TrainingRecord]]] {
+        user.getTrainingRecords(for: .oneWeek, prev: false)
     }
 }
