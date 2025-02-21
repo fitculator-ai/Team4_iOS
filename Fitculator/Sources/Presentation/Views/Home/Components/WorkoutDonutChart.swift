@@ -40,7 +40,7 @@ struct WorkoutDonutChart: View {
                     innerRadius: .ratio(0.5),
                     angularInset: 1
                 )
-                .cornerRadius(40)
+                .cornerRadius(8)
                 .foregroundStyle(element.name == "남은 운동량_" ? Color.gray.opacity(0.3) : Color.blue)
                 .opacity(selectedIndex == nil || selectedIndex == index ? 1.0 : 0.4)
             }
