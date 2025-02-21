@@ -23,25 +23,24 @@ struct HomeView: View {
         GeometryReader { geometry in
             let viewWidth = geometry.size.width
             let viewHeight = geometry.size.height
-            VStack {
-                ScrollView(.vertical) {
-                    VStack(spacing: 16) {
-                        WorkoutDonutChart(user: viewModel.user)
-                            .frame(height: viewHeight * 0.4)
-                        
-                        FatigueChart(user: viewModel.user)
-                            .frame(width: viewWidth - 20, height: viewHeight * 0.13)
-                            .padding(.top, 16)
-                        
-                        WeeklyStrengthReps(user: viewModel.user)
-                            .frame(width: viewWidth - 20, height: viewHeight * 0.1)
-                        
-                        WorkoutHistory()
-                            .frame(width: viewWidth - 20)
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
+            
+            ScrollView(.vertical) {
+                VStack(spacing: 16) {
+                    WorkoutDonutChart(user: viewModel.user)
+                        .frame(height: viewHeight * 0.4)
+                    
+                    FatigueChart(user: viewModel.user)
+                        .frame(width: viewWidth - 20, height: viewHeight * 0.13)
+                        .padding(.top, 16)
+                    
+                    WeeklyStrengthReps(user: viewModel.user)
+                        .frame(width: viewWidth - 20, height: viewHeight * 0.1)
+                    
+                    WorkoutHistory()
+                        .frame(width: viewWidth - 20)
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 10)
             }
             .background(Color.fitculatorBackgroundColor)
         }
