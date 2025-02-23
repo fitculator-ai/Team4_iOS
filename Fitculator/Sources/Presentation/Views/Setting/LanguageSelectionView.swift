@@ -26,5 +26,12 @@ struct LanguageSelectionView: View {
         .background(Color.fitculatorBackgroundColor.opacity(1))
         .navigationTitle("language_setting".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
+            Button("ok".localized) {
+                viewModel.postLanguageNotification()
+            }
+        } message: {
+            Text(viewModel.alertMessage)
+        }
     }
 }

@@ -180,13 +180,16 @@ class SettingViewModel: ObservableObject {
     
     // MARK: 언어 변경
     var selectedLanguage: String {
-            return languageManager.currentLanguage == "ko" ? "한국어" : "English"
-        }
-        
+        return languageManager.currentLanguage == "ko" ? "한국어" : "English"
+    }
+    
     func changeLanguage(to language: String) {
         let newCode = language == "한국어" ? "ko" : "en"
         languageManager.currentLanguage = newCode
-        
+        showSettingsAlert(title: "language_changed".localized, message: "languange_apply_message".localized)
+    }
+    
+    func postLanguageNotification() {
         NotificationCenter.default.post(name: NSNotification.Name("LanguageChanged"), object: nil)
     }
 }

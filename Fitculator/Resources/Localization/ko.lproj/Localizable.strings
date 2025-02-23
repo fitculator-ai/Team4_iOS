@@ -63,6 +63,10 @@
 "custom_workout_program" = "개별 운동 프로그램 제공 (근력, Hyrox)";
 "program_feedback" = "프로그램 피드백";
 
+"language_changed" = "언어 변경 완료";
+"languange_apply_message" = "언어가 변경되어 메인화면으로 이동합니다.";
+"ok" = "확인";
+
 // MainTab
 "home" = "홈";
 "feed" = "피드";

@@ -63,6 +63,10 @@
 "custom_workout_program" = "Personalized Workout Program (Strength, Hyrox)";
 "program_feedback" = "Program Feedback";
 
+"language_changed" = "Language Change Completed";
+"languange_apply_message" = "The language has been changed. You will be redirected to the main screen.";
+"ok" = "OK";
+
 // MainTab
 "home" = "HOME";
 "feed" = "FEED";

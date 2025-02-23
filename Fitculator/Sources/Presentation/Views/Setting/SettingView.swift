@@ -56,7 +56,7 @@ struct SettingView: View {
                             Text("next_billing_date".localized)
                             Text("2025.03.14")
                         }
-                            .foregroundStyle(Color.gray)
+                        .foregroundStyle(Color.gray)
                     })
                     NavigationLink("subscription_type".localized, destination: PayInfoView())
                 } header: {
