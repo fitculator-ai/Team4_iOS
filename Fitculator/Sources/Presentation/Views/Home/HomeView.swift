@@ -19,6 +19,10 @@ struct WorkoutData: Identifiable, Equatable {
 struct HomeView: View {
     
     @StateObject var viewModel: HomeViewModel
+    @State var isDisplayHome: Bool = false
+    
+    var horizontalPadding: CGFloat = 10
+    var verticalPadding: CGFloat = 10
     
     var body: some View {
         GeometryReader { geometry in
@@ -26,23 +30,36 @@ struct HomeView: View {
             let viewHeight = geometry.size.height
             
             // TODO: - "<"누르면 저번주, 한번더 누를시 기간으로 나오게 + 네비게이션 바 추가
-            ScrollView(.vertical) {
-                VStack(spacing: 16) {
-                    WorkoutDonutChart(user: viewModel.user)
-                        .frame(height: viewHeight * 0.4)
-                    
-                    FatigueChart(user: viewModel.user)
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.13)
-                        .padding(.top, 16)
-                    
-                    WeeklyStrengthReps(user: viewModel.user)
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.1)
-                    
-                    WorkoutHistory(user: viewModel.user)
-                        .frame(width: viewWidth - 20)
+            // TODO: - isDisplayHome사용해 하위뷰 분기, CustomNavBar isDisplayHome에 넘겨주기
+            ZStack(alignment: .top) {
+                ScrollView(.vertical) {
+                    VStack(spacing: 8) {
+                        CustomNavigationBar(isDisplayHome: true, homeBtnAction: {}, calendarBtnAction: {}, notificationBtnAction: {})
+                            .zIndex(1)
+                            .frame(height: 44)
+                        
+                        WorkoutDonutChart(user: viewModel.user)
+                            .frame(height: viewHeight * 0.4)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                        
+                        FatigueChart(user: viewModel.user)
+                            .frame(width: viewWidth - 20, height: viewHeight * 0.13)
+                            .padding(.top, 16)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                        
+                        WeeklyStrengthReps(user: viewModel.user)
+                            .frame(width: viewWidth - 20, height: viewHeight * 0.1)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                        
+                        WorkoutHistory(user: viewModel.user)
+                            .frame(width: viewWidth - 20)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                    }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
             }
             .background(Color.fitculatorBackgroundColor)
         }
