@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingView: View {
     @StateObject private var viewModel = SettingViewModel()
     @State private var selectedGoal: String = ""
-    @State private var showLanguageAlert = false
     
     var body: some View {
         NavigationStack {
@@ -18,7 +17,7 @@ struct SettingView: View {
                         }
                     }
                     NavigationLink("device".localized, destination: DeviceView())
-                    NavigationLink(destination: LanguageSelectionView(viewModel: viewModel, showLanguageAlert: $showLanguageAlert)) {
+                    NavigationLink(destination: LanguageSelectionView(viewModel: viewModel)) {
                         HStack {
                             Text("language_setting".localized)
                             Spacer()
@@ -74,77 +73,6 @@ struct SettingView: View {
         .navigationTitle("settings".localized)
         .navigationBarTitleDisplayMode(.inline)
         .preferredColorScheme(.dark)
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LanguageChanged"))) { _ in
-            showLanguageAlert = true
-        }
-    }
-}
-
-struct WorkoutGoalView: View {
-    @Binding var selectedGoal: String
-    let goals = ["diet".localized, "muscle_gain".localized, "maintain_weight".localized, "other_goals".localized]
-    
-    var body: some View {
-        List {
-            ForEach(goals, id: \.self) { goal in
-                HStack {
-                    Text(goal)
-                    Spacer()
-                    if selectedGoal == goal {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(Color.tabButtonColor)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedGoal = goal
-                }
-            }
-            .listRowBackground(Color.brightBackgroundColor)
-        }
-        .scrollContentBackground(.hidden)
-        .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("fitness_goal".localized)
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct LanguageSelectionView: View {
-    @ObservedObject var viewModel: SettingViewModel
-    @Binding var showLanguageAlert: Bool
-    @Environment(\.presentationMode) var presentationMode
-    
-    let languages = ["한국어", "English"]
-    
-    var body: some View {
-        List {
-            ForEach(languages, id: \.self) { language in
-                HStack {
-                    Text("\(language)")
-                    Spacer()
-                    if viewModel.selectedLanguage == language {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(Color.tabButtonColor)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    viewModel.changeLanguage(to: language)
-                }
-            }
-            .listRowBackground(Color.brightBackgroundColor)
-        }
-        .scrollContentBackground(.hidden)
-        .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("language_setting".localized)
-        .navigationBarTitleDisplayMode(.inline)
-        .alert("language_changed_title".localized, isPresented: $showLanguageAlert) {
-                    Button("ok".localized, role: .cancel) {
-                        exit(0)
-                    }
-        } message: {
-            Text("restart_app_message".localized)
-        }
     }
 }
 

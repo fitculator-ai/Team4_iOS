@@ -14,14 +14,13 @@ class SettingViewModel: ObservableObject {
     @Published var profileUIImage: UIImage?
     @Published var tempUIImage: UIImage?
     
-    @Published var languageCode: String
     @Published var showAlert: Bool = false
     @Published var alertTitle: String = ""
     @Published var alertMessage: String = ""
+    @ObservedObject var languageManager: LanguageManager
     
-    init() {
-        let savedLanguageCode = SettingViewModel.getSavedLanguageCode()
-        self.languageCode = savedLanguageCode
+    init(languageManager: LanguageManager = LanguageManager()) {
+        self.languageManager = languageManager
         loadProfileImage()
     }
     
@@ -181,27 +180,31 @@ class SettingViewModel: ObservableObject {
     
     // MARK: 언어 변경
     var selectedLanguage: String {
-        return languageCode == "ko" ? "한국어" : "English"
-    }
-    
-    func changeLanguage(to language: String) {
-        if language == "한국어" {
-            languageCode = "ko"
-        } else {
-            languageCode = "en"
+            return languageManager.currentLanguage == "ko" ? "한국어" : "English"
         }
         
-        // 시스템에 언어 변경 적용
-        UserDefaults.standard.set(languageCode, forKey: "languageCode")
-        UserDefaults.standard.set([languageCode], forKey: "AppleLanguages")
-        UserDefaults.standard.synchronize()
+    func changeLanguage(to language: String) {
+        let newCode = language == "한국어" ? "ko" : "en"
+        languageManager.currentLanguage = newCode
         
-        // 언어 변경 alert 띄우기 위한 노티
         NotificationCenter.default.post(name: NSNotification.Name("LanguageChanged"), object: nil)
     }
+}
+
+class LanguageManager: ObservableObject {
+    @Published var currentLanguage: String {
+        didSet {
+            UserDefaults.standard.set(currentLanguage, forKey: "languageCode")
+            UserDefaults.standard.set([currentLanguage], forKey: "AppleLanguages")
+            objectWillChange.send()
+        }
+    }
     
-    // 언어 받아오기
-    private static func getSavedLanguageCode() -> String {
+    init() {
+        self.currentLanguage = LanguageManager.getSavedLanguageCode()
+    }
+    
+    static func getSavedLanguageCode() -> String {
         if let savedLanguageCode = UserDefaults.standard.string(forKey: "languageCode") {
             return savedLanguageCode
         } else {
