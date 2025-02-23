@@ -47,6 +47,9 @@ struct FatigueChart: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                     .offset(y: -40)
+                
+                Spacer()
+                
                 Button {
                     isTooltipVisible = true
                     DispatchQueue.main
@@ -106,8 +109,6 @@ struct FatigueChart: View {
         let result = changeTrainingDataForChart(traningRecords)
         self.changedTraningRecordsData = result.data
         self.fatigueValue = (result.originalTotal) / 100
-        
-        print("fatigueValue= \(fatigueValue) \n result.originalTotal= \(result.originalTotal)")
     }
 }
 
