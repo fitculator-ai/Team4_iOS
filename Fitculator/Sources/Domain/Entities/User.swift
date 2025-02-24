@@ -109,6 +109,7 @@ struct User {
     }
 }
 
+
 struct TrainingRecord: Equatable {
     var id = UUID()
     let trainingDate: Date
