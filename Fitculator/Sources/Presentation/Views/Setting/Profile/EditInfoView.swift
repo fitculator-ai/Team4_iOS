@@ -63,7 +63,7 @@ struct EditInfoView: View {
                                 viewModel.tempUser.exercise_goal = viewModel.filterExerciseIndicator(viewModel.tempUser.exercise_goal)
                             }
                     } else {
-                        Text(viewModel.user.exercise_issue)
+                        Text(viewModel.user.exercise_goal)
                             .foregroundStyle(.gray)
                     }
                 }
