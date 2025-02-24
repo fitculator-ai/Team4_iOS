@@ -9,7 +9,6 @@ import Foundation
 import Combine
 
 class DataSource {
-    
     // TODO: - Repository추가 해야함.
     func fetchUsers() -> AnyPublisher<User, Error> {
         return Future { promise in
