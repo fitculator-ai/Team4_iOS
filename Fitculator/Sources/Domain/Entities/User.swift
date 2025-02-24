@@ -121,7 +121,6 @@ struct User {
     }
 }
 
-
 struct TrainingRecord: Equatable {
     var id = UUID()
     let trainingDate: Date
@@ -135,13 +134,6 @@ struct TrainingRecord: Equatable {
     var max_bpm: Int
     var key: String {
         return "\(trainingDate.dateToString(includeDay: .fullDay))-\(trainingName)-\(gained_point)"
-    }
-    
-    enum Intensity {
-        case verLow
-        case low
-        case normal
-        case high
     }
     
     static func generateDummyRecords(for date: Date) -> [TrainingRecord] {
