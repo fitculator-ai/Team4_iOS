@@ -36,13 +36,15 @@ enum EndPoint: String {
     case exerciseList = "http://13.209.96.25:8000/api/exercise/?exercise_type="
 }
 
+
+
 /// ExerciseType
 ///  - cardio: 유산소
 ///  - strength: 근력
-enum ExerciseType: String {
-    case cardio = "유산소"
-    case strength = "근력"
-}
+//enum ExerciseType: String {
+//    case cardio = "유산소"
+//    case strength = "근력"
+//}
 
 class TrainingNetworking: TrainingNetworkingProtocol {
     func thisWeekRecord(userId: Int) -> AnyPublisher<[ThisWeekTraining], Error> {
@@ -186,4 +188,48 @@ struct ThisWeekTraining: Codable {
             exerciseNote: ""
         )
     }
+}
+
+
+enum Environment2 {
+    case development
+    case production
+    
+    var baseURL: String {
+        switch self {
+        case .development:
+            return "http://13.209.96.25:8000"
+        case .production:
+            return "https://13.209.96.25:8000"
+        }
+    }
+}
+
+
+enum APIEndPoint{
+    case thisWeekRecord(_ userId: Int)
+    case fetchExerciesList
+   
+
+    var path:String {
+        switch self {
+        case .thisWeekRecord:
+            return "/api/exercies-logs/this-week"
+        case .fetchExerciesList:
+            return "/api/exercise"
+        }
+    }
+    
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case .thisWeekRecord(let userId):
+            return [
+                URLQueryItem(name: "userId", value: String(userId))
+            ]
+        case .fetchExerciesList:
+            return []
+            
+        }
+    }
+    
 }
