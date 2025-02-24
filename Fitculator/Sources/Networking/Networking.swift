@@ -38,9 +38,15 @@ enum EndPoint: String {
 
 
 
+
+
 /// ExerciseType
 ///  - cardio: 유산소
 ///  - strength: 근력
+//enum ExerciseType: String {
+//    case cardio = "유산소"
+//    case strength = "근력"
+//}
 //enum ExerciseType: String {
 //    case cardio = "유산소"
 //    case strength = "근력"
