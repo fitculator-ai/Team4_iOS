@@ -14,7 +14,7 @@ struct EditInfoView: View {
             // MARK: 유저 정보
             UserInfoView(viewModel: viewModel)
             
-            // MARK: 안정시 심박수(운동고민, 운동목표 추가 고려중)
+            // MARK: 개인 운동 지표(안정시 심박수, 운동고민, 목표)
             Section {
                 HStack {
                     Text("resting_heart_rate".localized)
@@ -42,7 +42,25 @@ struct EditInfoView: View {
                             .frame(width: 150)
                             .multilineTextAlignment(.trailing)
                             .onChange(of: viewModel.tempUser.exercise_issue) {
-                                viewModel.tempUser.exercise_issue = viewModel.filterExerciseIssue(viewModel.tempUser.exercise_issue)
+                                viewModel.tempUser.exercise_issue = viewModel.filterExerciseIndicator(viewModel.tempUser.exercise_issue)
+                            }
+                    } else {
+                        Text(viewModel.user.exercise_issue)
+                            .foregroundStyle(.gray)
+                    }
+                }
+                .listRowBackground(Color.brightBackgroundColor)
+                
+                HStack {
+                    Text("fitness_goal".localized)
+                    Spacer()
+                    if viewModel.isEditing {
+                        TextField("fitness_goal".localized, text: $viewModel.tempUser.exercise_goal)
+                            .textFieldStyle(DefaultTextFieldStyle())
+                            .frame(width: 150)
+                            .multilineTextAlignment(.trailing)
+                            .onChange(of: viewModel.tempUser.exercise_goal) {
+                                viewModel.tempUser.exercise_goal = viewModel.filterExerciseIndicator(viewModel.tempUser.exercise_goal)
                             }
                     } else {
                         Text(viewModel.user.exercise_issue)
@@ -82,7 +100,7 @@ struct EditInfoView: View {
                     }
                     viewModel.isEditing.toggle()
                 }
-                .disabled(viewModel.tempUser.nickName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(!viewModel.isFormValid)
             }
         }
         .alert("unsaved_changes".localized, isPresented: $showDiscardAlert) {

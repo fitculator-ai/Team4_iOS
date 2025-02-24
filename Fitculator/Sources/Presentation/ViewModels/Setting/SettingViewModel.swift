@@ -37,7 +37,9 @@ class SettingViewModel: ObservableObject {
         tempUser.height != user.height ||
         !isSameDate ||
         tempUser.restHR != user.restHR ||
-        tempUIImage != profileUIImage
+        tempUIImage != profileUIImage ||
+        tempUser.exercise_goal != user.exercise_goal ||
+        tempUser.exercise_issue != user.exercise_issue
     }
     
     // TODO: 서버 연결 시 전체적으로 다 수정해야 함
@@ -47,6 +49,8 @@ class SettingViewModel: ObservableObject {
         tempUser.birthDate = user.birthDate
         tempUser.restHR = user.restHR
         tempUser.profileImage = user.profileImage
+        tempUser.exercise_goal = user.exercise_goal
+        tempUser.exercise_issue = user.exercise_issue
         tempUIImage = profileUIImage
     }
     
@@ -55,6 +59,8 @@ class SettingViewModel: ObservableObject {
         user.height = tempUser.height
         user.birthDate = tempUser.birthDate
         user.restHR = tempUser.restHR
+        user.exercise_issue = tempUser.exercise_issue
+        user.exercise_goal = tempUser.exercise_goal
         
         if let image = tempUIImage {
             if profileUIImage != tempUIImage {
@@ -178,10 +184,23 @@ class SettingViewModel: ObservableObject {
         return String(filtered.prefix(10)) // 최대 10자 제한
     }
     
-    // 운동고민 필터링(수정필요)
-    func filterExerciseIssue(_ input: String) -> String {
-        let filtered = input.filter { $0.isLetter || $0.isNumber } // 영문 & 숫자만 허용
-        return String(filtered.prefix(10)) // 최대 10자 제한
+    // 운동고민/목표 필터링
+    func filterExerciseIndicator(_ input: String) -> String {
+        var result = input
+        if let firstChar = result.first, firstChar.isWhitespace || (!firstChar.isLetter && !firstChar.isNumber) {
+            result.removeFirst()
+        }
+        let filtered = result.prefix(20)
+        return String(filtered)
+    }
+    
+    var isFormValid: Bool {
+        let isValid = [
+            tempUser.nickName,
+            tempUser.exercise_issue,
+            tempUser.exercise_goal
+        ].allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        return isValid
     }
     
     // MARK: 언어 변경
