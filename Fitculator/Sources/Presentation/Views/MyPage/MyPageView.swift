@@ -42,7 +42,7 @@ struct MyPageView: View {
                             
                             // MARK: 운동량 기록 그래프들
                             VStack {
-                                WorkOutRecordView(viewModel: viewModel, height: height)
+                                WorkOutRecordView(viewModel: viewModel, width: width, height: height)
                             }
                             .padding(.bottom, 10)
                         }
@@ -155,7 +155,7 @@ struct FatigueView: View {
             Rectangle()
                 .fill(Color.brightBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                .frame(width: width * 3, height: height / 2.5)
+                .frame(width: width * 3 - 30, height: height / 2.5)
                 .overlay(alignment: .center, content: {
                     WeeklyWorkoutGraphView(viewModel: viewModel)
                 })
@@ -165,6 +165,7 @@ struct FatigueView: View {
 
 struct WorkOutRecordView: View {
     @ObservedObject var viewModel: MyPageViewModel
+    var width: CGFloat
     var height: CGFloat
     
     var body: some View {
@@ -181,7 +182,7 @@ struct WorkOutRecordView: View {
             Rectangle()
                 .fill(Color.brightBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                .frame(height: height / 2.5)
+                .frame(width: width * 3 - 30, height: height / 2.5)
                 .overlay(alignment: .center) {
                     WorkoutWeeklyChartView(viewModel: viewModel)
                 }

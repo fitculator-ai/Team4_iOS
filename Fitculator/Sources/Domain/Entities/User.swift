@@ -53,6 +53,7 @@ struct User {
             if let weekStart = calendar.date(byAdding: .weekOfYear, value: -weekOffset, to: today)?.startOfWeek(using: calendar) {
                 for dayOffset in 0..<7 {
                     if let date = calendar.date(byAdding: .day, value: dayOffset, to: weekStart) {
+//                        if date.dateToString(includeDay: .fullDay).contains("2024.07") { continue }
                         if date <= today {
                             history[date] = TrainingRecord.generateDummyRecords(for: date) // 과거 데이터
                         } else {
@@ -66,15 +67,18 @@ struct User {
         return history
     }
     
-    func getTrainingRecords(for period: RecordPeriod) -> [[Date: [TrainingRecord]]] {
+    func getTrainingRecords(for period: RecordPeriod, prev: Bool? = nil) -> [[Date: [TrainingRecord]]] {
         let calendar = Calendar.current
         let today = Date()
         var result: [[Date: [TrainingRecord]]] = []
 
-        let weeksToFetch: Int
+        var weeksToFetch: Int
         switch period {
         case .oneWeek:
             weeksToFetch = 1
+            if let prev = prev {
+                weeksToFetch += prev ? 1 : -1
+            }
         case .oneMonth:
             weeksToFetch = 4
         case .threeMonth:
@@ -83,7 +87,6 @@ struct User {
             weeksToFetch = 35
         }
 
-        // ✅ 이번 주의 정확한 월요일 찾기
         if let thisWeekStart = today.startOfWeek(using: calendar) {
             for weekOffset in 0..<weeksToFetch {
                 if let weekStart = calendar.date(byAdding: .weekOfYear, value: -weekOffset, to: thisWeekStart) {
@@ -102,7 +105,19 @@ struct User {
             }
         }
         
+        if let prev = prev, prev {
+            result = [result.last!]
+        }
+        
         return result.reversed() // 과거 -> 현재 순으로 정렬
+    }
+    
+    func getPrevWeek() -> [[Date: [TrainingRecord]]] {
+        self.getTrainingRecords(for: .oneWeek, prev: true)
+    }
+    
+    func getNextWeek() -> [[Date: [TrainingRecord]]] {
+        self.getTrainingRecords(for: .oneWeek, prev: false)
     }
 }
 
@@ -177,4 +192,10 @@ enum RecordPeriod {
     case oneMonth
     case threeMonth
     case all
+}
+
+enum CurrentDateState {
+    case thisWeek
+    case lastWeek
+    case other
 }
