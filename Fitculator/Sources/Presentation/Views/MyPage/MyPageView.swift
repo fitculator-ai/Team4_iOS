@@ -184,7 +184,7 @@ struct WorkOutRecordView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .frame(width: width * 3 - 30, height: height / 2.5)
                 .overlay(alignment: .center) {
-                    WorkoutWeeklyChartView(viewModel: viewModel)
+//                    WorkoutWeeklyChartView(viewModel: viewModel)
                 }
         }
     }

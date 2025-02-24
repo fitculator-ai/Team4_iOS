@@ -17,7 +17,7 @@ protocol UserInfoNetworkingProtocol {
 }
 
 protocol TrainingNetworkingProtocol {
-    func thisWeekRecord(userId: Int) -> AnyPublisher<[ThisWeekTraining], Error>
+    func thisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error>
     func thisWeekMuscleRecordCount(userId: Int) -> AnyPublisher<Int, Error>
     func thisWeekPoints(userId: Int) -> Int
     
@@ -45,13 +45,13 @@ enum ExerciseType: String {
 }
 
 class TrainingNetworking: TrainingNetworkingProtocol {
-    func thisWeekRecord(userId: Int) -> AnyPublisher<[ThisWeekTraining], Error> {
+    func thisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error> {
         let url = EndPoint.thisWeekRecord.rawValue + "\(userId)"
         
-        return Future<[ThisWeekTraining], Error> { promise in
+        return Future<[Record], Error> { promise in
             AF.request(url)
                 .validate(statusCode: 200..<300)
-                .responseDecodable(of: [ThisWeekTraining].self) { res in
+                .responseDecodable(of: [Record].self) { res in
                     switch res.result {
                     case .success(let records):
                         promise(.success(records))
@@ -136,13 +136,6 @@ struct ThisWeekTraining: Codable {
         case exerciseNote = "exercise_note"
     }
     
-    enum Intensity: String, Codable {
-        case verLow = "매우 낮음"
-        case low = "낮음"
-        case normal = "보통"
-        case high = "높음"
-    }
-    
     static func generateDummyRecords(for date: Date) -> [ThisWeekTraining] {
         let trainingNames = ["러닝", "싸이클", "수영", "근력운동"]
         var records: [ThisWeekTraining] = []
@@ -186,4 +179,11 @@ struct ThisWeekTraining: Codable {
             exerciseNote: ""
         )
     }
+}
+
+enum Intensity: String, Codable {
+    case verLow = "매우 낮음"
+    case low = "낮음"
+    case normal = "보통"
+    case high = "높음"
 }

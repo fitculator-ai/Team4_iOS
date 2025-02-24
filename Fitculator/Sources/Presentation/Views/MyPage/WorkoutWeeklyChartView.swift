@@ -71,9 +71,9 @@ struct WorkoutWeeklyChartView: View {
                                         groupedRecords[date]
                                     }
                                     
-                                    sortedGroupedRecords.forEach {
-                                        viewModel.getMaxPoint(records: $0)
-                                    }
+//                                    sortedGroupedRecords.forEach {
+//                                        viewModel.getMaxPoint(records: $0)
+//                                    }
                                     
                                     viewModel.filteredTrainingCount = sortedGroupedRecords.map { $0.filter { $0.trainingName == "근력운동" }.count }
                                     viewModel.weeklyTrainingData = sortedGroupedRecords
