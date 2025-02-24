@@ -44,18 +44,17 @@ struct HomeView: View {
                             .padding(.vertical, verticalPadding)
                         
                         FatigueChart(user: viewModel.user)
-                            .frame(width: viewWidth - 20, height: viewHeight * 0.13)
+                            .frame(height: viewHeight * 0.13)
                             .padding(.top, 16)
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, verticalPadding)
                         
                         WeeklyStrengthReps(user: viewModel.user)
-                            .frame(width: viewWidth - 20, height: viewHeight * 0.1)
+                            .frame(height: viewHeight * 0.1)
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, verticalPadding)
                         
                         WorkoutHistory(user: viewModel.user)
-                            .frame(width: viewWidth - 20)
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, verticalPadding)
                     }
@@ -63,8 +62,8 @@ struct HomeView: View {
                 .refreshable {
                     viewModel.fetchUser()
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
+                .padding(.horizontal, horizontalPadding)
+                .padding(.vertical, verticalPadding)
             }
             .background(Color.fitculatorBackgroundColor)
         }
