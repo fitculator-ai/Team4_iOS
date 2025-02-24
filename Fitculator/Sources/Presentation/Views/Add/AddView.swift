@@ -287,9 +287,11 @@ struct AMPMToggle: View {
 struct ExerciseTypeSection: View {
     @Binding var selectedExerciseType: String?
     @Binding var showDropdown: Bool
+    @State private var selectedItem: String = "운동 선택"
     
     var body: some View {
         ZStack(alignment: .top) {
+            // 메인 컨텐츠
             VStack(spacing: 0) {
                 HStack {
                     Text("운동종류")
@@ -298,6 +300,7 @@ struct ExerciseTypeSection: View {
                     Spacer()
                 }
                 
+                // 유산소/근력 버튼
                 HStack {
                     Button {
                         withAnimation(.spring()) {
@@ -308,10 +311,11 @@ struct ExerciseTypeSection: View {
                         Text("유산소")
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(selectedExerciseType == "유산소" ? .blue : .white)
+                            .background(selectedExerciseType == "유산소" ? Color.blue.opacity(0.2) : Color.clear)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .stroke(.gray, lineWidth: 2)
+                                    .stroke(selectedExerciseType == "유산소" ? .blue : .gray, lineWidth: 2)
                             )
                     }
                     
@@ -324,27 +328,48 @@ struct ExerciseTypeSection: View {
                         Text("근력")
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(selectedExerciseType == "근력" ? .blue : .white)
+                            .background(selectedExerciseType == "근력" ? Color.blue.opacity(0.2) : Color.clear)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .stroke(.gray, lineWidth: 2)
+                                    .stroke(selectedExerciseType == "근력" ? .blue : .gray, lineWidth: 2)
                             )
                     }
                 }
                 .padding(.top, 8)
+                
+                // 드롭다운 헤더
+                if selectedExerciseType != nil {
+                    DropdownHeader(
+                        selectedItem: $selectedItem,
+                        isExpanded: $showDropdown
+                    )
+                    .background(Color.fitculatorBackgroundColor)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray, lineWidth: 1)
+                    )
+                    .cornerRadius(10)
+                    .padding(.top, 8)
+                }
             }
-            .background(Color.fitculatorBackgroundColor)
             .padding(.horizontal, 20)
-            .padding(.top, 8)
             
+            // 드롭다운 컨텐츠 (오버레이)
             if showDropdown {
-                DropdownView()
-                    .padding(.horizontal, 20)
-                    .offset(y: 120)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                DropdownContent(
+                    selectedExerciseType: selectedExerciseType,
+                    selectedItem: $selectedItem,
+                    isExpanded: $showDropdown
+                )
+                .background(Color.fitculatorBackgroundColor)
+                .cornerRadius(10)
+                .shadow(radius: 5)
+                .offset(y: 85)
+                .zIndex(1)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .background(Color.fitculatorBackgroundColor)
     }
 }
 
