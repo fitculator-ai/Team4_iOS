@@ -8,6 +8,7 @@ enum Field: Hashable {
 }
 
 struct AddView: View {
+    @StateObject var viewModel: AddViewModel = AddViewModel(addUseCase: ExerciseListUseCase(repository: ExerciseListRepository(networkService: NetworkService(session: .shared))))
     @State private var selectedDate = Date()
     @State private var showDatePicker = false
     @State private var keyboardHeight: CGFloat = 0
@@ -72,6 +73,7 @@ struct AddView: View {
             hideKeyboard()
         }
         .onAppear {
+            viewModel.fetchExerciesList()
             setupKeyboardNotifications()
         }
         .onDisappear {
