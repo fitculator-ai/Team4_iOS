@@ -1,6 +1,9 @@
 import Foundation
+import Combine
 
 class MyPageViewModel: ObservableObject {
+    private let networking = TrainingNetworking()
+    private var cancellables = Set<AnyCancellable>()
     @Published var selectedTitle: String? = nil
     @Published var user = UserService.shared.user
     @Published var weeklyTrainingData: [[TrainingRecord]] = []
@@ -63,4 +66,20 @@ class MyPageViewModel: ObservableObject {
     }
     
     init() {}
+    
+    func getList() {
+        networking.thisWeekRecord(userId: 1)
+            .receive(on: DispatchQueue.main)
+            .sink { result in
+                switch result {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print("에러발생 : \(error.localizedDescription)")
+                }
+            } receiveValue: { trainings in
+                print(trainings)
+            }
+            .store(in: &cancellables)
+    }
 }

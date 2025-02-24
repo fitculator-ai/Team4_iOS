@@ -32,6 +32,11 @@ struct WorkoutWeeklyChartView: View {
                         y: .value("Point", pointSum * 1.5)
                     )
                     .foregroundStyle(Color.red)
+                    .symbol {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 5, height: 5)
+                    }
                 }
             }
             .chartXAxis {
