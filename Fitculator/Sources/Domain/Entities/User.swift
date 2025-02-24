@@ -12,10 +12,20 @@ struct User {
     var profileImage: String?
     var trainingHistory: [Date: [TrainingRecord]]
     var subscriptionPlan: SubscriptionPlan
-
+    var exercise_issue: String
+    var exercise_goal: String
+    
     enum Gender: String {
-        case M = "남성"
-        case F = "여성"
+        case M
+        case F
+        var localized: String {
+            switch self {
+            case .M:
+                return "male".localized
+            case .F:
+                return "female".localized
+            }
+        }
     }
     
     init() {
@@ -29,6 +39,8 @@ struct User {
         self.profileImage = nil
         self.trainingHistory = User.generateTrainingHistory()
         self.subscriptionPlan = subscriptionPlans[0]
+        self.exercise_goal = "Diet"
+        self.exercise_issue = "운동고민내용"
     }
     
     static func generateTrainingHistory() -> [Date: [TrainingRecord]] {

@@ -1,0 +1,2 @@
+NSCameraUsageDescription = "The camera access is required to take profile photos.";
+NSPhotoLibraryUsageDescription = "Photo library access is required to select profile photos.";
