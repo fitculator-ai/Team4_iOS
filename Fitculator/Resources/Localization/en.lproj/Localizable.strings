@@ -79,3 +79,7 @@
 "photo_permission_needed" = "Photo Access Permission Needed";
 "photo_permission_message" = "Please allow access in Settings to select a photo.";
 "go_to_settings" = "Go to Settings";
+
+
+"fitness_concern" = "Fitness Concern";
+"fitness_goal" = "Fitness Goal";

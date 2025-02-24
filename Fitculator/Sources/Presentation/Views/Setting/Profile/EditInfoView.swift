@@ -32,6 +32,24 @@ struct EditInfoView: View {
                     }
                 }
                 .listRowBackground(Color.brightBackgroundColor)
+                
+                HStack {
+                    Text("fitness_concern".localized)
+                    Spacer()
+                    if viewModel.isEditing {
+                        TextField("fitness_concern".localized, text: $viewModel.tempUser.exercise_issue)
+                            .textFieldStyle(DefaultTextFieldStyle())
+                            .frame(width: 150)
+                            .multilineTextAlignment(.trailing)
+                            .onChange(of: viewModel.tempUser.exercise_issue) {
+                                viewModel.tempUser.exercise_issue = viewModel.filterExerciseIssue(viewModel.tempUser.exercise_issue)
+                            }
+                    } else {
+                        Text(viewModel.user.exercise_issue)
+                            .foregroundStyle(.gray)
+                    }
+                }
+                .listRowBackground(Color.brightBackgroundColor)
             }
             
             // MARK: 계정 정보

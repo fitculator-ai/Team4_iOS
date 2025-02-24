@@ -178,6 +178,12 @@ class SettingViewModel: ObservableObject {
         return String(filtered.prefix(10)) // 최대 10자 제한
     }
     
+    // 운동고민 필터링(수정필요)
+    func filterExerciseIssue(_ input: String) -> String {
+        let filtered = input.filter { $0.isLetter || $0.isNumber } // 영문 & 숫자만 허용
+        return String(filtered.prefix(10)) // 최대 10자 제한
+    }
+    
     // MARK: 언어 변경
     var selectedLanguage: String {
         return languageManager.currentLanguage == "ko" ? "한국어" : "English"
