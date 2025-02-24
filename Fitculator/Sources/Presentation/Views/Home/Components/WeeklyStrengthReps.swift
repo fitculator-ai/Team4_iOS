@@ -5,19 +5,13 @@ import Charts
 struct WeeklyStrengthReps: View {
     
     @State var user: User
-    
-    var traningRecords: [[Date: [TrainingRecord]]]
-    // traningRecords 데이터 변환
-    var changedTraningRecordsData: [WorkoutData]
-    var weightCount: Int
+    @State var changedTraningRecordsData: [WorkoutData] = []
+    @State var traningRecords: [[Date: [TrainingRecord]]] = []
+    @State var weightCount: Int = 0
     
     init(user: User) {
         self.user = user
         self.traningRecords = user.getTrainingRecords(for: .oneWeek)
-        let result = changeTrainingDataForChart(traningRecords)
-        self.changedTraningRecordsData = result.data
-        self.weightCount = changedTraningRecordsData.filter { $0.type == WorkoutType.weight }.count
-        
     }
     
     var body: some View {
@@ -92,6 +86,31 @@ struct WeeklyStrengthReps: View {
                 }
             }
         }
+        .onAppear {
+            updateWeeklyStreengthReps()
+            weightCount = calculateWeightCount()
+        }
+        .onChange(of: traningRecords) { oldValue, newValue in
+            updateWeeklyStreengthReps()
+            weightCount = calculateWeightCount()
+        }
+    }
+    
+    func updateWeeklyStreengthReps() {
+        traningRecords = user.getTrainingRecords(for: .oneWeek)
+        let result = changeTrainingDataForChart(traningRecords)
+        changedTraningRecordsData = result.data
+        weightCount = calculateWeightCount()
+    }
+    
+    func calculateWeightCount() -> Int {
+        var calculatedCount = 0
+        for record in changedTraningRecordsData {
+            if record.duration >= 30 && record.type == .weight {
+                calculatedCount += 1
+            }
+        }
+        return calculatedCount
     }
 }
 

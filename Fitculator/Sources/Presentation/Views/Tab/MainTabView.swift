@@ -71,6 +71,25 @@ struct MainTabView: View {
                 }
                 .offset(x: 0, y: (UIScreen.main.bounds.height/2)-74)
             }
+            
+                Button(action: {
+                    self.isModalPresented = true
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .resizable()
+                        .frame(width: 35, height: 35)
+                        .background(Color.white.opacity(0.8))
+                        .clipShape(Circle())
+                        .shadow(radius: 4)
+                        .padding(30)
+                }
+                .fullScreenCover(isPresented: $isModalPresented) {
+                    AddView()
+                        .ignoresSafeArea()
+                
+                }
+                .offset(x: 0, y: (UIScreen.main.bounds.height/2)-74)
+            }
         } else {
             BackgroundView {
                 ZStack {
