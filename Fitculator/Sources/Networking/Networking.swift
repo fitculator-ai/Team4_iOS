@@ -36,13 +36,15 @@ enum EndPoint: String {
     case exerciseList = "http://13.209.96.25:8000/api/exercise/?exercise_type="
 }
 
+
+
 /// ExerciseType
 ///  - cardio: 유산소
 ///  - strength: 근력
-enum ExerciseType: String {
-    case cardio = "유산소"
-    case strength = "근력"
-}
+//enum ExerciseType: String {
+//    case cardio = "유산소"
+//    case strength = "근력"
+//}
 
 class TrainingNetworking: TrainingNetworkingProtocol {
     func thisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error> {
@@ -112,78 +114,52 @@ class TrainingNetworking: TrainingNetworkingProtocol {
     }
 }
 
-struct ThisWeekTraining: Codable {
-    let userID: Int
-    let exerciseName: String
-    let avgBPM, maxBPM, duration: Int
-    let endAt: String
-    let exerciseIntensity: Intensity
-    let earnedPoint: Double
-    let exerciseNote: String?
-    var key: String {
-        return "\(endAt)-\(exerciseName)-\(earnedPoint)"
-    }
-    
-    enum CodingKeys: String, CodingKey {
-        case userID = "user_id"
-        case exerciseName = "exercise_name"
-        case avgBPM = "avg_bpm"
-        case maxBPM = "max_bpm"
-        case duration
-        case endAt = "end_at"
-        case exerciseIntensity = "exercise_intensity"
-        case earnedPoint = "earned_point"
-        case exerciseNote = "exercise_note"
-    }
-    
-    static func generateDummyRecords(for date: Date) -> [ThisWeekTraining] {
-        let trainingNames = ["러닝", "싸이클", "수영", "근력운동"]
-        var records: [ThisWeekTraining] = []
-        
-        let count = Int.random(in: 1...3)
-        for _ in 0..<count {
-            let trainingName = trainingNames.randomElement()!
-            let duration = Int.random(in: 30...120)
-            let avg_bpm = Int.random(in: 90...160)
-            let max_bpm = avg_bpm + Int.random(in: 5...20)
-            let intensity: Intensity = [.verLow, .low, .normal, .high].randomElement()!
-            let gained_point = Double.random(in: 10...100)
-            
-            let record = ThisWeekTraining(
-                userID: 1,
-                exerciseName: trainingName,
-                avgBPM: avg_bpm,
-                maxBPM: max_bpm,
-                duration: duration,
-                endAt: date.addingTimeInterval(TimeInterval(duration * 60)).dateToString(includeDay: .fullDay),
-                exerciseIntensity: intensity,
-                earnedPoint: gained_point,
-                exerciseNote: "\(trainingName) for \(duration) minutes"
-            )
-            
-            records.append(record)
-        }
-        return records
-    }
-    
-    static func createEmptyRecord(for date: Date) -> ThisWeekTraining {
-        return ThisWeekTraining(
-            userID: 1,
-            exerciseName: "",
-            avgBPM: 0,
-            maxBPM: 0,
-            duration: 0,
-            endAt: Date().dateToString(includeDay: .fullDay),
-            exerciseIntensity: .verLow,
-            earnedPoint: 0,
-            exerciseNote: ""
-        )
-    }
-}
-
 enum Intensity: String, Codable {
     case verLow = "매우 낮음"
     case low = "낮음"
     case normal = "보통"
     case high = "높음"
+}
+
+enum Environment2 {
+    case development
+    case production
+    
+    var baseURL: String {
+        switch self {
+        case .development:
+            return "http://13.209.96.25:8000"
+        case .production:
+            return "https://13.209.96.25:8000"
+        }
+    }
+}
+
+
+enum APIEndPoint{
+    case thisWeekRecord(_ userId: Int)
+    case fetchExerciesList
+   
+
+    var path:String {
+        switch self {
+        case .thisWeekRecord:
+            return "/api/exercies-logs/this-week"
+        case .fetchExerciesList:
+            return "/api/exercise"
+        }
+    }
+    
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case .thisWeekRecord(let userId):
+            return [
+                URLQueryItem(name: "userId", value: String(userId))
+            ]
+        case .fetchExerciesList:
+            return []
+            
+        }
+    }
+    
 }
