@@ -114,7 +114,7 @@ class TrainingNetworking: TrainingNetworkingProtocol {
     }
 }
 
-struct ThisWeekTraining: Codable {
+struct ThisWeekTraining: Codable, Equatable {
     let userID: Int
     let exerciseName: String
     let avgBPM, maxBPM, duration: Int
@@ -124,6 +124,12 @@ struct ThisWeekTraining: Codable {
     let exerciseNote: String?
     var key: String {
         return "\(endAt)-\(exerciseName)-\(earnedPoint)"
+    }
+    var endDate: Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter.date(from: endAt)
     }
     
     enum CodingKeys: String, CodingKey {

@@ -17,7 +17,6 @@ struct WorkoutData: Identifiable, Equatable {
 }
 
 struct HomeView: View {
-    
     @StateObject var viewModel: HomeViewModel
     @State var isDisplayHome: Bool = false
     
@@ -26,35 +25,48 @@ struct HomeView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            let viewWidth = geometry.size.width
             let viewHeight = geometry.size.height
             
             // TODO: - "<"누르면 저번주, 한번더 누를시 기간으로 나오게 + 네비게이션 바 추가
             // TODO: - isDisplayHome사용해 하위뷰 분기, CustomNavBar isDisplayHome에 넘겨주기
             ZStack(alignment: .top) {
-                ScrollView(.vertical) {
+                ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 8) {
                         CustomNavigationBar(isDisplayHome: true, homeBtnAction: {}, calendarBtnAction: {}, notificationBtnAction: {})
                             .zIndex(1)
                             .frame(height: 44)
                         
-                        WorkoutDonutChart(user: viewModel.user)
+                        WorkoutDonutChart(
+                            originalTotal: viewModel.originalTotal,
+                            totalPct: viewModel.totalPct,
+                            remainingPct: viewModel.remainingPct,
+                            changedTraningRecordsData: viewModel.changedTraningRecordsData,
+                            traningRecords: viewModel.traningRecords,
+                            activeChartData: viewModel.activeChartData
+                        )
                             .frame(height: viewHeight * 0.4)
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, verticalPadding)
                         
-                        FatigueChart(user: viewModel.user)
+                        FatigueChart(
+                            fatigueValue: viewModel.fatigueValue,
+                            changedTraningRecordsData: viewModel.changedTraningRecordsData,
+                            traningRecords: viewModel.traningRecords
+                        )
                             .frame(height: viewHeight * 0.13)
                             .padding(.top, 16)
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, verticalPadding)
                         
-                        WeeklyStrengthReps(user: viewModel.user)
+                        WeeklyStrengthReps(
+                            changedTraningRecordsData: viewModel.changedTraningRecordsData,
+                            traningRecords: viewModel.traningRecords
+                        )
                             .frame(height: viewHeight * 0.1)
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, verticalPadding)
                         
-                        WorkoutHistory(user: viewModel.user)
+                        WorkoutHistory(traningRecords: viewModel.traningRecords)
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, verticalPadding)
                     }
@@ -67,6 +79,10 @@ struct HomeView: View {
                 .padding(.vertical, verticalPadding)
             }
             .background(Color.fitculatorBackgroundColor)
+            .onAppear {
+                viewModel.fetchWorkoutHistory()
+                viewModel.updateDonutChartData()
+            }
         }
     }
 }
