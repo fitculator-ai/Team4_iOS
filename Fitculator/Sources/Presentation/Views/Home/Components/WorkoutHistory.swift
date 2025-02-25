@@ -46,6 +46,7 @@ struct WorkoutHistory: View {
     
     private func getIconData(for trainingName: String) -> (iconName: String, backgroundColor: Color) {
         let iconData: [String: (String, Color)] = [
+            // TODO: - 서버에서 받은 운동리스트와 SFSymbols 어떻게 매치시키지,,?
             // 유산소 운동
             "달리기": ("figure.run", Color.green),
             "사이클": ("bicycle", Color.cyan),

@@ -9,4 +9,5 @@ import Foundation
 
 class EndpointJ {
     static let perWeek = "http://13.209.96.25:8000/api/exercise-logs/this-week?user_id="
+    static let workoutList = "http://13.209.96.25:8000/api/exercise/"
 }

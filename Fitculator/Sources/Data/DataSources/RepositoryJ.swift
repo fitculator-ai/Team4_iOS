@@ -11,6 +11,8 @@ import Combine
 
 protocol RepositoryJ {
     func fetchWorkoutThisWeekHistory() -> AnyPublisher<[ThisWeekTraining], Error>
+    
+    func fetchWorkoutList() -> AnyPublisher<WorkoutList, Error>
 }
 
 class RepositoryJImpl: RepositoryJ {
@@ -23,5 +25,9 @@ class RepositoryJImpl: RepositoryJ {
     
     func fetchWorkoutThisWeekHistory() -> AnyPublisher<[ThisWeekTraining], any Error> {
         return dataSource.fetchWorkoutThisWeekHistory(userID: 1)
+    }
+    
+    func fetchWorkoutList() -> AnyPublisher<WorkoutList, Error> {
+        return dataSource.fetchWorkoutList()
     }
 }

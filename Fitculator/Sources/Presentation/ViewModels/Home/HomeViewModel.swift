@@ -18,29 +18,23 @@ class HomeViewModel: ObservableObject {
     // FatigueChart
     @Published var fatigueValue: Double = 0.0
     
-    private let fetchUseCase: UseCase
+    // WeeklyStrengthReps
+    @Published var workoutList: WorkoutList?
+    
     private let fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase
+    private let fetchWorkoutList: fetchWorkoutListUseCase
     private var cancellables = Set<AnyCancellable>()
     
-    init(fetchUseCase: UseCase, fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase) {
-        self.fetchUseCase = fetchUseCase
+    init(
+        fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase,
+        fetchWorkoutList: fetchWorkoutListUseCase
+    ) {
         self.fetchWorkoutThisWeekHistory = fetchWorkoutThisWeekHistory
+        self.fetchWorkoutList = fetchWorkoutList
 
-        fetchUser()
         fetchWorkoutHistory()
+        fetchWorkoutLists()
         updateDonutChartData()
-    }
-    
-    func fetchUser() {
-        fetchUseCase.execute()
-            .sink(receiveCompletion: { [weak self] completion in
-                if case let .failure(error) = completion {
-                    self?.error = error as? NetworkError
-                }
-            }, receiveValue: { [weak self] user in
-                self?.user = user
-            })
-            .store(in: &cancellables)
     }
     
     func fetchWorkoutHistory() {
@@ -55,6 +49,21 @@ class HomeViewModel: ObservableObject {
             })
             .store(in: &cancellables)
     }
+    
+    func fetchWorkoutLists() {
+        fetchWorkoutList.execute()
+            .sink(receiveCompletion: { completion in
+                if case let .failure(error) = completion {
+                    print("🏋️운동 리스트 API 에러: \(error)🏋️ \n")
+                    self.error = error as? NetworkError
+                }
+            }, receiveValue: { [weak self] data in
+                self?.workoutList = data
+                print("🏋️ 받은 운동 리스트: \(data)🏋️ \n")
+            })
+            .store(in: &cancellables)
+    }
+    
     
     func thisWeekTrainingToDateTrainingRecord(trainings: [ThisWeekTraining]) -> [[Date: [TrainingRecord]]] {
         var grouped: [Date: [TrainingRecord]] = [:]
@@ -91,23 +100,72 @@ class HomeViewModel: ObservableObject {
                 training_detail: training_detail,
                 max_bpm: training.maxBPM
             )
-            
-            print("💥💥 record= \(record) 💥💥\n")
-            
+                        
             let day = Calendar.current.startOfDay(for: date)
             grouped[day, default: []].append(record)
         }
-        print("💥💥 grouped= \([grouped]) 💥💥\n")
         return [grouped]
+    }
+    
+    /// [[Date: [TrainingRecord]]] -> [WorkoutData]
+    func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data: [WorkoutData], originalTotal: Double) {
+        var dataDict: [String: (points: Double, duration: Int,  type: WorkoutType)] = [:]
+        for week in records {
+            for (_, dailyRecords) in week {
+                for record in dailyRecords {
+                    let key = "\(record.trainingName)_\(record.gained_point)"
+                    let workoutType: WorkoutType = (record.trainingName == "근력운동") ? .weight : .cardio
+
+                    if var existing = dataDict[key] {
+                        existing.points += record.gained_point
+                        existing.duration += record.duration
+                        dataDict[key] = existing
+                    } else {
+                        dataDict[key] = (record.gained_point, record.duration, workoutType)
+                    }
+
+                }
+            }
+        }
+        
+        let originalTotal = dataDict.values.reduce(0) { $0 + $1.points } // 전체 운동량의 총합
+        let total = dataDict.values.reduce(0) { $0 + $1.points } // 비율 조정을 위한 totalPct
+        
+        // 전체 합이 100을 넘는 경우, 100을 기준으로 비율 조정
+        var result: [WorkoutData] = []
+        
+        if originalTotal > 100 {
+            result = dataDict.map { (key, value) -> WorkoutData in
+                let adjustedPct = value.points / total * 100
+
+                return WorkoutData(
+                    name: key,
+                    pct: adjustedPct,
+                    actualPoints: value.points,
+                    duration: value.duration,
+                    type: value.type
+                )
+            }
+        } else {
+            result = dataDict.map { (key, value) -> WorkoutData in
+                return WorkoutData(
+                    name: key,
+                    pct: value.points,
+                    actualPoints: value.points,
+                    duration: value.duration,
+                    type: value.type
+                )
+            }
+        }
+        
+        return (result, originalTotal)
     }
     
     func updateDonutChartData() {
         self.traningRecords = thisWeekTrainingToDateTrainingRecord(trainings: self.workoutThisWeekHistory)
         print("💥💥traningRecords = \(traningRecords)💥💥 \n")
         let result = changeTrainingDataForChart(traningRecords)
-        print("💥💥result = \(result)💥💥 \n")
         self.changedTraningRecordsData = result.data
-        print("💥💥changedTraningRecordsData = \(changedTraningRecordsData)💥💥 \n")
         self.originalTotal = result.originalTotal
         self.totalPct = changedTraningRecordsData.reduce(0) { $0 + $1.pct }
         self.remainingPct = max(100 - totalPct, 0)

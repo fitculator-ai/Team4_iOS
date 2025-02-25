@@ -21,13 +21,30 @@ class DataSource {
     
     func fetchWorkoutThisWeekHistory(userID: Int) -> AnyPublisher<[ThisWeekTraining], Error> {
         let urlString = EndpointJ.perWeek + "\(userID)"
-        guard let url = URL(string: urlString) else {
+        guard URL(string: urlString) != nil else {
             return Fail(error: URLError(.badURL))
                 .eraseToAnyPublisher()
         }
         
         return AF.request(urlString)
             .publishDecodable(type: [ThisWeekTraining].self)
+            .value()
+            .receive(on: DispatchQueue.main)
+            .mapError { (afterError: AFError)  in
+                return afterError as Error
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func fetchWorkoutList() -> AnyPublisher<WorkoutList, Error> {
+        let urlString = EndpointJ.workoutList
+        guard URL(string: urlString) != nil else {
+            return Fail(error: URLError(.badURL))
+                .eraseToAnyPublisher()
+        }
+        
+        return AF.request(urlString)
+            .publishDecodable(type: WorkoutList.self)
             .value()
             .receive(on: DispatchQueue.main)
             .mapError { (afterError: AFError)  in

@@ -239,3 +239,19 @@ enum APIEndPoint{
     }
     
 }
+
+// MARK: - 운동리스트 API 모델
+struct WorkoutList: Decodable {
+    let cardio: [WorkoutListItem]
+    let strength: [WorkoutListItem]
+    
+    private enum CodingKeys: String, CodingKey {
+        case cardio = "유산소"
+        case strength = "근력"
+    }
+}
+
+struct WorkoutListItem: Decodable, Identifiable {
+    let id: Int
+    let name: String
+}

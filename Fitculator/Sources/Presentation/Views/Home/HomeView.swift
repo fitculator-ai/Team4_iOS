@@ -60,7 +60,7 @@ struct HomeView: View {
                         
                         WeeklyStrengthReps(
                             changedTraningRecordsData: viewModel.changedTraningRecordsData,
-                            traningRecords: viewModel.traningRecords
+                            traningRecords: viewModel.traningRecords, workoutList: viewModel.workoutList
                         )
                             .frame(height: viewHeight * 0.1)
                             .padding(.horizontal, horizontalPadding)
@@ -72,8 +72,8 @@ struct HomeView: View {
                     }
                 }
                 .refreshable {
-                    viewModel.fetchUser()
                     viewModel.fetchWorkoutHistory()
+                    viewModel.fetchWorkoutLists()
                 }
                 .padding(.horizontal, horizontalPadding)
                 .padding(.vertical, verticalPadding)
@@ -85,60 +85,6 @@ struct HomeView: View {
             }
         }
     }
-}
-
-/// [[Date: [TrainingRecord]]] -> [WorkoutData]
-func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data: [WorkoutData], originalTotal: Double) {
-    var dataDict: [String: (points: Double, duration: Int,  type: WorkoutType)] = [:]
-    for week in records {
-        for (_, dailyRecords) in week {
-            for record in dailyRecords {
-                let key = "\(record.trainingName)_\(record.gained_point)"
-                let workoutType: WorkoutType = (record.trainingName == "근력운동") ? .weight : .cardio
-
-                if var existing = dataDict[key] {
-                    existing.points += record.gained_point
-                    existing.duration += record.duration
-                    dataDict[key] = existing
-                } else {
-                    dataDict[key] = (record.gained_point, record.duration, workoutType)
-                }
-
-            }
-        }
-    }
-    
-    let originalTotal = dataDict.values.reduce(0) { $0 + $1.points } // 전체 운동량의 총합
-    let total = dataDict.values.reduce(0) { $0 + $1.points } // 비율 조정을 위한 totalPct
-    
-    // 전체 합이 100을 넘는 경우, 100을 기준으로 비율 조정
-    var result: [WorkoutData] = []
-    
-    if originalTotal > 100 {
-        result = dataDict.map { (key, value) -> WorkoutData in
-            let adjustedPct = value.points / total * 100
-
-            return WorkoutData(
-                name: key,
-                pct: adjustedPct,
-                actualPoints: value.points,
-                duration: value.duration,
-                type: value.type
-            )
-        }
-    } else {
-        result = dataDict.map { (key, value) -> WorkoutData in
-            return WorkoutData(
-                name: key,
-                pct: value.points,
-                actualPoints: value.points,
-                duration: value.duration,
-                type: value.type
-            )
-        }
-    }
-    
-    return (result, originalTotal)
 }
 
 //#Preview {

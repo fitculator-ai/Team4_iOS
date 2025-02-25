@@ -31,3 +31,15 @@ class fetchWorkoutThisWeekHistoryUseCase {
         return repository.fetchWorkoutThisWeekHistory()
     }
 }
+
+class fetchWorkoutListUseCase {
+    private let repository: RepositoryJ
+    
+    init(repository: RepositoryJ) {
+        self.repository = repository
+    }
+    
+    func execute() -> AnyPublisher<WorkoutList, Error> {
+        return repository.fetchWorkoutList()
+    }
+}
