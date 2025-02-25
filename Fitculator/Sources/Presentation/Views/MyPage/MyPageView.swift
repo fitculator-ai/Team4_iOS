@@ -3,6 +3,17 @@ import Charts
 
 struct MyPageView: View {
     @StateObject var viewModel = MyPageViewModel()
+    
+    init() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+        appearance.backgroundColor = UIColor(Color.fitculatorBackgroundColor)
+        
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+    }
   
     var body: some View {
         GeometryReader { geo in

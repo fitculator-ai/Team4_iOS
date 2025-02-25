@@ -17,6 +17,7 @@ extension Date {
         case dayOfWeek
         case onlyDay
         case time
+        case time2
         case custom
     }
     
@@ -49,6 +50,8 @@ extension Date {
             format = "EEEE"
         case .time:
             format = "yyyy.MM.dd HH:MM"
+        case .time2:
+            format = "MM.dd E HH:MM"
         case .custom:
             format = ""
         }
