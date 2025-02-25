@@ -66,10 +66,10 @@ struct WeeklyWorkoutGraphView: View {
                                 .annotation(position: .top, alignment: .center, spacing: 0) {
                                     VStack {
                                         if total > 0 {
-//                                            ForEach(0..<viewModel.filteredTrainingCount[index], id: \.self) { _ in
-//                                                Image(systemName: "dumbbell.fill")
-//                                                    .foregroundStyle(Color.white)
-//                                            }
+                                            ForEach(0..<viewModel.muscleTrainingCount[index], id: \.self) { _ in
+                                                Image(systemName: "dumbbell.fill")
+                                                    .foregroundStyle(Color.white)
+                                            }
                                             Text("\(total, specifier: "%.1f")")
                                                 .font(.system(size: 12, weight: .bold))
                                                 .foregroundStyle(Color.white)

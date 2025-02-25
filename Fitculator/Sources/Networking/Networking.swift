@@ -17,7 +17,7 @@ protocol UserInfoNetworkingProtocol {
 }
 
 protocol TrainingNetworkingProtocol {
-    func thisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error>
+    func getThisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error>
     func thisWeekMuscleRecordCount(userId: Int) -> AnyPublisher<Int, Error>
     func thisWeekPoints(userId: Int) -> Int
     
@@ -36,33 +36,48 @@ enum EndPoint: String {
     case exerciseList = "http://13.209.96.25:8000/api/exercise/?exercise_type="
 }
 
-
-
-/// ExerciseType
-///  - cardio: 유산소
-///  - strength: 근력
-//enum ExerciseType: String {
-//    case cardio = "유산소"
-//    case strength = "근력"
-//}
-
 class TrainingNetworking: TrainingNetworkingProtocol {
-    func thisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error> {
-        let url = EndPoint.thisWeekRecord.rawValue + "\(userId)"
-        
-        return Future<[Record], Error> { promise in
-            AF.request(url)
-                .validate(statusCode: 200..<300)
-                .responseDecodable(of: [Record].self) { res in
-                    switch res.result {
-                    case .success(let records):
-                        promise(.success(records))
-                    case .failure(let error):
-                        promise(.failure(error))
+    func getThisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error> {
+        do {
+            let request = try MyPageAPIEndPoint.getThisWeekRecords(.development, userId).getURLRequest()
+            
+            return Future<[Record], Error> { promise in
+                AF.request(request)
+                    .validate(statusCode: 200..<300)
+                    .responseDecodable(of: [Record].self) { res in
+                        switch res.result {
+                        case .success(let records):
+                            promise(.success(records))
+                        case .failure(let error):
+                            promise(.failure(error))
+                        }
                     }
-                }
+            }
+            .eraseToAnyPublisher()
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
         }
-        .eraseToAnyPublisher()
+    }
+    
+    func get25WeeksRecords(userId: Int) -> AnyPublisher<[RecordWithPeriod], Error> {
+        do {
+            let request = try MyPageAPIEndPoint.get25WeekRecords(.development, userId).getURLRequest()
+            return Future<[RecordWithPeriod], Error> { promise in
+                AF.request(request)
+                    .validate(statusCode: 200..<300)
+                    .responseDecodable(of: [RecordWithPeriod].self) { res in
+                        switch res.result {
+                        case .success(let records):
+                            promise(.success(records))
+                        case .failure(let error):
+                            promise(.failure(error))
+                        }
+                    }
+            }
+            .eraseToAnyPublisher()
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
     }
     
     func thisWeekMuscleRecordCount(userId: Int) -> AnyPublisher<Int, Error> {
@@ -119,6 +134,7 @@ enum Intensity: String, Codable {
     case low = "낮음"
     case normal = "보통"
     case high = "높음"
+    case veryHigh = "매우 높음"
 }
 
 enum Environment2 {
@@ -135,13 +151,11 @@ enum Environment2 {
     }
 }
 
-
-enum APIEndPoint{
+enum APIEndPoint {
     case thisWeekRecord(_ userId: Int)
     case fetchExerciesList
-   
 
-    var path:String {
+    var path: String {
         switch self {
         case .thisWeekRecord:
             return "/api/exercies-logs/this-week"
@@ -161,5 +175,52 @@ enum APIEndPoint{
             
         }
     }
+}
+
+enum MyPageAPIEndPoint {
+    case getThisWeekRecords(_ environment: Environment2, _ userId: Int)
+    case get25WeekRecords(_ environment: Environment2, _ userId: Int)
     
+    var path: String {
+        switch self {
+        case .getThisWeekRecords(let environment, _):
+            return "\(environment.baseURL)/api/exercise-logs/this-week"
+        case .get25WeekRecords(let environment, _):
+            return "\(environment.baseURL)/api/mypage/get-exercise-logs/25weeks"
+        }
+    }
+    
+    var method: HTTPMethod {
+        return .get
+    }
+    
+    var headers: HTTPHeaders {
+        return ["Content-Type": "application/json"]
+    }
+    
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case .getThisWeekRecords(_, let userId),
+             .get25WeekRecords(_, let userId):
+            return [URLQueryItem(name: "user_id", value: "\(userId)")]
+        }
+    }
+    
+    func getURLRequest() throws -> URLRequest {
+        guard var urlComponents = URLComponents(string: self.path) else {
+            throw URLError(.badURL)
+        }
+        
+        urlComponents.queryItems = queryItems
+        
+        guard let url = urlComponents.url else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.method = self.method
+        request.headers = self.headers
+
+        return request
+    }
 }

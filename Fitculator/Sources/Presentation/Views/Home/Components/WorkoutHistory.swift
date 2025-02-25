@@ -76,6 +76,8 @@ struct WorkoutHistory: View {
             return Color.orange
         case .high:
             return Color.red
+        case .veryHigh:
+            return Color.black
         }
     }
 }
