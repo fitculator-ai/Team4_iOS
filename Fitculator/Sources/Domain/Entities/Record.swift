@@ -7,6 +7,11 @@
 
 import Foundation
 
+struct RecordWithPeriod: Codable {
+    let week_start, week_end: String
+    let logs: [Record]
+}
+
 struct Record: Codable, Equatable {
     let user_id: Int
     let exercise_name: String

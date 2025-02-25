@@ -18,15 +18,20 @@ class MyPageViewModel: ObservableObject {
       ]
     
     @Published var thisWeekRecords: [[Record]] = []
+    @Published var last25WeeksRecords: [[Record]] = []
     @Published var weeklyMaxPoint: Double = 0
     @Published var selectedTitle: String? = nil
+    @Published var weekDateStr: String = ""
+    @Published var user = UserService.shared.user
+    @Published var selectedWeek: Int? = nil
+    @Published var muscleTrainingCount: [Int] = []
     
     init() {
         
     }
     
     func getThisWeekTraining() {
-        networking.thisWeekRecord(userId: 1)
+        networking.getThisWeekRecord(userId: 1)
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
@@ -79,8 +84,8 @@ class MyPageViewModel: ObservableObject {
                     }
                 }
                 
-                filteredTrainingCount = datas.map {
-                    return $0.filter { !self.muscleCategory.contains($0.exercise_name) }.count
+                muscleTrainingCount = datas.map {
+                    return $0.filter { self.muscleCategory.contains($0.exercise_name) }.count
                 }
                 thisWeekRecords = datas
                 
@@ -95,44 +100,69 @@ class MyPageViewModel: ObservableObject {
         }
     }
     
-    func getTargetWeekTraining(date: String) {
-        
-    }
-    
-    
-    
-    
-    
-    
-    @Published var user = UserService.shared.user
-    @Published var weeklyTrainingData: [[TrainingRecord]] = []
-    @Published var trainingFatigueDatas: [[TrainingRecord]] = []
-    @Published var selectedWeek: Int? = nil
-    @Published var filteredTrainingCount: [Int] = []
-    @Published var weekDateStr: String = ""
-    
-    func fetchAllData(period: RecordPeriod) {
-        let trainingRecords = user.getTrainingRecords(for: period)
-        var datas: [[TrainingRecord]] = []
-        trainingRecords.forEach { records in
-            let sortedRecords = records.sorted { $0.key < $1.key }
-            let keys = sortedRecords.map { $0.key }
-            
-            var tempDatas: [TrainingRecord] = []
-            for (index, week) in sortedRecords.enumerated() {
-                if week.key == keys[index] {
-                    tempDatas.append(contentsOf: week.value)
+    func get25WeekTraining() {
+        networking.get25WeeksRecords(userId: 1)
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print("\(#function) \(#line) >> \(error.localizedDescription)")
                 }
+            } receiveValue: { [weak self] records in
+                guard let self = self else { return }
+                let calendar = Calendar.current
+                let today = Date()
+                var result: [[Date: [Record]]] = []
+                
+                let dic = Dictionary(grouping: records.map { $0.logs }.flatMap { $0 }, by: { $0.end_at.components(separatedBy: "T").first! })
+                for weekOffset in 0..<20 {
+                    if let weekStart = calendar.date(byAdding: .weekOfYear, value: -weekOffset, to: today)?.startOfWeek(using: calendar) {
+                        var weekData: [(Date, [Record])] = []
+                        for dayOffset in 0..<7 {
+                            if let date = calendar.date(byAdding: .day, value: dayOffset, to: weekStart) {
+                                let records = dic[date.dateToString(includeDay: .fullDay2)] ?? [Record(user_id: 1,
+                                                                                                       exercise_name: "",
+                                                                                                       avg_bpm: 0,
+                                                                                                       max_bpm: 0,
+                                                                                                       duration: 0,
+                                                                                                       end_at: date.dateToString(includeDay: .fullDay2),
+                                                                                                       exercise_intensity: .verLow,
+                                                                                                       earned_point: 0,
+                                                                                                       exercise_note: nil)]
+                                weekData.append((date, records))
+                            }
+                        }
+                        weekData.sort { $0.0 < $1.0 }
+                        result.append(Dictionary(uniqueKeysWithValues: weekData))
+                    }
+                }
+                
+                result = result.reversed()
+                
+                var datas: [[Record]] = []
+                result.forEach { records in
+                    let sortedRecords = records.sorted { $0.key < $1.key }
+                    let keys = sortedRecords.map { $0.key }
+                    
+                    var tempDatas: [Record] = []
+                    for (index, week) in sortedRecords.enumerated() {
+                        if week.key == keys[index] {
+                            tempDatas.append(contentsOf: week.value)
+                        }
+                    }
+                    
+                    datas += Array(arrayLiteral: tempDatas)
+                }
+                
+                self.selectedWeek = last25WeeksRecords.count - 1
+                last25WeeksRecords = datas
             }
-            
-            datas += Array(arrayLiteral: tempDatas)
-        }
-        
-        self.selectedWeek = trainingRecords.count - 1
-        self.trainingFatigueDatas = datas
+            .store(in: &cancellables)
     }
     
     func setWeekDateStr() {
-        weekDateStr = "\(weeklyTrainingData.first?.first?.trainingDate.dateToString(includeDay: .fullDay) ?? "") ~ \(weeklyTrainingData.last?.last?.trainingDate.dateToString(includeDay: .fullDay) ?? "")"
+        weekDateStr = "\(thisWeekRecords.first?.first?.end_at.components(separatedBy: "T").first ?? "") ~ \(thisWeekRecords.last?.last?.end_at.components(separatedBy: "T").first ?? "")"
     }
 }
