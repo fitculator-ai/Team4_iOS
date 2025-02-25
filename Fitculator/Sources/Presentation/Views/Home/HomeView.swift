@@ -61,6 +61,7 @@ struct HomeView: View {
                 }
                 .refreshable {
                     viewModel.fetchUser()
+                    viewModel.fetchWorkoutHistory()
                 }
                 .padding(.horizontal, horizontalPadding)
                 .padding(.vertical, verticalPadding)
@@ -124,6 +125,6 @@ func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data:
     return (result, originalTotal)
 }
 
-#Preview {
-    HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
-}
+//#Preview {
+//    HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource()), fetchWorkoutThisWeekHistory: <#fetchWorkoutThisWeekHistoryUseCase#>))
+//}

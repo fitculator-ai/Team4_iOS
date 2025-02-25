@@ -201,3 +201,26 @@ enum CurrentDateState {
     case lastWeek
     case other
 }
+
+// TODO: - Entities에 뺴두기.
+struct WorkoutRecord: Codable {
+    let userID: Int
+    let exerciseName: String
+    let avgBPM, maxBPM, duration: Int
+    let endAt: String
+    let exerciseIntensity: String
+    let earnedPoint: Double
+    let exerciseNote: String
+
+    enum CodingKeys: String, CodingKey {
+        case userID = "user_id"
+        case exerciseName = "exercise_name"
+        case avgBPM = "avg_bpm"
+        case maxBPM = "max_bpm"
+        case duration
+        case endAt = "end_at"
+        case exerciseIntensity = "exercise_intensity"
+        case earnedPoint = "earned_point"
+        case exerciseNote = "exercise_note"
+    }
+}

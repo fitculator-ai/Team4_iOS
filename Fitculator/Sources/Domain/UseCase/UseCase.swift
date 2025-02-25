@@ -19,3 +19,15 @@ class UseCase {
         return dataSource.fetchUsers()
     }
 }
+
+class fetchWorkoutThisWeekHistoryUseCase {
+    private let repository: RepositoryJ
+    
+    init(repository: RepositoryJ) {
+        self.repository = repository
+    }
+    
+    func execute() -> AnyPublisher<[ThisWeekTraining], Error> {
+        return repository.fetchWorkoutThisWeekHistory()
+    }
+}
