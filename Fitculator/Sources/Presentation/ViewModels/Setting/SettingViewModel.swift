@@ -75,14 +75,6 @@ class SettingViewModel: ObservableObject {
         }
     }
     
-    func userLogout() {
-        print("로그아웃")
-    }
-    
-    func userWithdraw() {
-        print("탈퇴")
-    }
-    
     func loadProfileImage() {
         if let imageString = user.profileImage {
             profileUIImage = UIImage(contentsOfFile: imageString)

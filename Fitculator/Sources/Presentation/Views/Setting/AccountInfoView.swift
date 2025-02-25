@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AccountInfoView: View {
-    @StateObject private var viewModel = SettingViewModel()
+    @StateObject private var viewModel = AccountInfoViewModel()
     
     var body: some View {
         VStack {
@@ -9,8 +9,15 @@ struct AccountInfoView: View {
                 HStack {
                     Text("email".localized)
                     Spacer()
-                    Text("\(viewModel.user.userEmail)")
-                        .foregroundColor(.gray)
+                    if let user = viewModel.user {
+                        Text("\(user.email)")
+                            .foregroundColor(.gray)
+                    } else {
+                        Text("Loading...")
+                            .onAppear {
+                                viewModel.getUserEmail(email: "qwer@naver.com")
+                            }
+                    }
                 }
                 .listRowBackground(Color.gray.opacity(0.2))
             }
@@ -18,12 +25,12 @@ struct AccountInfoView: View {
             
             HStack(spacing: 15) {
                 Button("logout".localized) {
-                    userLogout()
+                    viewModel.userLogout()
                 }
                 .foregroundColor(.red)
                 
                 Button("withdraw".localized) {
-                    userWithdraw()
+                    viewModel.userWithdraw()
                 }
                 .foregroundColor(.gray)
             }
@@ -33,13 +40,5 @@ struct AccountInfoView: View {
         .background(Color.fitculatorBackgroundColor.opacity(1))
         .navigationTitle("accountInfo".localized)
         .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private func userLogout() {
-        viewModel.userLogout()
-    }
-    
-    private func userWithdraw() {
-        viewModel.userWithdraw()
     }
 }
