@@ -136,6 +136,14 @@ struct TrainingRecord: Equatable {
         return "\(trainingDate.dateToString(includeDay: .fullDay))-\(trainingName)-\(gained_point)"
     }
     
+    enum Intensity: String, Codable {
+        case verLow = "매우 낮음"
+        case low = "낮음"
+        case normal = "보통"
+        case high = "높음"
+        case veryHigh = "매우 높음"
+    }
+    
     static func generateDummyRecords(for date: Date) -> [TrainingRecord] {
         let trainingNames = ["러닝", "싸이클", "수영", "근력운동"]
         var records: [TrainingRecord] = []

@@ -87,6 +87,8 @@ class HomeViewModel: ObservableObject {
                 intensity = .low
             case .verLow:
                 intensity = .verLow
+            case .veryHigh:
+                intensity = .veryHigh
             }
             
             let record = TrainingRecord(
@@ -100,9 +102,11 @@ class HomeViewModel: ObservableObject {
                 training_detail: training_detail,
                 max_bpm: training.maxBPM
             )
+            print("💥💥 record: \(record) 💥💥")
                         
             let day = Calendar.current.startOfDay(for: date)
             grouped[day, default: []].append(record)
+            print("💥💥 grouped: \(grouped) 💥💥")
         }
         return [grouped]
     }
