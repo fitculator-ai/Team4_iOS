@@ -209,6 +209,7 @@ enum Environment2 {
 enum APIEndPoint{
     case thisWeekRecord(_ userId: Int)
     case fetchExerciesList
+    case addExerciseRecord(_ request: AddExerciseRequestDTO)
    
 
     var path:String {
@@ -217,6 +218,17 @@ enum APIEndPoint{
             return "/api/exercies-logs/this-week"
         case .fetchExerciesList:
             return "/api/exercise"
+        case .addExerciseRecord:
+            return "/api/exercise-logs/"
+        }
+    }
+    
+    var httpMethod: String {
+        switch self {
+        case .thisWeekRecord, .fetchExerciesList:
+            return "GET"
+        case .addExerciseRecord:
+            return "POST"
         }
     }
     
@@ -226,10 +238,17 @@ enum APIEndPoint{
             return [
                 URLQueryItem(name: "userId", value: String(userId))
             ]
-        case .fetchExerciesList:
+        case .fetchExerciesList,.addExerciseRecord:
             return []
             
         }
+    }
+    
+    var headers: [String: String] {
+        return [
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        ]
     }
     
 }
