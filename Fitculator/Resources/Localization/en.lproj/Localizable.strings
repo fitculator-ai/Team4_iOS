@@ -83,3 +83,8 @@
 
 "fitness_concern" = "Fitness Concern";
 "fitness_goal" = "Fitness Goal";
+
+// My Page
+"my_page" = "My Page";
+"weekly_record" = "Week Record";
+"weekly_fatigue" = "Weekly Fatigue";

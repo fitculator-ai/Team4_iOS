@@ -30,7 +30,8 @@ extension Date {
     /// - time: "yyyy.MM.dd HH:MM"
     func dateToString(includeDay: IncludeDay = .dayOfWeek) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ko_KR")
+        let langCode = LanguageManager.getSavedLanguageCode()
+        dateFormatter.locale = Locale(identifier: "\(langCode)")
         
         var format: String = ""
         switch includeDay {
@@ -57,12 +58,16 @@ extension Date {
         }
         dateFormatter.dateFormat = format
         
+        if includeDay == .onlyDay {
+            return String(dateFormatter.string(from: self).prefix(3))
+        }
+        
         return dateFormatter.string(from: self)
     }
     
     func startOfWeek(using calendar: Calendar) -> Date? {
         var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
-        components.weekday = 2 // ✅ 월요일을 기준으로 설정 (1: 일요일, 2: 월요일)
+        components.weekday = 2
         return calendar.date(from: components)
     }
     

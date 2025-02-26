@@ -31,28 +31,28 @@ struct WeeklyWorkoutGraphView: View {
                                     data.earned_point >= 20 && data.earned_point < 50 ? Color.yellow :
                                     Color.red
                             )
-                            .annotation(position: .overlay, alignment: .center, spacing: 0) {
-                                if !data.exercise_name.isEmpty {
-                                    VStack {
-                                        Text("\(data.exercise_name)")
-                                            .font(.system(size: 14, weight: .bold))
-                                            .foregroundStyle(Color.white)
-                                            .minimumScaleFactor(0.5)
-                                            .lineLimit(1)
-                                            .allowsTightening(true)
-                                        
-                                        Text("\(data.earned_point, specifier: "%.1f")")
-                                            .font(.system(size: 14, weight: .bold))
-                                            .foregroundStyle(Color.white)
-                                            .minimumScaleFactor(0.5)
-                                            .lineLimit(1)
-                                            .allowsTightening(true)
-                                    }
-                                    .padding(4)
-                                    .background(Color.black.opacity(0.3))
-                                    .clipShape(RoundedRectangle(cornerRadius: 5))
-                                }
-                            }
+//                            .annotation(position: .overlay, alignment: .center, spacing: 0) {
+//                                if !data.exercise_name.isEmpty {
+//                                    VStack {
+//                                        Text("\(data.exercise_name)")
+//                                            .font(.system(size: 14, weight: .bold))
+//                                            .foregroundStyle(Color.white)
+//                                            .minimumScaleFactor(0.5)
+//                                            .lineLimit(1)
+//                                            .allowsTightening(true)
+//                                        
+//                                        Text("\(data.earned_point, specifier: "%.1f")")
+//                                            .font(.system(size: 14, weight: .bold))
+//                                            .foregroundStyle(Color.white)
+//                                            .minimumScaleFactor(0.5)
+//                                            .lineLimit(1)
+//                                            .allowsTightening(true)
+//                                    }
+//                                    .padding(4)
+//                                    .background(Color.black.opacity(0.3))
+//                                    .clipShape(RoundedRectangle(cornerRadius: 5))
+//                                }
+//                            }
                             
                             let totalPointMap = viewModel.thisWeekRecords.map {
                                 return ($0.first!.end_at.components(separatedBy: "T").first!, $0.filter { !viewModel.muscleCategory.contains($0.exercise_name) }.map { $0.earned_point }.reduce(0, +))
@@ -60,16 +60,16 @@ struct WeeklyWorkoutGraphView: View {
                             ForEach(totalPointMap, id: \.0) { value in
                                 let (date, total) = value
                                 PointMark(
-                                    x: .value("date", date.stringToDate(format: "yyyy-MM-dd").dateToString(includeDay: .onlyDay)),
+                                    x: .value("Date", date.stringToDate(format: "yyyy-MM-dd").dateToString(includeDay: .onlyDay)),
                                     y: .value("total", total)
                                 )
                                 .annotation(position: .top, alignment: .center, spacing: 0) {
                                     VStack {
                                         if total > 0 {
-                                            ForEach(0..<viewModel.muscleTrainingCount[index], id: \.self) { _ in
-                                                Image(systemName: "dumbbell.fill")
-                                                    .foregroundStyle(Color.white)
-                                            }
+//                                            ForEach(0..<viewModel.muscleTrainingCount[index], id: \.self) { _ in
+//                                                Image(systemName: "dumbbell.fill")
+//                                                    .foregroundStyle(Color.white)
+//                                            }
                                             Text("\(total, specifier: "%.1f")")
                                                 .font(.system(size: 12, weight: .bold))
                                                 .foregroundStyle(Color.white)

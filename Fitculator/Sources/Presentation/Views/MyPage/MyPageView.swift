@@ -32,7 +32,7 @@ struct MyPageView: View {
                                     ProfileImageView(viewModel: viewModel, width: width)
                                 }
                                 
-                                Text("Lucy 님")
+                                Text("Lucy")
                                     .font(.largeTitle)
                                     .bold()
                                     .foregroundStyle(.white)
@@ -62,7 +62,7 @@ struct MyPageView: View {
                 .onAppear {
                     
                 }
-                .navigationTitle("My") // TODO: title 색상 흰색으로 변경
+                .navigationTitle("my_page".localized)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -148,8 +148,8 @@ struct FatigueView: View {
     var body: some View {
         VStack(spacing: 5) {
             HStack {
-                Text("피로도")
-                    .font(.largeTitle)
+                Text("weekly_record".localized)
+                    .font(.title2)
                     .bold()
                     .foregroundStyle(Color.white)
                 
@@ -182,8 +182,8 @@ struct WorkOutRecordView: View {
     var body: some View {
         VStack(spacing: 5) {
             HStack {
-                Text("운동량 기록")
-                    .font(.largeTitle)
+                Text("weekly_fatigue".localized)
+                    .font(.title2)
                     .bold()
                     .foregroundStyle(Color.white)
                 Spacer()
