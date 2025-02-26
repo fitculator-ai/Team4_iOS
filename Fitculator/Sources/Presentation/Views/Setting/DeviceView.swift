@@ -6,9 +6,9 @@ struct DeviceView: View {
     
     var body: some View {
         List {
-            Section(header: Text("연결된 기기")) {
+            Section(header: Text("connectedDevice".localized)) {
                 if bluetoothManager.connectedDevices.isEmpty {
-                    Text("연결된 블루투스 기기가 없습니다.")
+                    Text("noDevice".localized)
                         .foregroundStyle(.gray)
                 } else {
                     ForEach(bluetoothManager.connectedDevices, id: \.self) { device in
@@ -26,7 +26,7 @@ struct DeviceView: View {
                 }) {
                     HStack {
                         Image(systemName: "gear")
-                        Text("블루투스 설정으로 이동")
+                        Text("gotoBluetooth".localized)
                     }
                     .foregroundColor(.blue)
                 }
@@ -35,7 +35,7 @@ struct DeviceView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("디바이스")
+        .navigationTitle("device".localized)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             bluetoothManager.startScanning()
@@ -61,7 +61,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
         if central.state == .poweredOn {
             central.scanForPeripherals(withServices: nil, options: nil)
         } else {
-            connectedDevices = ["블루투스를 활성화하세요."]
+            connectedDevices = ["enableBluetooth".localized]
         }
     }
 

@@ -7,26 +7,28 @@ struct WorkoutDonutChart: View {
     @State var selectedIndex: Int?
     @State private var chartSize: CGSize = .zero
     @State private var selectedAngle: Double?
-    @State var user: User
-    @State var activeChartData: [WorkoutData] = []
-    @State var originalTotal: Double = 0.0 // 전체 운동량 저장 변수
-    @State var totalPct: Double = 0.0 // 차트 운동량을 100을 기준으로 저장되는 변수
-    @State var remainingPct: Double = 0.0
-    @State var changedTraningRecordsData: [WorkoutData] = []
+    var originalTotal: Double = 0.0 // 전체 운동량 저장 변수
+    var totalPct: Double = 0.0 // 차트 운동량을 100을 기준으로 저장되는 변수
+    var remainingPct: Double = 0.0
+    var changedTraningRecordsData: [WorkoutData] = []
 
-    var traningRecords: [[Date: [TrainingRecord]]]
+    var traningRecords: [[Date: [TrainingRecord]]] = []
+    var activeChartData: [WorkoutData] = []
         
-    init(user: User) {
-        self.user = user
-        self.traningRecords = user.getTrainingRecords(for: .oneWeek)
-        let result = changeTrainingDataForChart(traningRecords)
-        self.changedTraningRecordsData = result.data
-        self.originalTotal = result.originalTotal
-        self.totalPct = changedTraningRecordsData.reduce(0) { $0 + $1.pct }
-        self.remainingPct = max(100 - totalPct, 0)
-        self.activeChartData = totalPct < 100
-        ? changedTraningRecordsData + [WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, type: .none)]
-                : changedTraningRecordsData
+    init(
+        originalTotal: Double,
+        totalPct: Double,
+        remainingPct: Double,
+        changedTraningRecordsData: [WorkoutData],
+        traningRecords: [[Date : [TrainingRecord]]],
+        activeChartData: [WorkoutData]
+    ) {
+        self.originalTotal = originalTotal
+        self.totalPct = totalPct
+        self.remainingPct = remainingPct
+        self.changedTraningRecordsData = changedTraningRecordsData
+        self.traningRecords = traningRecords
+        self.activeChartData = activeChartData
     }
     
     var body: some View {
@@ -40,7 +42,7 @@ struct WorkoutDonutChart: View {
                     innerRadius: .ratio(0.5),
                     angularInset: 1
                 )
-                .cornerRadius(40)
+                .cornerRadius(8)
                 .foregroundStyle(element.name == "남은 운동량_" ? Color.gray.opacity(0.3) : Color.blue)
                 .opacity(selectedIndex == nil || selectedIndex == index ? 1.0 : 0.4)
             }
@@ -52,7 +54,6 @@ struct WorkoutDonutChart: View {
             )
             .onAppear {
                 chartSize = geometry.size
-                updateActiveChartData()
             }
             .chartBackground { chartProxy in
                 if let plotFrame = chartProxy.plotFrame {
@@ -62,7 +63,7 @@ struct WorkoutDonutChart: View {
                             let selectedData = activeChartData[index]
                             
                             // 운동량 총합이 100이 넘으면 100을 기준으로 각 운동 포인트가 보정된 값이 나와 분기 처리.
-                            let _ = print("선택된 운동: \(selectedData.name) 운동량: \(selectedData.actualPoints) \n")
+                            let _ = print("선택된 운동: \(selectedData.name) 운동량: \(selectedData.actualPoints) 운동시간: \(selectedData.duration) \n")
                             Text("\(String(selectedData.name.split(separator: "_").first ?? "")) \n \(selectedData.actualPoints, specifier: "%.1f")P")                                .font(.system(size: geometry.size.width * 0.07))
                                 .foregroundStyle(Color.white)
                                 .fontWeight(.bold)
@@ -82,32 +83,9 @@ struct WorkoutDonutChart: View {
             .chartOverlay { chart in
                 getChartOverlay(chart: chart, geometry: geometry, data: activeChartData)
             }
-            .onAppear() {
-                updateActiveChartData()
-            }
-            // MARK: 에러나서 다른 탭 갔다가 홈으로 돌아오면 화면이 안나와서 임시 주석처리
-//            .onChange(of: activeChartData) {
-//                updateActiveChartData()
-//            }
             .chartLegend(.hidden)
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
-        }
-    }
-    
-    func updateActiveChartData() {
-        let result = changeTrainingDataForChart(traningRecords)
-        self.changedTraningRecordsData = result.data
-        self.originalTotal = result.originalTotal
-        self.totalPct = changedTraningRecordsData.reduce(0) { $0 + $1.pct }
-        self.remainingPct = max(100 - totalPct, 0)
-
-        if totalPct < 100 {
-            self.activeChartData = changedTraningRecordsData + [
-                WorkoutData(name: "남은 운동량_", pct: remainingPct, actualPoints: remainingPct, type: .none)
-            ]
-        } else {
-            self.activeChartData = changedTraningRecordsData
         }
     }
     

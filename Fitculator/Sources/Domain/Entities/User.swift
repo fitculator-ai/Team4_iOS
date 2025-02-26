@@ -12,10 +12,20 @@ struct User {
     var profileImage: String?
     var trainingHistory: [Date: [TrainingRecord]]
     var subscriptionPlan: SubscriptionPlan
-
+    var exercise_issue: String
+    var exercise_goal: String
+    
     enum Gender: String {
-        case M = "남성"
-        case F = "여성"
+        case M
+        case F
+        var localized: String {
+            switch self {
+            case .M:
+                return "male".localized
+            case .F:
+                return "female".localized
+            }
+        }
     }
     
     init() {
@@ -29,6 +39,8 @@ struct User {
         self.profileImage = nil
         self.trainingHistory = User.generateTrainingHistory()
         self.subscriptionPlan = subscriptionPlans[0]
+        self.exercise_goal = "Diet"
+        self.exercise_issue = "운동고민내용"
     }
     
     static func generateTrainingHistory() -> [Date: [TrainingRecord]] {
@@ -109,7 +121,7 @@ struct User {
     }
 }
 
-struct TrainingRecord {
+struct TrainingRecord: Equatable {
     var id = UUID()
     let trainingDate: Date
     let trainingName: String
@@ -124,11 +136,12 @@ struct TrainingRecord {
         return "\(trainingDate.dateToString(includeDay: .fullDay))-\(trainingName)-\(gained_point)"
     }
     
-    enum Intensity {
-        case verLow
-        case low
-        case normal
-        case high
+    enum Intensity: String, Codable {
+        case verLow = "매우 낮음"
+        case low = "낮음"
+        case normal = "보통"
+        case high = "높음"
+        case veryHigh = "매우 높음"
     }
     
     static func generateDummyRecords(for date: Date) -> [TrainingRecord] {
@@ -142,7 +155,8 @@ struct TrainingRecord {
             let avg_bpm = Int.random(in: 90...160)
             let max_bpm = avg_bpm + Int.random(in: 5...20)
             let intensity: Intensity = [.verLow, .low, .normal, .high].randomElement()!
-            let gained_point = Double.random(in: 10...100)
+//            let gained_point = Double.random(in: 10...100)
+            let gained_point = Double.random(in: 10...11)
             
             let record = TrainingRecord(
                 trainingDate: date,
@@ -186,4 +200,27 @@ enum CurrentDateState {
     case thisWeek
     case lastWeek
     case other
+}
+
+// TODO: - Entities에 뺴두기.
+struct WorkoutRecord: Codable {
+    let userID: Int
+    let exerciseName: String
+    let avgBPM, maxBPM, duration: Int
+    let endAt: String
+    let exerciseIntensity: String
+    let earnedPoint: Double
+    let exerciseNote: String
+
+    enum CodingKeys: String, CodingKey {
+        case userID = "user_id"
+        case exerciseName = "exercise_name"
+        case avgBPM = "avg_bpm"
+        case maxBPM = "max_bpm"
+        case duration
+        case endAt = "end_at"
+        case exerciseIntensity = "exercise_intensity"
+        case earnedPoint = "earned_point"
+        case exerciseNote = "exercise_note"
+    }
 }

@@ -21,19 +21,22 @@ struct NetworkService: NetworkServiceProtocol {
     init(session: URLSession = .shared,
          logger: NetworkLogging = DefaultNetworkLogging(),
          timeoutInterval: TimeInterval = 30) {
-            self.session = session
-            self.logger = logger
-            self.timeoutInterval = timeoutInterval
-        }
+        self.session = session
+        self.logger = logger
+        self.timeoutInterval = timeoutInterval
+    }
     
+
     func request<T: Decodable>(_ endpoint: APIEndPoint,
                              environment: Environment2) -> AnyPublisher<T, NetworkError> {
+
         
         guard var components = URLComponents(string: environment.baseURL + endpoint.path) else {
             return Fail(error: NetworkError.invalidURL("Invalid base URL or path"))
                 .eraseToAnyPublisher()
         }
             
+
         if !endpoint.queryItems.isEmpty {
             components.queryItems = endpoint.queryItems
         }
@@ -95,9 +98,6 @@ struct NetworkService: NetworkServiceProtocol {
     }
 }
 
-
-
-
 protocol NetworkLogging {
     func log(request: URLRequest)
     func log(response: HTTPURLResponse, data: Data)
@@ -124,8 +124,6 @@ struct DefaultNetworkLogging: NetworkLogging {
     }
 }
 
-
-
 protocol ExerciseListRepositoryProtocol {
     func fetchExerciseList() -> AnyPublisher<ExerciseListDomain, NetworkError>
     func undonggiroksaengseong(request: AddExerciseRequestDTO) -> AnyPublisher<Never,NetworkError>
@@ -141,6 +139,7 @@ struct ExerciseListRepository: ExerciseListRepositoryProtocol {
     }
     
     func fetchExerciseList() -> AnyPublisher<ExerciseListDomain, NetworkError> {
+
         
         return networkService.request(
             .fetchExerciesList,
@@ -156,9 +155,9 @@ struct ExerciseListRepository: ExerciseListRepositoryProtocol {
             , environment: .development
         )
         .eraseToAnyPublisher()
+
     }
 }
-
 
 struct ExerciseListDomain: Codable {
     let cardio: [String]

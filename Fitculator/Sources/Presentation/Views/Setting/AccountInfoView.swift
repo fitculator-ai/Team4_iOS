@@ -7,7 +7,7 @@ struct AccountInfoView: View {
         VStack {
             List {
                 HStack {
-                    Text("이메일")
+                    Text("email".localized)
                     Spacer()
                     Text("\(viewModel.user.userEmail)")
                         .foregroundColor(.gray)
@@ -17,12 +17,12 @@ struct AccountInfoView: View {
             .background(Color.fitculatorBackgroundColor.opacity(1))
             
             HStack(spacing: 15) {
-                Button("로그아웃") {
+                Button("logout".localized) {
                     userLogout()
                 }
                 .foregroundColor(.red)
                 
-                Button("회원탈퇴") {
+                Button("withdraw".localized) {
                     userWithdraw()
                 }
                 .foregroundColor(.gray)
@@ -31,7 +31,7 @@ struct AccountInfoView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.fitculatorBackgroundColor.opacity(1))
-        .navigationTitle("계정 정보")
+        .navigationTitle("accountInfo".localized)
         .navigationBarTitleDisplayMode(.inline)
     }
     

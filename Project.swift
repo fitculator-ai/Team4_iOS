@@ -3,10 +3,10 @@ import ProjectDescription
 let project = Project(
     name: "Fitculator",
     options: .options(
-      automaticSchemesOptions: .disabled,
-      defaultKnownRegions: ["en", "ko"],
-      developmentRegion: "ko",
-      textSettings: .textSettings(usesTabs: false, indentWidth: 4, tabWidth: 4)
+        automaticSchemesOptions: .disabled,
+        defaultKnownRegions: ["en", "ko"],
+        developmentRegion: "ko",
+        textSettings: .textSettings(usesTabs: false, indentWidth: 4, tabWidth: 4)
     ),
     targets: [
         .target(
@@ -19,8 +19,10 @@ let project = Project(
                 with: [
                     "UILaunchScreen": [
                         "UIColorName": "",
-                        "UIImageName": "",
+                        "UIImageName": ""
                     ],
+                    "NSCameraUsageDescription" : "NSCameraUsageDescription",
+                    "NSPhotoLibraryUsageDescription" : "NSPhotoLibraryUsageDescription",
                 ]
             ),
             sources: [

@@ -12,7 +12,7 @@ struct UserInfoView: View {
     var body: some View {
         Section {
             HStack {
-                Text("이름")
+                Text("name".localized)
                 Spacer()
                 Text(viewModel.user.name)
                     .foregroundStyle(.gray)
@@ -20,10 +20,10 @@ struct UserInfoView: View {
             .listRowBackground(Color.brightBackgroundColor)
             
             HStack {
-                Text("닉네임")
+                Text("nickname".localized)
                 Spacer()
                 if viewModel.isEditing {
-                    TextField("닉네임 입력", text: $viewModel.tempUser.nickName)
+                    TextField("nickname_placeholder".localized, text: $viewModel.tempUser.nickName)
                         .textFieldStyle(DefaultTextFieldStyle())
                         .frame(width: 150)
                         .multilineTextAlignment(.trailing)
@@ -38,15 +38,15 @@ struct UserInfoView: View {
             .listRowBackground(Color.brightBackgroundColor)
             
             HStack {
-                Text("성별")
+                Text("gender".localized)
                 Spacer()
-                Text(viewModel.user.gender.rawValue)
+                Text(viewModel.user.gender.localized)
                     .foregroundStyle(.gray)
             }
             .listRowBackground(Color.brightBackgroundColor)
             
             HStack {
-                Text("키(cm)")
+                Text("height".localized)
                 Spacer()
                 if viewModel.isEditing {
                     Picker("", selection: $viewModel.tempUser.height) {
@@ -63,7 +63,7 @@ struct UserInfoView: View {
             .listRowBackground(Color.brightBackgroundColor)
             
             HStack {
-                Text("생년월일")
+                Text("birthdate".localized)
                 Spacer()
                 if viewModel.isEditing {
                     DatePicker("", selection: $viewModel.tempUser.birthDate, in: dateRange, displayedComponents: .date)

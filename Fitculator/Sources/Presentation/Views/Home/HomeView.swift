@@ -12,77 +12,81 @@ struct WorkoutData: Identifiable, Equatable {
     let name: String
     let pct: Double // 보정된 운동포인트 값
     let actualPoints: Double // 실제 운동 포인트 값
+    let duration: Int
     let type: WorkoutType
 }
 
 struct HomeView: View {
-    
     @StateObject var viewModel: HomeViewModel
+    @State var isDisplayHome: Bool = false
+    
+    var horizontalPadding: CGFloat = 10
+    var verticalPadding: CGFloat = 10
     
     var body: some View {
         GeometryReader { geometry in
-            let viewWidth = geometry.size.width
             let viewHeight = geometry.size.height
             
-            ScrollView(.vertical) {
-                VStack(spacing: 16) {
-                    WorkoutDonutChart(user: viewModel.user)
-                        .frame(height: viewHeight * 0.4)
-                    
-                    FatigueChart(user: viewModel.user)
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.13)
-                        .padding(.top, 16)
-                    
-                    WeeklyStrengthReps(user: viewModel.user)
-                        .frame(width: viewWidth - 20, height: viewHeight * 0.1)
-                    
-                    WorkoutHistory()
-                        .frame(width: viewWidth - 20)
+            // TODO: - "<"누르면 저번주, 한번더 누를시 기간으로 나오게 + 네비게이션 바 추가
+            // TODO: - isDisplayHome사용해 하위뷰 분기, CustomNavBar isDisplayHome에 넘겨주기
+            ZStack(alignment: .top) {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 8) {
+                        CustomNavigationBar(isDisplayHome: true, homeBtnAction: {}, calendarBtnAction: {}, notificationBtnAction: {})
+                            .zIndex(1)
+                            .frame(height: 44)
+                        
+                        WorkoutDonutChart(
+                            originalTotal: viewModel.originalTotal,
+                            totalPct: viewModel.totalPct,
+                            remainingPct: viewModel.remainingPct,
+                            changedTraningRecordsData: viewModel.changedTraningRecordsData,
+                            traningRecords: viewModel.traningRecords,
+                            activeChartData: viewModel.activeChartData
+                        )
+                            .frame(height: viewHeight * 0.4)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                        
+                        FatigueChart(
+                            fatigueValue: viewModel.fatigueValue,
+                            changedTraningRecordsData: viewModel.changedTraningRecordsData,
+                            traningRecords: viewModel.traningRecords
+                        )
+                            .frame(height: viewHeight * 0.13)
+                            .padding(.top, 16)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                        
+                        WeeklyStrengthReps(
+                            changedTraningRecordsData: viewModel.changedTraningRecordsData,
+                            traningRecords: viewModel.traningRecords, workoutList: viewModel.workoutList
+                        )
+                            .frame(height: viewHeight * 0.1)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                        
+                        WorkoutHistory(traningRecords: viewModel.traningRecords)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.vertical, verticalPadding)
+                    }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
+                .refreshable {
+                    viewModel.fetchWorkoutHistory()
+                    viewModel.fetchWorkoutLists()
+                }
+                .padding(.horizontal, horizontalPadding)
+                .padding(.vertical, verticalPadding)
             }
             .background(Color.fitculatorBackgroundColor)
-        }
-    }
-}
-
-/// [[Date: [TrainingRecord]]] -> [WorkoutData]
-func changeTrainingDataForChart(_ records: [[Date: [TrainingRecord]]]) -> (data: [WorkoutData], originalTotal: Double) {
-    var dataDict: [String: Double] = [:]
-    
-    for week in records {
-        for (_, dailyRecords) in week {
-            for record in dailyRecords {
-                let key = "\(record.trainingName)_\(record.gained_point)"
-                dataDict[key, default: 0] += record.gained_point
+            .onAppear {
+                viewModel.fetchWorkoutHistory()
+                viewModel.updateDonutChartData()
             }
         }
     }
-    
-    let originalTotal = dataDict.values.reduce(0, +) // 전체 운동량의 총합
-    let total = dataDict.values.reduce(0, +) // 비율 조정을 위한 totalPct
-    
-    // 전체 합이 100을 넘는 경우, 100을 기준으로 비율 조정
-    var result: [WorkoutData] = []
-    if originalTotal > 100 {
-        result = dataDict.map { (key, value) -> WorkoutData in
-            let adjustedPct = value / total * 100  // 전체 합이 100을 초과하면 비율을 조정
-            return WorkoutData(name: key, pct: adjustedPct, actualPoints: value, type: .weight)
-        }
-    } else {
-        result = dataDict.map { (key, value) -> WorkoutData in
-            return WorkoutData(
-                name: key,
-                pct: value, actualPoints: value,
-                type: .weight
-            )
-        }
-    }
-    
-    return (result, originalTotal)
 }
 
-#Preview {
-    HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
-}
+//#Preview {
+//    HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource()), fetchWorkoutThisWeekHistory: <#fetchWorkoutThisWeekHistoryUseCase#>))
+//}

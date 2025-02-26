@@ -5,9 +5,15 @@ struct MainTabView: View {
     init() {
         let tabBarAppearance = UITabBarAppearance()
         tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.backgroundColor = UIColor(Color.fitculatorBackgroundColor)
-        tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor(.tabButtonColor)
-        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(.tabButtonColor)] // 선택된 탭 텍스트 색상
+        tabBarAppearance.backgroundColor = UIColor(
+            Color.fitculatorBackgroundColor
+        )
+        tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor(
+            .tabButtonColor
+        )
+        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(
+            .tabButtonColor
+        )] // 선택된 탭 텍스트 색상
         tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor.white // 선택되지 않은 아이콘 색상
         tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.white] // 선택되지 않은 탭 텍스트 색상
 
@@ -20,18 +26,17 @@ struct MainTabView: View {
         if #available(iOS 18.0, *) {
             ZStack {
                 TabView {
-                    Tab("홈", systemImage: "house.fill") {
+                    Tab("home".localized, systemImage: "house.fill") {
                         BackgroundView {
                             HomeView(
                                 viewModel: HomeViewModel(
-                                    fetchUseCase: UseCase(
-                                        dataSource: DataSource()
-                                    )
+                                    fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase(repository: RepositoryJImpl(dataSource: DataSource())),
+                                    fetchWorkoutList: fetchWorkoutListUseCase(repository: RepositoryJImpl(dataSource: DataSource()))
                                 )
                             )
                         }
                     }
-                    Tab("피드", systemImage: "message.fill") {
+                    Tab("feed".localized, systemImage: "message.fill") {
                         BackgroundView {
                             FeedView()
                         }
@@ -41,12 +46,12 @@ struct MainTabView: View {
 
                     }
                 
-                    Tab("커뮤니티", systemImage: "person.2.fill") {
+                    Tab("community".localized, systemImage: "person.2.fill") {
                         BackgroundView {
                             CommunityView()
                         }
                     }
-                    Tab("마이페이지", systemImage: "person.fill") {
+                    Tab("myPage".localized, systemImage: "person.fill") {
                         BackgroundView {
                             MyPageView()
                         }
@@ -71,11 +76,35 @@ struct MainTabView: View {
                 }
                 .offset(x: 0, y: (UIScreen.main.bounds.height/2)-74)
             }
-        } else {
+            
+            Button(action: {
+                self.isModalPresented = true
+            }) {
+                Image(systemName: "plus.circle.fill")
+                    .resizable()
+                    .frame(width: 35, height: 35)
+                    .background(Color.white.opacity(0.8))
+                    .clipShape(Circle())
+                    .shadow(radius: 4)
+                    .padding(30)
+            }
+            .fullScreenCover(isPresented: $isModalPresented) {
+                AddView()
+                    .ignoresSafeArea()
+                
+            }
+            .offset(x: 0, y: (UIScreen.main.bounds.height/2)-74)
+        }
+        else {
             BackgroundView {
                 ZStack {
                     TabView {
-                        HomeView(viewModel: HomeViewModel(fetchUseCase: UseCase(dataSource: DataSource())))
+                        HomeView(
+                            viewModel: HomeViewModel(
+                                fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase(repository: RepositoryJImpl(dataSource: DataSource())),
+                                fetchWorkoutList: fetchWorkoutListUseCase(repository: RepositoryJImpl(dataSource: DataSource()))
+                            )
+                        )
                         .tabItem {
                             Label("홈", systemImage: "house.fill")
                         }
