@@ -9,7 +9,7 @@ import SwiftUI
 import Charts
 
 struct RecordDetailView: View {
-    let record: Record
+    let record: TrainingRecord
     
     @State var showEditSheet: Bool = false
     @State var trainingNote: String = ""
@@ -24,12 +24,13 @@ struct RecordDetailView: View {
                         VStack(spacing: 100) {
                             HStack {
                                 VStack(alignment: .leading, spacing: 5) {
-                                    Text(record.exercise_name)
+//                                    Text(record.exercise_name)
+                                    Text(record.trainingName)
                                         .foregroundStyle(Color.white)
                                         .font(.title)
                                         .bold()
                                     
-                                    Text(record.end_at)
+                                    Text(record.end_at.dateToString(includeDay: .time2))
                                         .foregroundStyle(Color(UIColor.lightGray))
                                         .font(.headline)
                                 }
@@ -43,13 +44,15 @@ struct RecordDetailView: View {
                                 VStack(alignment: .trailing, spacing: 20) {
                                     VStack(alignment: .trailing, spacing: 20) {
                                         HStack(spacing: 20) {
-                                            Text(record.exercise_name)
+//                                            Text(record.exercise_name)
+                                            Text(record.trainingName)
                                                 .foregroundStyle(Color.white)
                                                 .font(.headline)
                                                 .bold()
                                                 .padding(.top, 10)
                                             
-                                            Text("\(record.earned_point, specifier: "%.1f") pt")
+//                                            Text("\(record.earned_point, specifier: "%.1f") pt")
+                                            Text("\(record.gained_point, specifier: "%.1f") pt")
                                                 .foregroundStyle(Color.white)
                                                 .font(.title)
                                                 .bold()
@@ -109,9 +112,9 @@ struct RecordDetailView: View {
                                                 .font(.headline)
                                                 .bold()
                                             
-                                            Text("\(record.exercise_intensity.rawValue)")
+                                            Text("\(record.training_intensity.rawValue)")
                                                 .foregroundStyle(
-                                                    record.exercise_intensity == .verLow ? Color.green : record.exercise_intensity == .low ? Color.blue : record.exercise_intensity == .normal ? Color.green : record.exercise_intensity == .high ? Color.red : Color.black
+                                                    record.training_intensity == .verLow ? Color.green : record.training_intensity == .low ? Color.blue : record.training_intensity == .normal ? Color.green : record.training_intensity == .high ? Color.red : Color.black
                                                 )
                                                 .font(.largeTitle)
                                                 .bold()
@@ -226,13 +229,13 @@ struct RecordDetailView: View {
                 .overlay {
                     Chart {
                         SectorMark(
-                            angle: .value("Pct", record.earned_point),
+                            angle: .value("Pct", record.gained_point),
                             innerRadius: .ratio(0.5),
                             angularInset: 1
                         )
                         .foregroundStyle(Color.green)
                         .annotation(position: .overlay, alignment: .center) {
-                            Text("\(record.earned_point, specifier: "%.1f")%")
+                            Text("\(record.gained_point, specifier: "%.1f")%")
                                 .font(.headline)
                                 .bold()
                                 .padding(.top, 20)
@@ -240,7 +243,7 @@ struct RecordDetailView: View {
                         }
                         
                         SectorMark(
-                            angle: .value("Pct", 100 - record.earned_point),
+                            angle: .value("Pct", 100 - record.gained_point),
                             innerRadius: .ratio(0.5),
                             angularInset: 1
                         )
@@ -250,7 +253,7 @@ struct RecordDetailView: View {
                     .offset(x: -180, y: -100)
                 }
                 .onAppear {
-                    self.trainingNote = record.exercise_note ?? ""
+                    self.trainingNote = record.training_detail ?? ""
                 }
             }
         }
@@ -263,18 +266,18 @@ struct RecordDetailView: View {
     }
 }
 
-#Preview {
-    RecordDetailView(
-        record: Record(
-            user_id: 1,
-            exercise_name: "테니스",
-            avg_bpm: 100,
-            max_bpm: 100,
-            duration: 100,
-            end_at: Date().dateToString(includeDay: .time2),
-            exercise_intensity: .verLow,
-            earned_point: 20,
-            exercise_note: "아 재밌었다."
-        )
-    )
-}
+//#Preview {
+//    RecordDetailView(
+//        record: Record(
+//            user_id: 1,
+//            exercise_name: "테니스",
+//            avg_bpm: 100,
+//            max_bpm: 100,
+//            duration: 100,
+//            end_at: Date().dateToString(includeDay: .time2),
+//            exercise_intensity: .verLow,
+//            earned_point: 20,
+//            exercise_note: "아 재밌었다."
+//        )
+//    )
+//}
