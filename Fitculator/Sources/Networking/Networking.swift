@@ -219,6 +219,13 @@ enum APIEndPoint {
             
         }
     }
+    
+    var headers: [String: String] {
+        return [
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        ]
+    }
 }
 
 enum MyPageAPIEndPoint {
@@ -283,18 +290,4 @@ struct WorkoutList: Decodable {
 struct WorkoutListItem: Decodable, Identifiable {
     let id: Int
     let name: String
-    var headers: [String: String] {
-        return [
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        ]
-    }
-    
-    var headers: [String: String] {
-        return [
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        ]
-    }
-    
 }
