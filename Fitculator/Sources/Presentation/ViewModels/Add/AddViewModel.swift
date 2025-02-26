@@ -9,6 +9,7 @@ final class AddViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var error: NetworkError?
     @Published private(set) var exerciseList: ExerciseListDomain?
+    @Published private(set) var isRecordSubmitted = false
     
     init(addUseCase: ExerciseListUseCaseProtocol) {
         self.addUseCase = addUseCase
@@ -35,5 +36,38 @@ final class AddViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
+    func submitExerciseRecord() {
+         isLoading = true
+         error = nil
+         
+         // AddExerciseRequestDTO 생성
+         let request = AddExerciseRequestDTO(
+             userId: 3,
+             exerciseId: 1,
+             avgBPM: 1,
+             maxBPM: 1,
+             duration: 1,
+             endAt: Date(),
+             earnedPoint: 1,
+             intensity: "힘들어",
+             note: "아 힘들어"
+         )
+         
+         addUseCase.executeRecord(request: request)
+             .receive(on: DispatchQueue.main)
+             .sink { [weak self] completion in
+                 self?.isLoading = false
+                 switch completion {
+                 case .finished:
+                     self?.isRecordSubmitted = true
+                 case .failure(let error):
+                     self?.error = error
+                     self?.isRecordSubmitted = false
+                 }
+             } receiveValue: { _ in
+             }
+             .store(in: &cancellables)
+     }
     
 }

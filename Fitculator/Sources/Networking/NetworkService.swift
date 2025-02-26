@@ -26,30 +26,49 @@ struct NetworkService: NetworkServiceProtocol {
         self.timeoutInterval = timeoutInterval
     }
     
-    func request<T: Decodable>(_ endpoint: APIEndPoint, environment: Environment2) -> AnyPublisher<T, NetworkError> {
+
+    func request<T: Decodable>(_ endpoint: APIEndPoint,
+                             environment: Environment2) -> AnyPublisher<T, NetworkError> {
+
         
         guard var components = URLComponents(string: environment.baseURL + endpoint.path) else {
             return Fail(error: NetworkError.invalidURL("Invalid base URL or path"))
                 .eraseToAnyPublisher()
         }
             
-           // components.queryItems = endpoint.queryItems
-        
+
         if !endpoint.queryItems.isEmpty {
-             components.queryItems = endpoint.queryItems
-         }
+            components.queryItems = endpoint.queryItems
+        }
             
         guard let url = components.url else {
-            return Fail(
-                error: NetworkError.invalidURL("Could not construct URL from components")
-            )
-            .eraseToAnyPublisher()
+            return Fail(error: NetworkError
+                .invalidURL("Could not construct URL from components"))
+                .eraseToAnyPublisher()
         }
-        
+            
         var request = URLRequest(url: url)
         request.timeoutInterval = timeoutInterval
-        request.addValue("application/json", forHTTPHeaderField: "accept")
-    
+        
+
+        request.httpMethod = endpoint.httpMethod
+        
+
+        for (key, value) in endpoint.headers {
+            request.addValue(value, forHTTPHeaderField: key)
+        }
+        
+
+        if case .addExerciseRecord(let requestDTO) = endpoint {
+            do {
+                let encoder = JSONEncoder()
+                request.httpBody = try encoder.encode(requestDTO)
+            } catch {
+                return Fail(error: NetworkError.decodingError(error))
+                    .eraseToAnyPublisher()
+            }
+        }
+        
         logger.log(request: request)
         
         return session.dataTaskPublisher(for: request)
@@ -107,9 +126,12 @@ struct DefaultNetworkLogging: NetworkLogging {
 
 protocol ExerciseListRepositoryProtocol {
     func fetchExerciseList() -> AnyPublisher<ExerciseListDomain, NetworkError>
+    func undonggiroksaengseong(request: AddExerciseRequestDTO) -> AnyPublisher<Never,NetworkError>
 }
 
 struct ExerciseListRepository: ExerciseListRepositoryProtocol {
+
+    
     private let networkService: NetworkServiceProtocol
     
     init(networkService: NetworkServiceProtocol) {
@@ -117,9 +139,23 @@ struct ExerciseListRepository: ExerciseListRepositoryProtocol {
     }
     
     func fetchExerciseList() -> AnyPublisher<ExerciseListDomain, NetworkError> {
-        return networkService
-            .request(.fetchExerciesList, environment: .development)
-            .eraseToAnyPublisher()
+
+        
+        return networkService.request(
+            .fetchExerciesList,
+                environment: .development
+               )
+               .eraseToAnyPublisher()
+        }
+    
+    func undonggiroksaengseong(request: AddExerciseRequestDTO) -> AnyPublisher<Never, NetworkError> {
+        
+        return networkService.request(
+            .addExerciseRecord(request)
+            , environment: .development
+        )
+        .eraseToAnyPublisher()
+
     }
 }
 

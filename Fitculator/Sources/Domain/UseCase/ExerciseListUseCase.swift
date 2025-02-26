@@ -9,9 +9,12 @@ import Combine
 
 protocol ExerciseListUseCaseProtocol {
     func execute() -> AnyPublisher<ExerciseListDomain, NetworkError>
+    func executeRecord(request: AddExerciseRequestDTO) -> AnyPublisher<Void, NetworkError>
 }
 
 class ExerciseListUseCase: ExerciseListUseCaseProtocol {
+   
+    
    private let repository: ExerciseListRepositoryProtocol
    
    init(repository: ExerciseListRepositoryProtocol) {
@@ -23,4 +26,12 @@ class ExerciseListUseCase: ExerciseListUseCaseProtocol {
            .mapError { $0 as NetworkError }
            .eraseToAnyPublisher()
    }
+    
+
+    func executeRecord(request: AddExerciseRequestDTO) -> AnyPublisher<Void, NetworkError> {
+        return repository.undonggiroksaengseong(request: request)
+            .map { _ in  }
+            .mapError { $0 as NetworkError }
+            .eraseToAnyPublisher()
+    }
 }
