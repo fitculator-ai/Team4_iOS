@@ -156,7 +156,7 @@ class MyPageViewModel: ObservableObject {
                     datas += Array(arrayLiteral: tempDatas)
                 }
                 
-                self.selectedWeek = last25WeeksRecords.count - 1
+                self.selectedWeek = datas.count - 1
                 last25WeeksRecords = datas
             }
             .store(in: &cancellables)
