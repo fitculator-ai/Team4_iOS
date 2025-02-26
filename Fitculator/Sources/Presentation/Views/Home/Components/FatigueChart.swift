@@ -3,13 +3,13 @@ import Charts
 
 /// 포인트 합계(피로도) 차트
 struct FatigueChart: View {
-    @State var user: User
-    @State var fatigueValue: Double = 0.0
-    @State var changedTraningRecordsData: [WorkoutData] = []
-    @State var traningRecords: [[Date: [TrainingRecord]]] = []
     @State var isTooltipVisible: Bool = false
     
     private var maxFatigue: Int = 100
+    
+    var fatigueValue: Double = 0.0
+    var changedTraningRecordsData: [WorkoutData] = []
+    var traningRecords: [[Date: [TrainingRecord]]] = []
     
     private var fatigueMessage: String {
         let intFatigue = Int(fatigueValue * 100)
@@ -31,8 +31,10 @@ struct FatigueChart: View {
             }
         }
     
-    init(user: User) {
-        self.user = user
+    init(fatigueValue: Double, changedTraningRecordsData: [WorkoutData], traningRecords: [[Date : [TrainingRecord]]]) {
+        self.fatigueValue = fatigueValue
+        self.changedTraningRecordsData = changedTraningRecordsData
+        self.traningRecords = traningRecords
     }
     
     var body: some View {
@@ -99,16 +101,6 @@ struct FatigueChart: View {
             }
             
         }// ZStack
-        .onAppear {
-            UpdateFatigueChartProperties()
-        }
-    }
-    
-    func UpdateFatigueChartProperties() {
-        self.traningRecords = user.getTrainingRecords(for: .oneWeek)
-        let result = changeTrainingDataForChart(traningRecords)
-        self.changedTraningRecordsData = result.data
-        self.fatigueValue = (result.originalTotal) / 100
     }
 }
 

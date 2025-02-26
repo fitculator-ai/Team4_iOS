@@ -4,14 +4,20 @@ import Charts
 /// 근력 횟수 차트
 struct WeeklyStrengthReps: View {
     
-    @State var user: User
-    @State var changedTraningRecordsData: [WorkoutData] = []
-    @State var traningRecords: [[Date: [TrainingRecord]]] = []
     @State var weightCount: Int = 0
     
-    init(user: User) {
-        self.user = user
-        self.traningRecords = user.getTrainingRecords(for: .oneWeek)
+    var changedTraningRecordsData: [WorkoutData] = []
+    var traningRecords: [[Date: [TrainingRecord]]] = []
+    var workoutList: WorkoutList?
+    
+    init(
+        changedTraningRecordsData: [WorkoutData],
+        traningRecords: [[Date : [TrainingRecord]]],
+        workoutList: WorkoutList?
+    ) {
+        self.changedTraningRecordsData = changedTraningRecordsData
+        self.traningRecords = traningRecords
+        self.workoutList = workoutList
     }
     
     var body: some View {
@@ -97,16 +103,22 @@ struct WeeklyStrengthReps: View {
     }
     
     func updateWeeklyStreengthReps() {
-        traningRecords = user.getTrainingRecords(for: .oneWeek)
-        let result = changeTrainingDataForChart(traningRecords)
-        changedTraningRecordsData = result.data
         weightCount = calculateWeightCount()
     }
     
+    // TODO: - 근력운동 횟수
     func calculateWeightCount() -> Int {
+        guard let weightExercises = workoutList?.strength else { return 0 }
+            
         var calculatedCount = 0
         for record in changedTraningRecordsData {
-            if record.duration >= 30 && record.type == .weight {
+            let components = record.name.split(separator: "_")
+            guard let exerciseName = components.first.map({ String($0) }) else {
+                continue
+            }
+                
+            if record.duration >= 30 && weightExercises
+                .contains(where: { $0.name == exerciseName }) {
                 calculatedCount += 1
             }
         }
