@@ -209,14 +209,25 @@ enum Environment2 {
 enum APIEndPoint{
     case thisWeekRecord(_ userId: Int)
     case fetchExerciesList
-   
-
+    case getUserAccountInfo(email: String)
+    case getUserDetails(userId: Int)
+    case editUserDetails(userId: Int, userInfo: UserProfileInfo)
+    case uploadProfileImage(userId: Int)
+    
     var path:String {
         switch self {
         case .thisWeekRecord:
             return "/api/exercies-logs/this-week"
         case .fetchExerciesList:
             return "/api/exercise"
+        case .getUserAccountInfo:
+            return "/api/mypage/get-user"
+        case .getUserDetails:
+            return "/api/mypage/get-user-details"
+        case .editUserDetails(let userId, _):
+            return "/api/mypage/edit-user/\(userId)"
+        case .uploadProfileImage:
+            return "/api/mypage/edit-user/profile-image"
         }
     }
     
@@ -228,7 +239,16 @@ enum APIEndPoint{
             ]
         case .fetchExerciesList:
             return []
-            
+        case .getUserAccountInfo(let email):
+            return [URLQueryItem(name: "email", value: email)]
+        case .getUserDetails(let userId):
+            return [URLQueryItem(name: "user_id", value: String(userId))
+            ]
+        case .editUserDetails:
+            return []
+        case .uploadProfileImage(let userId):
+            return [URLQueryItem(name: "user_id", value: String(userId))
+            ]
         }
     }
     

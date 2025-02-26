@@ -1,6 +1,36 @@
 import Foundation
 import SwiftUI
 
+struct UserAccountInfo: Codable {
+    let name: String
+    let token: String
+    let email: String
+}
+
+struct UserProfileInfo: Codable {
+    let userNickname: String
+    let exerciseIssue: String
+    let exerciseGoal: String
+    let restingBpm: Int
+    let height: Int
+    let birth: String
+    let device: String
+    let profileImage: String
+    let gender: String
+    
+    enum CodingKeys: String, CodingKey {
+        case userNickname = "user_nickname"
+        case exerciseIssue = "exercise_issue"
+        case exerciseGoal = "exercise_goal"
+        case restingBpm = "resting_bpm"
+        case height
+        case birth
+        case device
+        case profileImage = "profile_image"
+        case gender
+    }
+}
+
 struct User {
     var name: String
     var nickName: String

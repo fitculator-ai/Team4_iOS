@@ -4,17 +4,29 @@ import Combine
 
 class AccountInfoViewModel: ObservableObject {
     @Published var user: UserAccountInfo?
+    @Published var error: Error?
     private var cancellables = Set<AnyCancellable>()
-    private let userInfoAPI = UserInfoAPI()
-
-    init() {
-        userInfoAPI.$user
-            .assign(to: &$user)
+    private let userAccount: UserAccountUseCase
+    
+    init(userAccountUseCase: UserAccountUseCase) {
+        self.userAccount = userAccountUseCase
     }
-
-    // 사용자 정보 가져오기 -> 현재 이메일을 받아오기 위해 파라미터로 이메일을 넣어야하는 이상한 상황,,
-    func getUserEmail(email: String) {
-        userInfoAPI.getUserAccountInfo(email: email)
+    
+    func getUserAccountInfo(email: String) {
+        userAccount.execute(email: email)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    self.error = error
+                    print("Error fetching user info: \(error)")
+                case .finished:
+                    break
+                }
+            }, receiveValue: { userInfo in
+                self.user = userInfo
+            })
+            .store(in: &cancellables)
     }
     
     // 로그아웃

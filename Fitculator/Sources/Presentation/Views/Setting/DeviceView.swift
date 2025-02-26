@@ -38,38 +38,55 @@ struct DeviceView: View {
         .navigationTitle("device".localized)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            bluetoothManager.startScanning()
+            bluetoothManager.checkConnectedDevices()
         }
     }
 }
 
-class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate {
+class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager?
     @Published var connectedDevices: [String] = []
+    private var retrievedPeripherals: [CBPeripheral] = []
+    
+    private let watchServicesUUIDs: [CBUUID] = [
+        CBUUID(string: "180D")
+    ]
 
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
 
-    func startScanning() {
+    func checkConnectedDevices() {
         connectedDevices.removeAll()
-        centralManager?.scanForPeripherals(withServices: nil, options: nil)
+
+        if centralManager?.state != .poweredOn {
+            connectedDevices = ["enableBluetooth".localized]
+            return
+        }
+        
+        if let connectedPeripherals = centralManager?.retrieveConnectedPeripherals(withServices: watchServicesUUIDs) {
+            if connectedPeripherals.isEmpty {
+                connectedDevices = ["noConnectedWatch".localized]
+            } else {
+                retrievedPeripherals = connectedPeripherals
+                for peripheral in connectedPeripherals {
+                    peripheral.delegate = self
+                    if let name = peripheral.name, !name.isEmpty {
+                        DispatchQueue.main.async {
+                            self.connectedDevices.append(name)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
-            central.scanForPeripherals(withServices: nil, options: nil)
+            checkConnectedDevices()
         } else {
             connectedDevices = ["enableBluetooth".localized]
-        }
-    }
-
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        if let name = peripheral.name, !connectedDevices.contains(name) {
-            DispatchQueue.main.async {
-                self.connectedDevices.append(name)
-            }
         }
     }
 }

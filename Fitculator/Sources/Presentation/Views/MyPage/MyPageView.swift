@@ -16,7 +16,19 @@ struct MyPageView: View {
                             // MARK: 프로필 사진
                             VStack(spacing: 0) {
                                 NavigationLink {
-                                    EditInfoView(viewModel: SettingViewModel())
+                                    EditInfoView(viewModel: SettingViewModel(
+                                        userDetailUseCase: UserDetailUseCase(
+                                            repository: SettingRepository(
+                                                networkService: NetworkService(session: .shared))),
+                                        userAccountUseCase: UserAccountUseCase(
+                                            repository: SettingRepository(
+                                                networkService: NetworkService(session: .shared))),
+                                        editUserDetailUseCase: EditUserDetailUseCase(
+                                            repository: SettingRepository(
+                                                networkService: NetworkService(session: .shared))),
+                                        uploadProfileImage: UploadProfileImageUseCase(
+                                            repository: SettingRepository(
+                                                networkService: NetworkService(session: .shared)))))
                                 } label: {
                                     ProfileImageView(viewModel: viewModel, width: width)
                                 }
@@ -55,7 +67,20 @@ struct MyPageView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink(destination: SettingView()) {
+                        NavigationLink(destination: SettingView(viewModel: SettingViewModel(
+                            userDetailUseCase: UserDetailUseCase(
+                                repository: SettingRepository(
+                                    networkService: NetworkService(session: .shared))),
+                            userAccountUseCase: UserAccountUseCase(
+                                repository: SettingRepository(
+                                    networkService: NetworkService(session: .shared))),
+                            editUserDetailUseCase: EditUserDetailUseCase(
+                                repository: SettingRepository(
+                                    networkService: NetworkService(session: .shared))),
+                            uploadProfileImage: UploadProfileImageUseCase(
+                                repository: SettingRepository(
+                                    networkService: NetworkService(session: .shared)))
+                        ))) {
                             Image(systemName: "gearshape.fill")
                                 .tint(.white)
                         }

@@ -1,15 +1,42 @@
 import SwiftUI
+import Combine
 import PhotosUI
 
+struct UserAccount {
+    let email: String
+    let name: String
+    let token: String
+}
+
+struct UserDetails {
+    var userNickname: String
+    var exerciseIssue: String
+    var exerciseGoal: String
+    var restingBpm: Int
+    var height: Int
+    var birth: String
+    var device: String
+    var profileImage: String
+    var gender: String
+}
+
 class SettingViewModel: ObservableObject {
-    @Published var isEditing: Bool = false
-    
-    @Published var user: User = User()
-    @Published var tempUser: User = User()
+    @Published var userAccount: UserAccount = UserAccount(email: "", name: "", token: "")
+    @Published var userProfileInfo: UserProfileInfo?
+    @Published var tempUserDetails: UserDetails = UserDetails(
+        userNickname: "",
+        exerciseIssue: "",
+        exerciseGoal: "",
+        restingBpm: 0,
+        height: 0,
+        birth: "",
+        device: "",
+        profileImage: "",
+        gender: "Male"
+    )
     
     @Published var showImagePicker: Bool = false
     @Published var showCameraPicker: Bool = false
-    @Published var showActionSheet: Bool = false
     
     @Published var profileUIImage: UIImage?
     @Published var tempUIImage: UIImage?
@@ -17,88 +44,169 @@ class SettingViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     @Published var alertTitle: String = ""
     @Published var alertMessage: String = ""
+    
     @ObservedObject var languageManager: LanguageManager
     
-    init(languageManager: LanguageManager = LanguageManager()) {
+    @Published var error: Error?
+    private var cancellables = Set<AnyCancellable>()
+    private let userDetail: UserDetailUseCase
+    private let userAccountUseCase: UserAccountUseCase
+    private let editUserDetail: EditUserDetailUseCase
+    private let uploadProfileImage: UploadProfileImageUseCase
+    
+    init(userDetailUseCase: UserDetailUseCase, userAccountUseCase: UserAccountUseCase, editUserDetailUseCase: EditUserDetailUseCase, uploadProfileImage: UploadProfileImageUseCase, languageManager: LanguageManager = LanguageManager()) {
         self.languageManager = languageManager
-        loadProfileImage()
+        self.userDetail = userDetailUseCase
+        self.userAccountUseCase = userAccountUseCase
+        self.editUserDetail = editUserDetailUseCase
+        self.uploadProfileImage = uploadProfileImage
+        
+        fetchUserProfile(userId: 1)
+        getUserAccountInfo(email: "qwer@naver.com")
     }
     
-    func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy.MM.dd"
-        return formatter.string(from: date)
+    func loadProfileImage(from urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.error = error
+                }
+                return
+            }
+            
+            guard let data = data, let image = UIImage(data: data) else {
+                DispatchQueue.main.async {
+                    self.error = NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to load image"])
+                }
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.profileUIImage = image
+            }
+        }.resume()
+    }
+    
+    // MARK: 이미지 로드가 안돼요,,
+    func uploadProfileImage(userId: Int, image: UIImage) {
+        guard let imageData = image.jpegData(compressionQuality: 0.7) else { return }
+        
+        uploadProfileImage.execute(userId: userId, imageData: imageData)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    self.error = error
+                    print(error)
+                case .finished:
+                    break
+                }
+            }, receiveValue: { response in
+                print("Upload response: \(response)")
+            })
+            .store(in: &cancellables)
+    }
+    
+    func getUserAccountInfo(email: String) {
+        userAccountUseCase.execute(email: email)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    self.error = error
+                    print("Error fetching user info: \(error)")
+                case .finished:
+                    break
+                }
+            }, receiveValue: { userInfo in
+                self.userAccount = UserAccount(email: userInfo.email, name: userInfo.name, token: userInfo.token)
+            })
+            .store(in: &cancellables)
+    }
+    
+    func fetchUserProfile(userId: Int) {
+        userDetail.execute(userId: userId)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    self.error = error
+                case .finished:
+                    break
+                }
+            }, receiveValue: { userProfile in
+                self.userProfileInfo = userProfile
+                self.tempUserDetails = UserDetails(
+                    userNickname: userProfile.userNickname,
+                    exerciseIssue: userProfile.exerciseIssue,
+                    exerciseGoal: userProfile.exerciseGoal,
+                    restingBpm: userProfile.restingBpm,
+                    height: userProfile.height,
+                    birth: userProfile.birth,
+                    device: userProfile.device,
+                    profileImage: userProfile.profileImage,
+                    gender: userProfile.gender
+                )
+                self.loadProfileImage(from: userProfile.profileImage)
+            })
+            .store(in: &cancellables)
+    }
+    
+    func saveUserProfile(userId: Int) {
+        if tempUIImage == nil {
+                tempUserDetails.profileImage = ""
+        } else if let newImage = tempUIImage, newImage != profileUIImage {
+            uploadProfileImage(userId: userId, image: newImage)
+        }
+        
+        let updatedUser = UserProfileInfo(
+            userNickname: tempUserDetails.userNickname,
+            exerciseIssue: tempUserDetails.exerciseIssue,
+            exerciseGoal: tempUserDetails.exerciseGoal,
+            restingBpm: tempUserDetails.restingBpm,
+            height: tempUserDetails.height,
+            birth: tempUserDetails.birth,
+            device: tempUserDetails.device,
+            profileImage: tempUserDetails.profileImage,
+            gender: tempUserDetails.gender
+        )
+        
+        editUserDetail.execute(userId: userId, userInfo: updatedUser)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    self.error = error
+                case .finished:
+                    break
+                }
+            }, receiveValue: { updatedUserInfo in
+                self.userProfileInfo = updatedUserInfo
+                self.tempUserDetails = UserDetails(
+                    userNickname: updatedUserInfo.userNickname,
+                    exerciseIssue: updatedUserInfo.exerciseIssue,
+                    exerciseGoal: updatedUserInfo.exerciseGoal,
+                    restingBpm: updatedUserInfo.restingBpm,
+                    height: updatedUserInfo.height,
+                    birth: updatedUserInfo.birth,
+                    device: updatedUserInfo.device,
+                    profileImage: updatedUserInfo.profileImage,
+                    gender: updatedUserInfo.gender
+                )
+            })
+            .store(in: &cancellables)
     }
     
     func hasChanges() -> Bool {
-        let isSameDate = Calendar.current.isDate(tempUser.birthDate, inSameDayAs: user.birthDate)
-        
-        return tempUser.nickName != user.nickName ||
-        tempUser.height != user.height ||
-        !isSameDate ||
-        tempUser.restHR != user.restHR ||
-        tempUIImage != profileUIImage ||
-        tempUser.exercise_goal != user.exercise_goal ||
-        tempUser.exercise_issue != user.exercise_issue
-    }
-    
-    // TODO: 서버 연결 시 전체적으로 다 수정해야 함
-    func backToExInfo() {
-        tempUser.nickName = user.nickName
-        tempUser.height = user.height
-        tempUser.birthDate = user.birthDate
-        tempUser.restHR = user.restHR
-        tempUser.profileImage = user.profileImage
-        tempUser.exercise_goal = user.exercise_goal
-        tempUser.exercise_issue = user.exercise_issue
-        tempUIImage = profileUIImage
-    }
-    
-    func updateUserInfo() {
-        user.nickName = tempUser.nickName
-        user.height = tempUser.height
-        user.birthDate = tempUser.birthDate
-        user.restHR = tempUser.restHR
-        user.exercise_issue = tempUser.exercise_issue
-        user.exercise_goal = tempUser.exercise_goal
-        
-        if let image = tempUIImage {
-            if profileUIImage != tempUIImage {
-                if let imagePath = saveImageToFile(image) {
-                    user.profileImage = imagePath
-                    profileUIImage = image
-                }
-            }
-        } else if tempUIImage == nil {
-            user.profileImage = nil
-            profileUIImage = nil
-        }
-    }
-    
-    func loadProfileImage() {
-        if let imageString = user.profileImage {
-            profileUIImage = UIImage(contentsOfFile: imageString)
-            tempUIImage = profileUIImage
-        } else {
-            profileUIImage = nil
-            tempUIImage = nil
-        }
-    }
-    
-    private func saveImageToFile(_ image: UIImage) -> String? {
-        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            return nil
-        }
-        
-        let fileName = UUID().uuidString + ".jpg"
-        let fileURL = documentsDirectory.appendingPathComponent(fileName)
-        
-        if let imageData = image.jpegData(compressionQuality: 0.7) {
-            try? imageData.write(to: fileURL)
-            return fileURL.path
-        }
-        
-        return nil
+        guard let userProfile = userProfileInfo else { return false }
+        return tempUserDetails.userNickname != userProfile.userNickname ||
+        tempUserDetails.height != userProfile.height ||
+        tempUserDetails.birth != userProfile.birth ||
+        tempUserDetails.restingBpm != userProfile.restingBpm ||
+        tempUserDetails.exerciseGoal != userProfile.exerciseGoal ||
+        tempUserDetails.exerciseIssue != userProfile.exerciseIssue
     }
     
     // MARK: 카메라, 사진 권한
@@ -170,12 +278,6 @@ class SettingViewModel: ObservableObject {
         self.showAlert = true
     }
     
-    // 닉네임 필터링
-    func filterNickname(_ input: String) -> String {
-        let filtered = input.filter { $0.isLetter || $0.isNumber } // 영문 & 숫자만 허용
-        return String(filtered.prefix(10)) // 최대 10자 제한
-    }
-    
     // 운동고민/목표 필터링
     func filterExerciseIndicator(_ input: String) -> String {
         var result = input
@@ -187,12 +289,13 @@ class SettingViewModel: ObservableObject {
     }
     
     var isFormValid: Bool {
-        let isValid = [
-            tempUser.nickName,
-            tempUser.exercise_issue,
-            tempUser.exercise_goal
-        ].allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-        return isValid
+        let requiredFields = [
+            tempUserDetails.userNickname.trimmingCharacters(in: .whitespacesAndNewlines),
+            tempUserDetails.exerciseGoal.trimmingCharacters(in: .whitespacesAndNewlines),
+            tempUserDetails.exerciseIssue.trimmingCharacters(in: .whitespacesAndNewlines)
+        ]
+        
+        return requiredFields.allSatisfy { $0.isEmpty == false }
     }
     
     // MARK: 언어 변경

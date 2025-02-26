@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AccountInfoView: View {
-    @StateObject private var viewModel = AccountInfoViewModel()
+    @StateObject var viewModel = AccountInfoViewModel(userAccountUseCase: UserAccountUseCase(repository: SettingRepository(networkService: NetworkService(session: .shared))))
     
     var body: some View {
         VStack {
@@ -15,7 +15,7 @@ struct AccountInfoView: View {
                     } else {
                         Text("Loading...")
                             .onAppear {
-                                viewModel.getUserEmail(email: "qwer@naver.com")
+                                viewModel.getUserAccountInfo(email: "qwer@naver.com")
                             }
                     }
                 }

@@ -2,50 +2,56 @@ import SwiftUI
 import PhotosUI
 
 struct EditInfoView: View {
-    @ObservedObject var viewModel: SettingViewModel
+    @StateObject var viewModel: SettingViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showDiscardAlert = false
+    @State private var isEditing = false
     
     var body: some View {
         List {
             // MARK: 프로필 이미지
-            ProfileImageSection(viewModel: viewModel)
+            ProfileImageSection(viewModel: viewModel, isEditing: $isEditing, tempUIImage: $viewModel.tempUIImage)
             
             // MARK: 유저 정보
-            UserInfoView(viewModel: viewModel)
+            UserInfoView(userAccount: viewModel.userAccount, userDetails: $viewModel.tempUserDetails, isEditing: $isEditing)
             
             // MARK: 개인 운동 지표(안정시 심박수, 운동고민, 목표)
             Section {
                 HStack {
                     Text("resting_heart_rate".localized)
                     Spacer()
-                    if viewModel.isEditing {
-                        Picker("", selection: $viewModel.tempUser.restHR) {
-                            ForEach(10...100, id: \.self) { restHR in
-                                Text("\(restHR) bpm").tag(restHR)
+                        if isEditing {
+                            Picker("", selection: $viewModel.tempUserDetails.restingBpm) {
+                                ForEach(10...100, id: \.self) { restHR in
+                                    Text("\(restHR) bpm").tag(restHR)
+                                }
                             }
+                            .pickerStyle(DefaultPickerStyle())
+                        } else {
+                            Text("\(viewModel.tempUserDetails.restingBpm)bpm")
+                                .foregroundStyle(.gray)
                         }
-                        .pickerStyle(DefaultPickerStyle())
-                    } else {
-                        Text("\(viewModel.user.restHR)bpm")
-                            .foregroundStyle(.gray)
-                    }
                 }
                 .listRowBackground(Color.brightBackgroundColor)
                 
                 HStack {
                     Text("fitness_concern".localized)
                     Spacer()
-                    if viewModel.isEditing {
-                        TextField("fitness_concern".localized, text: $viewModel.tempUser.exercise_issue)
-                            .textFieldStyle(DefaultTextFieldStyle())
-                            .frame(width: 150)
-                            .multilineTextAlignment(.trailing)
-                            .onChange(of: viewModel.tempUser.exercise_issue) {
-                                viewModel.tempUser.exercise_issue = viewModel.filterExerciseIndicator(viewModel.tempUser.exercise_issue)
-                            }
+                    if let user = viewModel.userProfileInfo {
+                        if isEditing {
+                            TextField("fitness_concern".localized, text: $viewModel.tempUserDetails.exerciseIssue)
+                                .textFieldStyle(DefaultTextFieldStyle())
+                                .frame(width: 150)
+                                .multilineTextAlignment(.trailing)
+                                .onChange(of: viewModel.tempUserDetails.exerciseIssue) {
+                                    viewModel.tempUserDetails.exerciseIssue = viewModel.filterExerciseIndicator(viewModel.tempUserDetails.exerciseIssue)
+                                }
+                        } else {
+                            Text(user.exerciseIssue)
+                                .foregroundStyle(.gray)
+                        }
                     } else {
-                        Text(viewModel.user.exercise_issue)
+                        Text("Loading...")
                             .foregroundStyle(.gray)
                     }
                 }
@@ -54,16 +60,21 @@ struct EditInfoView: View {
                 HStack {
                     Text("fitness_goal".localized)
                     Spacer()
-                    if viewModel.isEditing {
-                        TextField("fitness_goal".localized, text: $viewModel.tempUser.exercise_goal)
-                            .textFieldStyle(DefaultTextFieldStyle())
-                            .frame(width: 150)
-                            .multilineTextAlignment(.trailing)
-                            .onChange(of: viewModel.tempUser.exercise_goal) {
-                                viewModel.tempUser.exercise_goal = viewModel.filterExerciseIndicator(viewModel.tempUser.exercise_goal)
-                            }
+                    if let user = viewModel.userProfileInfo {
+                        if isEditing {
+                            TextField("fitness_goal".localized, text: $viewModel.tempUserDetails.exerciseGoal)
+                                .textFieldStyle(DefaultTextFieldStyle())
+                                .frame(width: 150)
+                                .multilineTextAlignment(.trailing)
+                                .onChange(of: viewModel.tempUserDetails.exerciseGoal) {
+                                    viewModel.tempUserDetails.exerciseGoal = viewModel.filterExerciseIndicator(viewModel.tempUserDetails.exerciseGoal)
+                                }
+                        } else {
+                            Text(user.exerciseGoal)
+                                .foregroundStyle(.gray)
+                        }
                     } else {
-                        Text(viewModel.user.exercise_goal)
+                        Text("Loading...")
                             .foregroundStyle(.gray)
                     }
                 }
@@ -78,10 +89,10 @@ struct EditInfoView: View {
         .background(Color.fitculatorBackgroundColor.opacity(1))
         .navigationTitle("my_info".localized)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(viewModel.isEditing)
+        .navigationBarBackButtonHidden(isEditing)
         .preferredColorScheme(.dark)
         .toolbar {
-            if viewModel.isEditing {
+            if isEditing {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("cancel".localized) {
                         if viewModel.hasChanges() {
@@ -94,11 +105,11 @@ struct EditInfoView: View {
             }
             
             ToolbarItem(placement: .topBarTrailing) {
-                Button(viewModel.isEditing ? "save".localized : "edit".localized) {
-                    if viewModel.isEditing {
-                        viewModel.updateUserInfo()
+                Button(isEditing ? "save".localized : "edit".localized) {
+                    if isEditing {
+                        viewModel.saveUserProfile(userId: 1)
                     }
-                    viewModel.isEditing.toggle()
+                    isEditing.toggle()
                 }
                 .disabled(!viewModel.isFormValid)
             }
@@ -117,11 +128,14 @@ struct EditInfoView: View {
         .sheet(isPresented: $viewModel.showCameraPicker) {
             ImagePicker(image: $viewModel.tempUIImage, sourceType: .camera)
         }
+        .onAppear {
+            viewModel.fetchUserProfile(userId: 1)  // 사용자 프로필 정보를 로드
+        }
     }
     
     private func cancelEditing() {
-        viewModel.backToExInfo()
-        viewModel.isEditing = false
+        viewModel.fetchUserProfile(userId: 1)
+        isEditing = false
     }
 }
 
@@ -162,8 +176,8 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
 }
 
-#Preview {
-    NavigationStack {
-        EditInfoView(viewModel: SettingViewModel())
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        EditInfoView()
+//    }
+//}

@@ -1,7 +1,10 @@
 import SwiftUI
 
 struct UserInfoView: View {
-    @ObservedObject var viewModel: SettingViewModel
+    let userAccount: UserAccount
+    @Binding var userDetails: UserDetails
+    @Binding var isEditing: Bool
+    @State private var tempBirthDate: Date = Date()
     
     var dateRange: ClosedRange<Date> {
         let min = Calendar.current.date(byAdding: .year, value: -100, to: Date())!
@@ -14,7 +17,7 @@ struct UserInfoView: View {
             HStack {
                 Text("name".localized)
                 Spacer()
-                Text(viewModel.user.name)
+                Text("\(userAccount.name)")
                     .foregroundStyle(.gray)
             }
             .listRowBackground(Color.brightBackgroundColor)
@@ -22,16 +25,16 @@ struct UserInfoView: View {
             HStack {
                 Text("nickname".localized)
                 Spacer()
-                if viewModel.isEditing {
-                    TextField("nickname_placeholder".localized, text: $viewModel.tempUser.nickName)
+                if isEditing {
+                    TextField("nickname_placeholder".localized, text: $userDetails.userNickname)
                         .textFieldStyle(DefaultTextFieldStyle())
                         .frame(width: 150)
                         .multilineTextAlignment(.trailing)
-                        .onChange(of: viewModel.tempUser.nickName) {
-                            viewModel.tempUser.nickName = viewModel.filterNickname(viewModel.tempUser.nickName)
+                        .onChange(of: userDetails.userNickname) {
+                            userDetails.userNickname = filterNickname(userDetails.userNickname)
                         }
                 } else {
-                    Text(viewModel.user.nickName)
+                    Text(userDetails.userNickname)
                         .foregroundStyle(.gray)
                 }
             }
@@ -40,23 +43,24 @@ struct UserInfoView: View {
             HStack {
                 Text("gender".localized)
                 Spacer()
-                Text(viewModel.user.gender.localized)
+                Text(userDetails.gender)
                     .foregroundStyle(.gray)
+                
             }
             .listRowBackground(Color.brightBackgroundColor)
             
             HStack {
                 Text("height".localized)
                 Spacer()
-                if viewModel.isEditing {
-                    Picker("", selection: $viewModel.tempUser.height) {
+                if isEditing {
+                    Picker("", selection: $userDetails.height) {
                         ForEach(130...250, id: \.self) { height in
                             Text("\(height) cm").tag(height)
                         }
                     }
                     .pickerStyle(DefaultPickerStyle())
                 } else {
-                    Text("\(viewModel.user.height)cm")
+                    Text("\(userDetails.height)cm")
                         .foregroundStyle(.gray)
                 }
             }
@@ -65,14 +69,51 @@ struct UserInfoView: View {
             HStack {
                 Text("birthdate".localized)
                 Spacer()
-                if viewModel.isEditing {
-                    DatePicker("", selection: $viewModel.tempUser.birthDate, in: dateRange, displayedComponents: .date)
+                if isEditing {
+                    DatePicker("", selection: $tempBirthDate, in: dateRange, displayedComponents: .date)
+                        .onAppear {
+                            if let birthDate = isoStringToDate(userDetails.birth) {
+                                tempBirthDate = birthDate
+                            }
+                        }
+                        .onChange(of: tempBirthDate) {
+                            userDetails.birth = dateToISOString(tempBirthDate) ?? ""
+                            
+                        }
                 } else {
-                    Text(viewModel.formatDate(viewModel.user.birthDate))
+                    Text(formatDate(isoStringToDate(userDetails.birth) ?? Date()))
                         .foregroundStyle(.gray)
                 }
             }
             .listRowBackground(Color.brightBackgroundColor)
         }
     }
+}
+
+func filterNickname(_ input: String) -> String {
+    let filtered = input.filter { $0.isLetter || $0.isNumber }
+    return String(filtered.prefix(10))
+}
+
+func formatDate(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy.MM.dd"
+    return formatter.string(from: date)
+}
+
+func isoStringToDate(_ isoString: String?) -> Date? {
+    guard let isoString = isoString, !isoString.isEmpty else { return nil }
+    
+    let isoWithZ = isoString + "Z"
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime]
+    let date = formatter.date(from: isoWithZ)
+    return date
+}
+
+func dateToISOString(_ date: Date?) -> String? {
+    guard let date = date else { return nil }
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime]
+    return formatter.string(from: date)
 }
