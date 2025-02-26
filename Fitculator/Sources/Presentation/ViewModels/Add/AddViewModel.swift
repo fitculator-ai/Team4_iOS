@@ -51,7 +51,7 @@ final class AddViewModel: ObservableObject {
              endAt: Date(),
              earnedPoint: 1,
              intensity: "힘들어",
-             note: "아 힘들어"
+             note: "으아아아아아아아아아아아아으아아ㅏ아아아아아아아아아아아아"
          )
          
          addUseCase.executeRecord(request: request)

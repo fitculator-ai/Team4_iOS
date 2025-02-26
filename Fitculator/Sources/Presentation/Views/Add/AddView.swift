@@ -9,6 +9,7 @@ enum Field: Hashable {
 
 struct AddView: View {
     @StateObject var viewModel: AddViewModel = AddViewModel(addUseCase: ExerciseListUseCase(repository: ExerciseListRepository(networkService: NetworkService(session: .shared))))
+    @Environment(\.presentationMode) var presentationMode
     @State private var selectedDate = Date()
     @State private var showDatePicker = false
     @State private var keyboardHeight: CGFloat = 0
@@ -19,66 +20,98 @@ struct AddView: View {
     @State private var showDropdown: Bool = false
     
     var body: some View {
-        ZStack(alignment: .top) {
-            Color.clear
-                .ignoresSafeArea()
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    hideKeyboard()
-                }
+        GeometryReader { geometry in
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 20) {
-                    DateTimeSection(
-                        selectedDate: $selectedDate,
-                        showDatePicker: $showDatePicker
-                    )
-                    .padding(.top, 100)
+            VStack(spacing: 0) {
+                HStack {
+                    Button {
+                        presentationMode.wrappedValue.dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .padding()
+                    }
+                    Spacer()
+                    Text("추가")
+                        .foregroundColor(.white)
+                        .font(.headline)
+                    Spacer()
                     
-                    TimeInputSection()
-                        .padding(.top, 16)
-                    
-                    ExerciseTypeSection(
-                        selectedExerciseType: $selectedExerciseType,
-                        showDropdown: $showDropdown
-                    )
-                    .zIndex(1)
-                    
-                    ExerciseTimeSection(currentField: $currentField)
-                        .onChange(of: currentField) { field in
-                            focusedField = field
-                        }
-                        .padding(.top, showDropdown ? -4: 8)
-                        .onChange(of: focusedField) { field in
-                            currentField = field
-                        }
-                        .zIndex(0)
-                        .padding(.top, -25)
-                    
-                    HeartRateSection(currentField: $currentField)
-                        .zIndex(0)
-                    
-                    MemoSection(currentField: $currentField)
-                    
-                    ButtonSection(viewModel: viewModel)
-                        .padding(.bottom, 30)
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(width: 44, height: 44)
                 }
-                .frame(maxWidth: .infinity)
+
+                .frame(height: 44)
+                .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0)
                 .background(Color.fitculatorBackgroundColor)
+                ZStack(alignment: .top) {
+                    Color.clear
+                        .ignoresSafeArea()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            hideKeyboard()
+                        }
+                    
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 20) {
+                            DateTimeSection(
+                                selectedDate: $selectedDate,
+                                showDatePicker: $showDatePicker
+                            )
+                            .padding(.top, 20)
+                            
+                            TimeInputSection()
+                                .padding(.top, 16)
+                            
+                            ExerciseTypeSection(
+                                selectedExerciseType: $selectedExerciseType,
+                                showDropdown: $showDropdown
+                            )
+                            .zIndex(1)
+                            
+                            ExerciseTimeSection(currentField: $currentField)
+                                .onChange(of: currentField) { field in
+                                    focusedField = field
+                                }
+                                .padding(.top, showDropdown ? -4: 8)
+                                .onChange(of: focusedField) { field in
+                                    currentField = field
+                                }
+                                .zIndex(0)
+                                .padding(.top, -25)
+                            
+                            HeartRateSection(currentField: $currentField)
+                                .zIndex(0)
+                            
+                            MemoSection(currentField: $currentField)
+                            
+                            ButtonSection(viewModel: viewModel)
+                                .padding(.bottom, 30)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .background(Color.fitculatorBackgroundColor)
+                    }
+                    .background(Color.fitculatorBackgroundColor)
+               
+                }
             }
-            .background(Color.fitculatorBackgroundColor)
-            .offset(y: -offset)
+            .offset(y: offset)
+            .setupKeyboardHandling(geometry: geometry, offset: $offset, focusField: focusedField)
+            .ignoresSafeArea(.all, edges: .top)
+            .onTapGesture {
+                hideKeyboard()
+            }
+//            .setupKeyboardHandling(geometry: geometry, offset: $offset, focusField: focusedField)
+            .onAppear {
+                viewModel.fetchExerciesList()
+//                setupKeyboardNotifications()
+            }
+            .onDisappear {
+//                removeKeyboardNotifications()
+            }
         }
-        .onTapGesture {
-            hideKeyboard()
-        }
-        .onAppear {
-            viewModel.fetchExerciesList()
-            setupKeyboardNotifications()
-        }
-        .onDisappear {
-            removeKeyboardNotifications()
-        }
+
     }
     
     private func hideKeyboard() {
@@ -89,39 +122,7 @@ struct AddView: View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
-    private func setupKeyboardNotifications() {
-        NotificationCenter.default.addObserver(
-            forName: UIResponder.keyboardWillShowNotification,
-            object: nil,
-            queue: .main
-        ) { notification in
-            guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-                  let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-            
-            let keyboardHeight = keyboardFrame.height
-            
-            if focusedField == .memo {
-                withAnimation(.easeOut(duration: duration)) {
-                    // ScrollView를 키보드 높이만큼 위로 올립니다
-                    self.offset = keyboardHeight + 600  // 100은 추가 여백입니다
-                }
-            } else {
-                withAnimation(.easeOut(duration: duration)) {
-                    self.offset = 0
-                }
-            }
-        }
-        
-        NotificationCenter.default.addObserver(
-            forName: UIResponder.keyboardWillHideNotification,
-            object: nil,
-            queue: .main
-        ) { _ in
-            withAnimation {
-                offset = 0
-            }
-        }
-    }
+
     private func removeKeyboardNotifications() {
         NotificationCenter.default.removeObserver(self)
     }
@@ -514,6 +515,32 @@ struct HeartRateField: View {
     }
 }
 
+//struct MemoSection: View {
+//    @State private var memoText: String = ""
+//    @Binding var currentField: Field?
+//    @FocusState private var focused: Bool
+//    
+//    var body: some View {
+//        VStack {
+//            HStack {
+//                Text("메모")
+//                    .font(.system(size: 16))
+//                    .foregroundStyle(.white)
+//                Spacer()
+//            }
+//            
+//            CustomTextView(text: $memoText, onFocus: { isFocused in
+//                currentField = isFocused ? .memo : nil
+//            })
+//                .frame(height: 200)
+//                .padding()
+//                .background(Color.gray.opacity(0.2))
+//                .cornerRadius(8)
+//        }
+//        .padding(.horizontal, 20)
+//    }
+//}
+
 struct MemoSection: View {
     @State private var memoText: String = ""
     @Binding var currentField: Field?
@@ -529,12 +556,16 @@ struct MemoSection: View {
             }
             
             CustomTextView(text: $memoText, onFocus: { isFocused in
-                currentField = isFocused ? .memo : nil
+                // 포커스 상태 변경 시 currentField 업데이트
+                withAnimation {
+                    currentField = isFocused ? .memo : nil
+                }
+                print("메모 포커스: \(isFocused), 현재 필드: \(String(describing: currentField))")
             })
-                .frame(height: 200)
-                .padding()
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(8)
+            .frame(height: 200)
+            .padding()
+            .background(Color.gray.opacity(0.2))
+            .cornerRadius(8)
         }
         .padding(.horizontal, 20)
     }
@@ -561,3 +592,80 @@ struct ButtonSection: View {
     }
 }
 
+
+struct KeyboardHandlingModifier: ViewModifier {
+    let geometry: GeometryProxy
+    @Binding var offset: CGFloat
+    var focusField: Field?
+    
+    func body(content: Content) -> some View {
+        content
+            .onAppear {
+                setupKeyboardNotifications()
+            }
+            .onDisappear {
+                NotificationCenter.default.removeObserver(self)
+            }
+    }
+    
+    private func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
+            guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+                  let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+            
+            // 메모 필드가 활성화되었을 때만 오프셋 적용
+            if focusField == .memo {
+                let keyboardHeight = keyboardFrame.height
+                let memoPosition = geometry.size.height * 0.8 // 메모 필드 위치 (화면 높이의 약 80% 지점)
+                let overlap = memoPosition + keyboardHeight - geometry.size.height
+                
+                if overlap > 0 {
+                    withAnimation(.easeOut(duration: duration)) {
+                        offset = -overlap - 20 // 추가 여백 20
+                    }
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
+            withAnimation(.easeOut(duration: 0.3)) {
+                offset = 0
+            }
+        }
+    }
+}
+
+
+// ViewModifier를 사용하기 위한 확장
+extension View {
+    func setupKeyboardHandling(geometry: GeometryProxy, offset: Binding<CGFloat>, focusField: Field? = nil) -> some View {
+        self.modifier(KeyboardHandlingModifier(geometry: geometry, offset: offset, focusField: focusField))
+    }
+}
+
+
+//private func setupKeyboardNotifications() {
+//    NotificationCenter.default.addObserver(
+//        forName: UIResponder.keyboardWillShowNotification,
+//        object: nil,
+//        queue: .main
+//    ) { notification in
+//        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+//              let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+//        
+//        print("키보드 높이: \(keyboardFrame.height)")
+//        print("현재 필드: \(String(describing: focusedField))")
+//        
+//        if focusedField == .memo {
+//            let newOffset = -keyboardFrame.height - 50
+//            print("설정할 오프셋: \(newOffset)")
+//            
+//            withAnimation(.easeOut(duration: duration)) {
+//                self.offset = newOffset
+//                print("오프셋 설정 완료: \(self.offset)")
+//            }
+//        }
+//    }
+//    
+//    // 나머지 코드는 동일
+//}
