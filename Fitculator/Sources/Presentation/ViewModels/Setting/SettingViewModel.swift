@@ -65,6 +65,7 @@ class SettingViewModel: ObservableObject {
         getUserAccountInfo(email: "qwer@naver.com")
     }
     
+    // 이미지 로드 안됨
     func loadProfileImage(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         
@@ -85,11 +86,11 @@ class SettingViewModel: ObservableObject {
             
             DispatchQueue.main.async {
                 self.profileUIImage = image
+                self.tempUIImage = image
             }
         }.resume()
     }
     
-    // MARK: 이미지 로드가 안돼요,,
     func uploadProfileImage(userId: Int, image: UIImage) {
         guard let imageData = image.jpegData(compressionQuality: 0.7) else { return }
         
@@ -149,6 +150,7 @@ class SettingViewModel: ObservableObject {
                     profileImage: userProfile.profileImage,
                     gender: userProfile.gender
                 )
+                self.tempUIImage = nil
                 self.loadProfileImage(from: userProfile.profileImage)
             })
             .store(in: &cancellables)
@@ -201,12 +203,14 @@ class SettingViewModel: ObservableObject {
     
     func hasChanges() -> Bool {
         guard let userProfile = userProfileInfo else { return false }
+        let tempbirthDate = tempUserDetails.birth.replacingOccurrences(of: "Z", with: "")
         return tempUserDetails.userNickname != userProfile.userNickname ||
         tempUserDetails.height != userProfile.height ||
-        tempUserDetails.birth != userProfile.birth ||
+        tempbirthDate != userProfile.birth ||
         tempUserDetails.restingBpm != userProfile.restingBpm ||
         tempUserDetails.exerciseGoal != userProfile.exerciseGoal ||
-        tempUserDetails.exerciseIssue != userProfile.exerciseIssue
+        tempUserDetails.exerciseIssue != userProfile.exerciseIssue ||
+        tempUIImage != profileUIImage
     }
     
     // MARK: 카메라, 사진 권한

@@ -199,7 +199,6 @@ enum APIEndPoint {
             return "/api/exercise"
         case .addExerciseRecord:
             return "/api/exercise-logs/"
-        }
         case .getUserAccountInfo:
             return "/api/mypage/get-user"
         case .getUserDetails:
@@ -208,6 +207,7 @@ enum APIEndPoint {
             return "/api/mypage/edit-user/\(userId)"
         case .uploadProfileImage:
             return "/api/mypage/edit-user/profile-image"
+        }
     }
     
     var httpMethod: String {
@@ -215,6 +215,14 @@ enum APIEndPoint {
         case .thisWeekRecord, .fetchExerciesList:
             return "GET"
         case .addExerciseRecord:
+            return "POST"
+        case .getUserAccountInfo:
+            return "GET"
+        case .getUserDetails:
+            return "GET"
+        case .editUserDetails:
+            return "PUT"
+        case .uploadProfileImage:
             return "POST"
         }
     }
