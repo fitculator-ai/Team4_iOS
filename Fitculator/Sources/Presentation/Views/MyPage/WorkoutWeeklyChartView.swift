@@ -14,21 +14,23 @@ struct WorkoutWeeklyChartView: View {
     var body: some View {
         VStack {
             Chart {
-                ForEach(viewModel.trainingFatigueDatas.indices, id: \.self) { index in
-                    let trainingDatas = viewModel.trainingFatigueDatas[index]
-                    let pointSum: Double = trainingDatas.map { $0.gained_point }.reduce(0, +)
+                ForEach(viewModel.last25WeeksRecords.indices, id: \.self) { index in
+                    let trainingDatas = viewModel.last25WeeksRecords[index]
+                    let pointSum: Double = trainingDatas.map { $0.earned_point }.reduce(0, +)
                     BarMark(
-                        x: .value("Date", "W \(index + 1)"),
+//                        x: .value("Date", "W \(index + 1)"),
+                        x: .value("Date", "\(index + 1)"),
                         y: .value("Point", pointSum)
                     )
-                    .foregroundStyle(viewModel.selectedWeek == index ? Color.red : Color.blue)
+                    .foregroundStyle(viewModel.selectedWeek == index ? Color.textFieldBackgrounColor : Color.blue)
                 }
                 
-                ForEach(viewModel.trainingFatigueDatas.indices, id: \.self) { index in
-                    let trainingDatas = viewModel.trainingFatigueDatas[index]
-                    let pointSum: Double = trainingDatas.map { $0.gained_point }.reduce(0, +)
+                ForEach(viewModel.last25WeeksRecords.indices, id: \.self) { index in
+                    let trainingDatas = viewModel.last25WeeksRecords[index]
+                    let pointSum: Double = trainingDatas.map { $0.earned_point }.reduce(0, +)
                     LineMark(
-                        x: .value("Date", "W \(index + 1)"),
+//                        x: .value("Date", "W \(index + 1)"),
+                        x: .value("Date", "\(index + 1)"),
                         y: .value("Point", pointSum * 1.5)
                     )
                     .foregroundStyle(Color.red)
@@ -59,12 +61,13 @@ struct WorkoutWeeklyChartView: View {
                         DragGesture()
                             .onChanged { value in
                                 let location = value.location
+                                viewModel.weeklyMaxPoint = 0
                                 if let selectedDateStr: String = proxy.value(atX: location.x) {
                                     let index = Int(selectedDateStr.components(separatedBy: " ").last!)! - 1
                                     viewModel.selectedWeek = index
                                     
-                                    let groupedRecords = Dictionary(grouping: viewModel.trainingFatigueDatas[viewModel.selectedWeek ?? viewModel.trainingFatigueDatas.count - 1]) { record in
-                                        return record.trainingDate
+                                    let groupedRecords = Dictionary(grouping: viewModel.last25WeeksRecords[viewModel.selectedWeek ?? viewModel.last25WeeksRecords.count - 1]) { record in
+                                        return record.end_at.components(separatedBy: "T").first!
                                     }
                                     
                                     let sortedGroupedRecords = groupedRecords.keys.sorted().compactMap { date in
@@ -75,8 +78,9 @@ struct WorkoutWeeklyChartView: View {
                                         viewModel.getMaxPoint(records: $0)
                                     }
                                     
-                                    viewModel.filteredTrainingCount = sortedGroupedRecords.map { $0.filter { $0.trainingName == "근력운동" }.count }
-                                    viewModel.weeklyTrainingData = sortedGroupedRecords
+                                    viewModel.muscleTrainingCount = sortedGroupedRecords.map { $0.filter { viewModel.muscleCategory.contains($0.exercise_name)
+                                    }.count }
+                                    viewModel.thisWeekRecords = sortedGroupedRecords
                                     viewModel.setWeekDateStr()
                                 }
                             }
@@ -85,7 +89,7 @@ struct WorkoutWeeklyChartView: View {
         }
         .padding()
         .onAppear {
-            viewModel.fetchAllData(period: .all)
+            viewModel.get25WeekTraining()
         }
     }
 }

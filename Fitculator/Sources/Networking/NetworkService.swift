@@ -28,34 +28,51 @@ struct NetworkService: NetworkServiceProtocol {
     init(session: URLSession = .shared,
          logger: NetworkLogging = DefaultNetworkLogging(),
          timeoutInterval: TimeInterval = 30) {
-            self.session = session
-            self.logger = logger
-            self.timeoutInterval = timeoutInterval
-        }
-    
+        self.session = session
+        self.logger = logger
+        self.timeoutInterval = timeoutInterval
+    }
+
     func request<T: Decodable>(_ endpoint: APIEndPoint,
-                               environment:Environment2) -> AnyPublisher<T, NetworkError> {
+                             environment: Environment2) -> AnyPublisher<T, NetworkError> {
+
         
         guard var components = URLComponents(string: environment.baseURL + endpoint.path) else {
-                return Fail(error: NetworkError.invalidURL("Invalid base URL or path"))
-                    .eraseToAnyPublisher()
-            }
-            
-           // components.queryItems = endpoint.queryItems
-        
+            return Fail(error: NetworkError.invalidURL("Invalid base URL or path"))
+                .eraseToAnyPublisher()
+        }
+      
         if !endpoint.queryItems.isEmpty {
-             components.queryItems = endpoint.queryItems
-         }
+            components.queryItems = endpoint.queryItems
+        }
             
-            guard let url = components.url else {
-                return Fail(error: NetworkError
-                    .invalidURL("Could not construct URL from components"))
+        guard let url = components.url else {
+            return Fail(error: NetworkError
+                .invalidURL("Could not construct URL from components"))
+                .eraseToAnyPublisher()
+        }
+            
+        var request = URLRequest(url: url)
+        request.timeoutInterval = timeoutInterval
+        
+
+        request.httpMethod = endpoint.httpMethod
+        
+
+        for (key, value) in endpoint.headers {
+            request.addValue(value, forHTTPHeaderField: key)
+        }
+        
+
+        if case .addExerciseRecord(let requestDTO) = endpoint {
+            do {
+                let encoder = JSONEncoder()
+                request.httpBody = try encoder.encode(requestDTO)
+            } catch {
+                return Fail(error: NetworkError.decodingError(error))
                     .eraseToAnyPublisher()
             }
-            
-            var request = URLRequest(url: url)
-            request.timeoutInterval = timeoutInterval
-            request.addValue("application/json", forHTTPHeaderField: "accept")
+        }
         
             logger.log(request: request)
         
@@ -172,17 +189,14 @@ struct NetworkService: NetworkServiceProtocol {
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
-        // Prepare the body of the request
         var body = Data()
         
-        // Add the image data to the raw http request data
         body.append("\r\n--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
         body.append(imageData)
         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
         
-        // Set the request body
         request.httpBody = body
         
         logger.log(request: request)
@@ -242,13 +256,14 @@ struct DefaultNetworkLogging: NetworkLogging {
     }
 }
 
-
-
 protocol ExerciseListRepositoryProtocol {
     func fetchExerciseList() -> AnyPublisher<ExerciseListDomain, NetworkError>
+    func undonggiroksaengseong(request: AddExerciseRequestDTO) -> AnyPublisher<Never,NetworkError>
 }
 
 struct ExerciseListRepository: ExerciseListRepositoryProtocol {
+
+    
     private let networkService: NetworkServiceProtocol
     
     init(networkService: NetworkServiceProtocol) {
@@ -262,11 +277,17 @@ struct ExerciseListRepository: ExerciseListRepositoryProtocol {
                 environment: .development
                )
                .eraseToAnyPublisher()
-        
-           
         }
+    
+    func undonggiroksaengseong(request: AddExerciseRequestDTO) -> AnyPublisher<Never, NetworkError> {
+        
+        return networkService.request(
+            .addExerciseRecord(request)
+            , environment: .development
+        )
+        .eraseToAnyPublisher()
+    }
 }
-
 
 struct ExerciseListDomain: Codable {
     let cardio: [String]

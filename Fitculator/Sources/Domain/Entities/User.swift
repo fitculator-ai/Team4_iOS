@@ -151,7 +151,6 @@ struct User {
     }
 }
 
-
 struct TrainingRecord: Equatable {
     var id = UUID()
     let trainingDate: Date
@@ -167,11 +166,12 @@ struct TrainingRecord: Equatable {
         return "\(trainingDate.dateToString(includeDay: .fullDay))-\(trainingName)-\(gained_point)"
     }
     
-    enum Intensity {
-        case verLow
-        case low
-        case normal
-        case high
+    enum Intensity: String, Codable {
+        case verLow = "매우 낮음"
+        case low = "낮음"
+        case normal = "보통"
+        case high = "높음"
+        case veryHigh = "매우 높음"
     }
     
     static func generateDummyRecords(for date: Date) -> [TrainingRecord] {
@@ -230,4 +230,27 @@ enum CurrentDateState {
     case thisWeek
     case lastWeek
     case other
+}
+
+// TODO: - Entities에 뺴두기.
+struct WorkoutRecord: Codable {
+    let userID: Int
+    let exerciseName: String
+    let avgBPM, maxBPM, duration: Int
+    let endAt: String
+    let exerciseIntensity: String
+    let earnedPoint: Double
+    let exerciseNote: String
+
+    enum CodingKeys: String, CodingKey {
+        case userID = "user_id"
+        case exerciseName = "exercise_name"
+        case avgBPM = "avg_bpm"
+        case maxBPM = "max_bpm"
+        case duration
+        case endAt = "end_at"
+        case exerciseIntensity = "exercise_intensity"
+        case earnedPoint = "earned_point"
+        case exerciseNote = "exercise_note"
+    }
 }

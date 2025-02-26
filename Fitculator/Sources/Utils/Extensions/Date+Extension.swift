@@ -13,9 +13,11 @@ extension Date {
         case fullMonth
         case monthDay
         case fullDay
+        case fullDay2
         case dayOfWeek
         case onlyDay
         case time
+        case time2
         case custom
     }
     
@@ -28,7 +30,8 @@ extension Date {
     /// - time: "yyyy.MM.dd HH:MM"
     func dateToString(includeDay: IncludeDay = .dayOfWeek) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ko_KR")
+        let langCode = LanguageManager.getSavedLanguageCode()
+        dateFormatter.locale = Locale(identifier: "\(langCode)")
         
         var format: String = ""
         switch includeDay {
@@ -40,23 +43,31 @@ extension Date {
             format = "MM.dd"
         case .fullDay:
             format = "yyyy.MM.dd"
+        case .fullDay2:
+            format = "yyyy-MM-dd"
         case .dayOfWeek:
             format = "yyyy.MM.dd EEEE"
         case .onlyDay:
             format = "EEEE"
         case .time:
             format = "yyyy.MM.dd HH:MM"
+        case .time2:
+            format = "MM.dd E HH:MM"
         case .custom:
             format = ""
         }
         dateFormatter.dateFormat = format
+        
+        if includeDay == .onlyDay {
+            return String(dateFormatter.string(from: self).prefix(3))
+        }
         
         return dateFormatter.string(from: self)
     }
     
     func startOfWeek(using calendar: Calendar) -> Date? {
         var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
-        components.weekday = 2 // ✅ 월요일을 기준으로 설정 (1: 일요일, 2: 월요일)
+        components.weekday = 2
         return calendar.date(from: components)
     }
     
@@ -69,9 +80,9 @@ extension Date {
 
 // MARK: format에 맞는 형식의 String에 대해 맞는 Date 타입을 리턴 만약 올바르지 않은 format이라면 현재 날짜를 리턴
 extension String {
-    func stringToDate() -> Date {
+    func stringToDate(format: String) -> Date {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM.dd"
+        dateFormatter.dateFormat = format
         
         return dateFormatter.date(from: self) ?? Date()
     }

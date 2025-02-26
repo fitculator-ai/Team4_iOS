@@ -118,6 +118,10 @@
 "time" = "Time";
 "intensity" = "Intensity";
 
-// MyPage
+// My Page
+"my_page" = "My Page";
+"weekly_record" = "Week Record";
+"weekly_fatigue" = "Weekly Fatigue";
+
 "fatigue" = "Fatigue";
 "exercise_record" = "Exercise Record";

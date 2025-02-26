@@ -17,7 +17,7 @@ protocol UserInfoNetworkingProtocol {
 }
 
 protocol TrainingNetworkingProtocol {
-    func thisWeekRecord(userId: Int) -> AnyPublisher<[ThisWeekTraining], Error>
+    func getThisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error>
     func thisWeekMuscleRecordCount(userId: Int) -> AnyPublisher<Int, Error>
     func thisWeekPoints(userId: Int) -> Int
     
@@ -36,33 +36,48 @@ enum EndPoint: String {
     case exerciseList = "http://13.209.96.25:8000/api/exercise/?exercise_type="
 }
 
-
-
-/// ExerciseType
-///  - cardio: 유산소
-///  - strength: 근력
-//enum ExerciseType: String {
-//    case cardio = "유산소"
-//    case strength = "근력"
-//}
-
 class TrainingNetworking: TrainingNetworkingProtocol {
-    func thisWeekRecord(userId: Int) -> AnyPublisher<[ThisWeekTraining], Error> {
-        let url = EndPoint.thisWeekRecord.rawValue + "\(userId)"
-        
-        return Future<[ThisWeekTraining], Error> { promise in
-            AF.request(url)
-                .validate(statusCode: 200..<300)
-                .responseDecodable(of: [ThisWeekTraining].self) { res in
-                    switch res.result {
-                    case .success(let records):
-                        promise(.success(records))
-                    case .failure(let error):
-                        promise(.failure(error))
+    func getThisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error> {
+        do {
+            let request = try MyPageAPIEndPoint.getThisWeekRecords(.development, userId).getURLRequest()
+            
+            return Future<[Record], Error> { promise in
+                AF.request(request)
+                    .validate(statusCode: 200..<300)
+                    .responseDecodable(of: [Record].self) { res in
+                        switch res.result {
+                        case .success(let records):
+                            promise(.success(records))
+                        case .failure(let error):
+                            promise(.failure(error))
+                        }
                     }
-                }
+            }
+            .eraseToAnyPublisher()
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
         }
-        .eraseToAnyPublisher()
+    }
+    
+    func get25WeeksRecords(userId: Int) -> AnyPublisher<[RecordWithPeriod], Error> {
+        do {
+            let request = try MyPageAPIEndPoint.get25WeekRecords(.development, userId).getURLRequest()
+            return Future<[RecordWithPeriod], Error> { promise in
+                AF.request(request)
+                    .validate(statusCode: 200..<300)
+                    .responseDecodable(of: [RecordWithPeriod].self) { res in
+                        switch res.result {
+                        case .success(let records):
+                            promise(.success(records))
+                        case .failure(let error):
+                            promise(.failure(error))
+                        }
+                    }
+            }
+            .eraseToAnyPublisher()
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
     }
     
     func thisWeekMuscleRecordCount(userId: Int) -> AnyPublisher<Int, Error> {
@@ -114,7 +129,7 @@ class TrainingNetworking: TrainingNetworkingProtocol {
     }
 }
 
-struct ThisWeekTraining: Codable {
+struct ThisWeekTraining: Codable, Equatable {
     let userID: Int
     let exerciseName: String
     let avgBPM, maxBPM, duration: Int
@@ -124,6 +139,12 @@ struct ThisWeekTraining: Codable {
     let exerciseNote: String?
     var key: String {
         return "\(endAt)-\(exerciseName)-\(earnedPoint)"
+    }
+    var endDate: Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter.date(from: endAt)
     }
     
     enum CodingKeys: String, CodingKey {
@@ -137,59 +158,15 @@ struct ThisWeekTraining: Codable {
         case earnedPoint = "earned_point"
         case exerciseNote = "exercise_note"
     }
-    
-    enum Intensity: String, Codable {
-        case verLow = "매우 낮음"
-        case low = "낮음"
-        case normal = "보통"
-        case high = "높음"
-    }
-    
-    static func generateDummyRecords(for date: Date) -> [ThisWeekTraining] {
-        let trainingNames = ["러닝", "싸이클", "수영", "근력운동"]
-        var records: [ThisWeekTraining] = []
-        
-        let count = Int.random(in: 1...3)
-        for _ in 0..<count {
-            let trainingName = trainingNames.randomElement()!
-            let duration = Int.random(in: 30...120)
-            let avg_bpm = Int.random(in: 90...160)
-            let max_bpm = avg_bpm + Int.random(in: 5...20)
-            let intensity: Intensity = [.verLow, .low, .normal, .high].randomElement()!
-            let gained_point = Double.random(in: 10...100)
-            
-            let record = ThisWeekTraining(
-                userID: 1,
-                exerciseName: trainingName,
-                avgBPM: avg_bpm,
-                maxBPM: max_bpm,
-                duration: duration,
-                endAt: date.addingTimeInterval(TimeInterval(duration * 60)).dateToString(includeDay: .fullDay),
-                exerciseIntensity: intensity,
-                earnedPoint: gained_point,
-                exerciseNote: "\(trainingName) for \(duration) minutes"
-            )
-            
-            records.append(record)
-        }
-        return records
-    }
-    
-    static func createEmptyRecord(for date: Date) -> ThisWeekTraining {
-        return ThisWeekTraining(
-            userID: 1,
-            exerciseName: "",
-            avgBPM: 0,
-            maxBPM: 0,
-            duration: 0,
-            endAt: Date().dateToString(includeDay: .fullDay),
-            exerciseIntensity: .verLow,
-            earnedPoint: 0,
-            exerciseNote: ""
-        )
-    }
 }
 
+enum Intensity: String, Codable {
+    case verLow = "매우 낮음"
+    case low = "낮음"
+    case normal = "보통"
+    case high = "높음"
+    case veryHigh = "매우 높음"
+}
 
 enum Environment2 {
     case development
@@ -205,21 +182,24 @@ enum Environment2 {
     }
 }
 
-
-enum APIEndPoint{
+enum APIEndPoint {
     case thisWeekRecord(_ userId: Int)
     case fetchExerciesList
+    case addExerciseRecord(_ request: AddExerciseRequestDTO)
     case getUserAccountInfo(email: String)
     case getUserDetails(userId: Int)
     case editUserDetails(userId: Int, userInfo: UserProfileInfo)
     case uploadProfileImage(userId: Int)
-    
-    var path:String {
+
+    var path: String {
         switch self {
         case .thisWeekRecord:
             return "/api/exercies-logs/this-week"
         case .fetchExerciesList:
             return "/api/exercise"
+        case .addExerciseRecord:
+            return "/api/exercise-logs/"
+        }
         case .getUserAccountInfo:
             return "/api/mypage/get-user"
         case .getUserDetails:
@@ -228,6 +208,14 @@ enum APIEndPoint{
             return "/api/mypage/edit-user/\(userId)"
         case .uploadProfileImage:
             return "/api/mypage/edit-user/profile-image"
+    }
+    
+    var httpMethod: String {
+        switch self {
+        case .thisWeekRecord, .fetchExerciesList:
+            return "GET"
+        case .addExerciseRecord:
+            return "POST"
         }
     }
     
@@ -237,7 +225,7 @@ enum APIEndPoint{
             return [
                 URLQueryItem(name: "userId", value: String(userId))
             ]
-        case .fetchExerciesList:
+        case .fetchExerciesList,.addExerciseRecord:
             return []
         case .getUserAccountInfo(let email):
             return [URLQueryItem(name: "email", value: email)]
@@ -252,4 +240,75 @@ enum APIEndPoint{
         }
     }
     
+    var headers: [String: String] {
+        return [
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        ]
+    }
+}
+
+enum MyPageAPIEndPoint {
+    case getThisWeekRecords(_ environment: Environment2, _ userId: Int)
+    case get25WeekRecords(_ environment: Environment2, _ userId: Int)
+    
+    var path: String {
+        switch self {
+        case .getThisWeekRecords(let environment, _):
+            return "\(environment.baseURL)/api/exercise-logs/this-week"
+        case .get25WeekRecords(let environment, _):
+            return "\(environment.baseURL)/api/mypage/get-exercise-logs/25weeks"
+        }
+    }
+    
+    var method: HTTPMethod {
+        return .get
+    }
+    
+    var headers: HTTPHeaders {
+        return ["Content-Type": "application/json"]
+    }
+    
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case .getThisWeekRecords(_, let userId),
+             .get25WeekRecords(_, let userId):
+            return [URLQueryItem(name: "user_id", value: "\(userId)")]
+        }
+    }
+    
+    func getURLRequest() throws -> URLRequest {
+        guard var urlComponents = URLComponents(string: self.path) else {
+            throw URLError(.badURL)
+        }
+        
+        urlComponents.queryItems = queryItems
+        
+        guard let url = urlComponents.url else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.method = self.method
+        request.headers = self.headers
+
+        return request
+    }
+}
+
+// MARK: - 운동리스트 API 모델
+struct WorkoutList: Decodable {
+    let cardio: [WorkoutListItem]
+    let strength: [WorkoutListItem]
+    
+    private enum CodingKeys: String, CodingKey {
+        case cardio = "유산소"
+        case strength = "근력"
+    }
+}
+
+struct WorkoutListItem: Decodable, Identifiable {
+    let id: Int
+    let name: String
+
 }

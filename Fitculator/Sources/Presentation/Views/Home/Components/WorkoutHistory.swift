@@ -3,12 +3,10 @@ import SwiftUI
 /// 나의 운동 기록 뷰
 struct WorkoutHistory: View {
     
-    @State var user: User
-    @State var traningRecords: [[Date: [TrainingRecord]]] = [[:]]
+    var traningRecords: [[Date: [TrainingRecord]]] = [[:]]
     
-    init(user: User) {
-        self.user = user
-        self.traningRecords = user.getTrainingRecords(for: .oneWeek)
+    init(traningRecords: [[Date : [TrainingRecord]]]) {
+        self.traningRecords = traningRecords
     }
     
     var body: some View {
@@ -41,26 +39,36 @@ struct WorkoutHistory: View {
                         }
                     }
                 }
-                    
             }
         }
-        .onAppear {
-            updateWorkHistoryData()
-        }
-        .onChange(of: traningRecords) { oldValue, newValue in
-            updateWorkHistoryData()
-        }
-    }
-    private func updateWorkHistoryData() {
-        traningRecords = user.getTrainingRecords(for: .oneWeek)
     }
     
     private func getIconData(for trainingName: String) -> (iconName: String, backgroundColor: Color) {
         let iconData: [String: (String, Color)] = [
-            "러닝": ("figure.run", Color.green),
-            "싸이클": ("bicycle", Color.gray),
+            // TODO: - 서버에서 받은 운동리스트와 SFSymbols 어떻게 매치시키지,,?
+            // 유산소 운동
+            "달리기": ("figure.run", Color.green),
+            "사이클": ("bicycle", Color.cyan),
             "수영": ("figure.pool.swim", Color.blue),
-            "근력운동": ("dumbbell", Color.black)
+            "줄넘기": ("figure.jumprope", Color.orange),
+            "등산": ("figure.hiking", Color.green),
+            "조깅": ("figure.run", Color.green),
+            "걷기": ("figure.walk", Color.green),
+            "로잉머신": ("figure.rower", Color.blue),
+            "에어로빅": ("heart.fill", Color.pink),
+            "스피닝": ("bicycle", Color.gray),
+            
+            // 근력 운동
+            "스쿼트": ("dumbbell", Color.black),
+            "데드리프트": ("dumbbell", Color.black),
+            "벤치프레스": ("dumbbell", Color.black),
+            "풀업": ("dumbbell", Color.black),
+            "랫풀다운": ("dumbbell", Color.black),
+            "바벨 로우": ("dumbbell", Color.black),
+            "숄더 프레스": ("dumbbell", Color.black),
+            "런지": ("dumbbell", Color.black),
+            "케틀벨 스윙": ("dumbbell", Color.black),
+            "레그 프레스": ("dumbbell", Color.black)
         ]
         
         return iconData[trainingName] ?? ("questionmark.circle", Color.gray)
@@ -76,6 +84,8 @@ struct WorkoutHistory: View {
             return Color.orange
         case .high:
             return Color.red
+        case .veryHigh:
+            return Color.black
         }
     }
 }
