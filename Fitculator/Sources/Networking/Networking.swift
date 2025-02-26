@@ -140,46 +140,6 @@ struct ThisWeekTraining: Codable, Equatable {
     let exerciseNote: String?
     var key: String {
         return "\(endAt)-\(exerciseName)-\(earnedPoint)"
-    var endDate: Date? {
-      let formatter = DateFormatter()
-      formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
-      formatter.timeZone = TimeZone(identifier: "UTC")
-      return formatter.date(from: endAt)
-    }
-
-enum Intensity: String, Codable {
-    case verLow = "매우 낮음"
-    case low = "낮음"
-    case normal = "보통"
-    case high = "높음"
-    case veryHigh = "매우 높음"
-}
-
-enum Environment2 {
-    case development
-    case production
-    
-    var baseURL: String {
-        switch self {
-        case .development:
-            return "http://13.209.96.25:8000"
-        case .production:
-            return "https://13.209.96.25:8000"
-        }
-    }
-}
-
-enum APIEndPoint {
-    case thisWeekRecord(_ userId: Int)
-    case fetchExerciesList
-
-    var path: String {
-        switch self {
-        case .thisWeekRecord:
-            return "/api/exercies-logs/this-week"
-        case .fetchExerciesList:
-            return "/api/exercise"
-        }
     }
     var endDate: Date? {
         let formatter = DateFormatter()
@@ -187,68 +147,14 @@ enum APIEndPoint {
         formatter.timeZone = TimeZone(identifier: "UTC")
         return formatter.date(from: endAt)
     }
-    
-    var queryItems: [URLQueryItem] {
-        switch self {
-        case .thisWeekRecord(let userId):
-            return [
-                URLQueryItem(name: "userId", value: String(userId))
-            ]
-        case .fetchExerciesList:
-            return []
-            
-        }
-    }
 }
-
-enum MyPageAPIEndPoint {
-    case getThisWeekRecords(_ environment: Environment2, _ userId: Int)
-    case get25WeekRecords(_ environment: Environment2, _ userId: Int)
-    
-    var path: String {
-        switch self {
-        case .getThisWeekRecords(let environment, _):
-            return "\(environment.baseURL)/api/exercise-logs/this-week"
-        case .get25WeekRecords(let environment, _):
-            return "\(environment.baseURL)/api/mypage/get-exercise-logs/25weeks"
-        }
-    }
-    
-    var method: HTTPMethod {
-        return .get
-    }
-    
-    var headers: HTTPHeaders {
-        return ["Content-Type": "application/json"]
-    }
-    
-    var queryItems: [URLQueryItem] {
-        switch self {
-        case .getThisWeekRecords(_, let userId),
-             .get25WeekRecords(_, let userId):
-            return [URLQueryItem(name: "user_id", value: "\(userId)")]
-        }
-    }
-    
-    func getURLRequest() throws -> URLRequest {
-        guard var urlComponents = URLComponents(string: self.path) else {
-            throw URLError(.badURL)
-        }
-        
-        urlComponents.queryItems = queryItems
-        
-        guard let url = urlComponents.url else {
-            throw URLError(.badURL)
-        }
-        
-        var request = URLRequest(url: url)
-        request.method = self.method
-        request.headers = self.headers
-
-        return request
-    }
+enum Intensity: String, Codable {
+    case verLow = "매우 낮음"
+    case low = "낮음"
+    case normal = "보통"
+    case high = "높음"
+    case veryHigh = "매우 높음"
 }
-
 
 enum Environment2 {
     case development

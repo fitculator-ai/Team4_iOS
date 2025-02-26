@@ -39,7 +39,6 @@ struct WorkoutHistory: View {
                         }
                     }
                 }
-                    
             }
         }
     }
@@ -75,7 +74,7 @@ struct WorkoutHistory: View {
         return iconData[trainingName] ?? ("questionmark.circle", Color.gray)
     }
     
-    private func getIntensityColor(for intensity: Intensity) -> Color {
+    private func getIntensityColor(for intensity: TrainingRecord.Intensity) -> Color {
         switch intensity {
         case .verLow:
             return Color.blue
