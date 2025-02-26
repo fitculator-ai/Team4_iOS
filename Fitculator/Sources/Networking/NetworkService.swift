@@ -25,7 +25,6 @@ struct NetworkService: NetworkServiceProtocol {
         self.logger = logger
         self.timeoutInterval = timeoutInterval
     }
-    
 
     func request<T: Decodable>(_ endpoint: APIEndPoint,
                              environment: Environment2) -> AnyPublisher<T, NetworkError> {
@@ -35,8 +34,7 @@ struct NetworkService: NetworkServiceProtocol {
             return Fail(error: NetworkError.invalidURL("Invalid base URL or path"))
                 .eraseToAnyPublisher()
         }
-            
-
+      
         if !endpoint.queryItems.isEmpty {
             components.queryItems = endpoint.queryItems
         }
@@ -139,7 +137,6 @@ struct ExerciseListRepository: ExerciseListRepositoryProtocol {
     }
     
     func fetchExerciseList() -> AnyPublisher<ExerciseListDomain, NetworkError> {
-
         
         return networkService.request(
             .fetchExerciesList,
@@ -155,7 +152,6 @@ struct ExerciseListRepository: ExerciseListRepositoryProtocol {
             , environment: .development
         )
         .eraseToAnyPublisher()
-
     }
 }
 
