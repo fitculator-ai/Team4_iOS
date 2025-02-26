@@ -20,7 +20,15 @@ let cardioExercises = [
     DropMenu(title: "수영", type: .cardio),
     DropMenu(title: "줄넘기", type: .cardio),
     DropMenu(title: "등산", type: .cardio),
-    DropMenu(title: "걷기", type: .cardio)
+    DropMenu(title: "걷기", type: .cardio),
+    DropMenu(title: "걷기2", type: .cardio),
+    DropMenu(title: "걷기3", type: .cardio),
+    DropMenu(title: "걷기4", type: .cardio),
+    DropMenu(title: "걷기5", type: .cardio),
+    DropMenu(title: "걷기6", type: .cardio),
+    DropMenu(title: "걷기7", type: .cardio),
+    DropMenu(title: "걷기8", type: .cardio)
+    
 ]
 
 let strengthExercises = [

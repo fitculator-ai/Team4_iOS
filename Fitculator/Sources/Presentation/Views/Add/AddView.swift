@@ -60,7 +60,7 @@ struct AddView: View {
                     
                     MemoSection(currentField: $currentField)
                     
-                    ButtonSection()
+                    ButtonSection(viewModel: viewModel)
                         .padding(.bottom, 30)
                 }
                 .frame(maxWidth: .infinity)
@@ -541,10 +541,11 @@ struct MemoSection: View {
 }
 
 struct ButtonSection: View {
+    @ObservedObject var viewModel: AddViewModel
     var body: some View {
         HStack {
             Button {
-                print("git test2")
+                viewModel.submitExerciseRecord()
             } label: {
                 Text("메모")
                     .font(.system(size: 16, weight: .semibold))

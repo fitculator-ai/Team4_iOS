@@ -173,13 +173,26 @@ enum Environment2 {
 enum APIEndPoint {
     case thisWeekRecord(_ userId: Int)
     case fetchExerciesList
+    case addExerciseRecord(_ request: AddExerciseRequestDTO)
+   
 
-    var path: String {
+    var path:String {
         switch self {
         case .thisWeekRecord:
             return "/api/exercies-logs/this-week"
         case .fetchExerciesList:
             return "/api/exercise"
+        case .addExerciseRecord:
+            return "/api/exercise-logs/"
+        }
+    }
+    
+    var httpMethod: String {
+        switch self {
+        case .thisWeekRecord, .fetchExerciesList:
+            return "GET"
+        case .addExerciseRecord:
+            return "POST"
         }
     }
     
@@ -189,7 +202,7 @@ enum APIEndPoint {
             return [
                 URLQueryItem(name: "userId", value: String(userId))
             ]
-        case .fetchExerciesList:
+        case .fetchExerciesList,.addExerciseRecord:
             return []
             
         }
@@ -258,4 +271,11 @@ struct WorkoutList: Decodable {
 struct WorkoutListItem: Decodable, Identifiable {
     let id: Int
     let name: String
+    var headers: [String: String] {
+        return [
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        ]
+    }
+    
 }
