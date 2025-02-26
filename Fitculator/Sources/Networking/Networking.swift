@@ -187,8 +187,7 @@ enum APIEndPoint {
     case fetchExerciesList
     case addExerciseRecord(_ request: AddExerciseRequestDTO)
    
-
-    var path:String {
+    var path: String {
         switch self {
         case .thisWeekRecord:
             return "/api/exercies-logs/this-week"
@@ -290,4 +289,5 @@ struct WorkoutList: Decodable {
 struct WorkoutListItem: Decodable, Identifiable {
     let id: Int
     let name: String
+
 }

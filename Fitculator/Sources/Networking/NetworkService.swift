@@ -25,15 +25,16 @@ struct NetworkService: NetworkServiceProtocol {
         self.logger = logger
         self.timeoutInterval = timeoutInterval
     }
-    
+
     func request<T: Decodable>(_ endpoint: APIEndPoint,
                              environment: Environment2) -> AnyPublisher<T, NetworkError> {
+
         
         guard var components = URLComponents(string: environment.baseURL + endpoint.path) else {
             return Fail(error: NetworkError.invalidURL("Invalid base URL or path"))
                 .eraseToAnyPublisher()
         }
-            
+      
         if !endpoint.queryItems.isEmpty {
             components.queryItems = endpoint.queryItems
         }
