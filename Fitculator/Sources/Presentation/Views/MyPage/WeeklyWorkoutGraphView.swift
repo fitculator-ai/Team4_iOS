@@ -14,38 +14,34 @@ struct WeeklyWorkoutGraphView: View {
     var body: some View {
         VStack {
             Chart {
-                // 막대 그래프 위 포인트 총 합을 보여주기 위함 TODO: viewModel로 이동
-                let totalPointsByDate = Dictionary(grouping: viewModel.weeklyTrainingData.flatMap { $0 },
-                                                   by: { $0.trainingDate })
-                    .mapValues { records in
-                        return records.filter { $0.trainingName != "근력운동" }.compactMap { $0 }.map { $0.gained_point }.reduce(0, +)
-                    }
+                ForEach(viewModel.thisWeekRecords.indices, id: \.self) { index in
+                    let trainingDatas = viewModel.thisWeekRecords[index]
                     
-                ForEach(viewModel.weeklyTrainingData.indices, id: \.self) { index in
-                    let trainingDatas = viewModel.weeklyTrainingData[index]
-                    
-                    ForEach(trainingDatas, id: \.key) { data in
-                        if data.trainingName != "근력운동" {
+                    ForEach(trainingDatas.indices, id: \.self) { index in
+                        let data = trainingDatas[index]
+                        if !viewModel.muscleCategory.contains(data.exercise_name) {
                             BarMark(
-                                x: .value("Date", data.trainingDate.dateToString(includeDay: .onlyDay)),
-                                y: .value("Point", data.gained_point)
+                                x: .value("Date", data.end_at.components(separatedBy: "T").first!
+                                    .stringToDate(format: "yyyy-MM-dd")
+                                    .dateToString(includeDay: .onlyDay)),
+                                y: .value("Point", data.earned_point)
                             )
                             .foregroundStyle(
-                                data.gained_point < 20 ? Color.blue :
-                                    data.gained_point >= 20 && data.gained_point < 50 ? Color.yellow :
+                                data.earned_point < 20 ? Color.blue :
+                                    data.earned_point >= 20 && data.earned_point < 50 ? Color.yellow :
                                     Color.red
                             )
                             .annotation(position: .overlay, alignment: .center, spacing: 0) {
-                                if !data.trainingName.isEmpty {
+                                if !data.exercise_name.isEmpty {
                                     VStack {
-                                        Text("\(data.trainingName)")
+                                        Text("\(data.exercise_name)")
                                             .font(.system(size: 14, weight: .bold))
                                             .foregroundStyle(Color.white)
                                             .minimumScaleFactor(0.5)
                                             .lineLimit(1)
                                             .allowsTightening(true)
                                         
-                                        Text("\(data.gained_point, specifier: "%.1f")")
+                                        Text("\(data.earned_point, specifier: "%.1f")")
                                             .font(.system(size: 14, weight: .bold))
                                             .foregroundStyle(Color.white)
                                             .minimumScaleFactor(0.5)
@@ -58,16 +54,19 @@ struct WeeklyWorkoutGraphView: View {
                                 }
                             }
                             
-                            ForEach(Array(totalPointsByDate.sorted(by: { $0.key < $1.key }).enumerated()), id: \.element.key) { index, element in
-                                let (date, total) = element
+                            let totalPointMap = viewModel.thisWeekRecords.map {
+                                return ($0.first!.end_at.components(separatedBy: "T").first!, $0.filter { !viewModel.muscleCategory.contains($0.exercise_name) }.map { $0.earned_point }.reduce(0, +))
+                            }
+                            ForEach(totalPointMap, id: \.0) { value in
+                                let (date, total) = value
                                 PointMark(
-                                    x: .value("date", date.dateToString(includeDay: .onlyDay)),
+                                    x: .value("date", date.stringToDate(format: "yyyy-MM-dd").dateToString(includeDay: .onlyDay)),
                                     y: .value("total", total)
                                 )
-                                .annotation(position: .top, alignment: .center, spacing: 10) {
+                                .annotation(position: .top, alignment: .center, spacing: 0) {
                                     VStack {
                                         if total > 0 {
-                                            ForEach(0..<viewModel.filteredTrainingCount[index], id: \.self) { _ in
+                                            ForEach(0..<viewModel.muscleTrainingCount[index], id: \.self) { _ in
                                                 Image(systemName: "dumbbell.fill")
                                                     .foregroundStyle(Color.white)
                                             }
@@ -102,7 +101,7 @@ struct WeeklyWorkoutGraphView: View {
         }
         .padding()
         .onAppear {
-            viewModel.fetchWeeklyData(period: .oneWeek)
+            viewModel.getThisWeekTraining()
         }
     }
 }

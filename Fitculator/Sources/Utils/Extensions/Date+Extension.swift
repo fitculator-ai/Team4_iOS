@@ -13,9 +13,11 @@ extension Date {
         case fullMonth
         case monthDay
         case fullDay
+        case fullDay2
         case dayOfWeek
         case onlyDay
         case time
+        case time2
         case custom
     }
     
@@ -40,12 +42,16 @@ extension Date {
             format = "MM.dd"
         case .fullDay:
             format = "yyyy.MM.dd"
+        case .fullDay2:
+            format = "yyyy-MM-dd"
         case .dayOfWeek:
             format = "yyyy.MM.dd EEEE"
         case .onlyDay:
             format = "EEEE"
         case .time:
             format = "yyyy.MM.dd HH:MM"
+        case .time2:
+            format = "MM.dd E HH:MM"
         case .custom:
             format = ""
         }
@@ -69,9 +75,9 @@ extension Date {
 
 // MARK: format에 맞는 형식의 String에 대해 맞는 Date 타입을 리턴 만약 올바르지 않은 format이라면 현재 날짜를 리턴
 extension String {
-    func stringToDate() -> Date {
+    func stringToDate(format: String) -> Date {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM.dd"
+        dateFormatter.dateFormat = format
         
         return dateFormatter.date(from: self) ?? Date()
     }
