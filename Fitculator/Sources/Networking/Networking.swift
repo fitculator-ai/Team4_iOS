@@ -290,4 +290,11 @@ struct WorkoutListItem: Decodable, Identifiable {
         ]
     }
     
+    var headers: [String: String] {
+        return [
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        ]
+    }
+    
 }
