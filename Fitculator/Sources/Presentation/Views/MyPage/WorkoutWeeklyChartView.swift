@@ -18,17 +18,19 @@ struct WorkoutWeeklyChartView: View {
                     let trainingDatas = viewModel.last25WeeksRecords[index]
                     let pointSum: Double = trainingDatas.map { $0.earned_point }.reduce(0, +)
                     BarMark(
-                        x: .value("Date", "W \(index + 1)"),
+//                        x: .value("Date", "W \(index + 1)"),
+                        x: .value("Date", "\(index + 1)"),
                         y: .value("Point", pointSum)
                     )
-                    .foregroundStyle(viewModel.selectedWeek == index ? Color.red : Color.blue)
+                    .foregroundStyle(viewModel.selectedWeek == index ? Color.textFieldBackgrounColor : Color.blue)
                 }
                 
                 ForEach(viewModel.last25WeeksRecords.indices, id: \.self) { index in
                     let trainingDatas = viewModel.last25WeeksRecords[index]
                     let pointSum: Double = trainingDatas.map { $0.earned_point }.reduce(0, +)
                     LineMark(
-                        x: .value("Date", "W \(index + 1)"),
+//                        x: .value("Date", "W \(index + 1)"),
+                        x: .value("Date", "\(index + 1)"),
                         y: .value("Point", pointSum * 1.5)
                     )
                     .foregroundStyle(Color.red)
@@ -59,6 +61,7 @@ struct WorkoutWeeklyChartView: View {
                         DragGesture()
                             .onChanged { value in
                                 let location = value.location
+                                viewModel.weeklyMaxPoint = 0
                                 if let selectedDateStr: String = proxy.value(atX: location.x) {
                                     let index = Int(selectedDateStr.components(separatedBy: " ").last!)! - 1
                                     viewModel.selectedWeek = index
@@ -75,7 +78,8 @@ struct WorkoutWeeklyChartView: View {
                                         viewModel.getMaxPoint(records: $0)
                                     }
                                     
-                                    viewModel.muscleTrainingCount = sortedGroupedRecords.map { $0.filter { viewModel.muscleCategory.contains($0.exercise_name) }.count }
+                                    viewModel.muscleTrainingCount = sortedGroupedRecords.map { $0.filter { viewModel.muscleCategory.contains($0.exercise_name)
+                                    }.count }
                                     viewModel.thisWeekRecords = sortedGroupedRecords
                                     viewModel.setWeekDateStr()
                                 }
