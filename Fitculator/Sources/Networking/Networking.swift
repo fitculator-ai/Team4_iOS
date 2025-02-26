@@ -129,7 +129,6 @@ class TrainingNetworking: TrainingNetworkingProtocol {
     }
 }
 
-
 struct ThisWeekTraining: Codable, Equatable {
     let userID: Int
     let exerciseName: String
@@ -143,11 +142,24 @@ struct ThisWeekTraining: Codable, Equatable {
     }
     var endDate: Date? {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         formatter.timeZone = TimeZone(identifier: "UTC")
         return formatter.date(from: endAt)
     }
+    
+    enum CodingKeys: String, CodingKey {
+        case userID = "user_id"
+        case exerciseName = "exercise_name"
+        case avgBPM = "avg_bpm"
+        case maxBPM = "max_bpm"
+        case duration
+        case endAt = "end_at"
+        case exerciseIntensity = "exercise_intensity"
+        case earnedPoint = "earned_point"
+        case exerciseNote = "exercise_note"
+    }
 }
+
 enum Intensity: String, Codable {
     case verLow = "매우 낮음"
     case low = "낮음"
@@ -173,10 +185,8 @@ enum Environment2 {
 enum APIEndPoint {
     case thisWeekRecord(_ userId: Int)
     case fetchExerciesList
-
     case addExerciseRecord(_ request: AddExerciseRequestDTO)
    
-
     var path: String {
         switch self {
         case .thisWeekRecord:
@@ -215,7 +225,6 @@ enum APIEndPoint {
             "Content-Type": "application/json"
         ]
     }
-    
 }
 
 enum MyPageAPIEndPoint {
