@@ -129,6 +129,7 @@ class TrainingNetworking: TrainingNetworkingProtocol {
     }
 }
 
+
 struct ThisWeekTraining: Codable, Equatable {
     let userID: Int
     let exerciseName: String
@@ -139,6 +140,46 @@ struct ThisWeekTraining: Codable, Equatable {
     let exerciseNote: String?
     var key: String {
         return "\(endAt)-\(exerciseName)-\(earnedPoint)"
+    var endDate: Date? {
+      let formatter = DateFormatter()
+      formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+      formatter.timeZone = TimeZone(identifier: "UTC")
+      return formatter.date(from: endAt)
+    }
+
+enum Intensity: String, Codable {
+    case verLow = "매우 낮음"
+    case low = "낮음"
+    case normal = "보통"
+    case high = "높음"
+    case veryHigh = "매우 높음"
+}
+
+enum Environment2 {
+    case development
+    case production
+    
+    var baseURL: String {
+        switch self {
+        case .development:
+            return "http://13.209.96.25:8000"
+        case .production:
+            return "https://13.209.96.25:8000"
+        }
+    }
+}
+
+enum APIEndPoint {
+    case thisWeekRecord(_ userId: Int)
+    case fetchExerciesList
+
+    var path: String {
+        switch self {
+        case .thisWeekRecord:
+            return "/api/exercies-logs/this-week"
+        case .fetchExerciesList:
+            return "/api/exercise"
+        }
     }
     var endDate: Date? {
         let formatter = DateFormatter()
@@ -147,60 +188,64 @@ struct ThisWeekTraining: Codable, Equatable {
         return formatter.date(from: endAt)
     }
     
-    enum CodingKeys: String, CodingKey {
-        case userID = "user_id"
-        case exerciseName = "exercise_name"
-        case avgBPM = "avg_bpm"
-        case maxBPM = "max_bpm"
-        case duration
-        case endAt = "end_at"
-        case exerciseIntensity = "exercise_intensity"
-        case earnedPoint = "earned_point"
-        case exerciseNote = "exercise_note"
-    }
-    
-    static func generateDummyRecords(for date: Date) -> [ThisWeekTraining] {
-        let trainingNames = ["러닝", "싸이클", "수영", "근력운동"]
-        var records: [ThisWeekTraining] = []
-        
-        let count = Int.random(in: 1...3)
-        for _ in 0..<count {
-            let trainingName = trainingNames.randomElement()!
-            let duration = Int.random(in: 30...120)
-            let avg_bpm = Int.random(in: 90...160)
-            let max_bpm = avg_bpm + Int.random(in: 5...20)
-            let intensity: Intensity = [.verLow, .low, .normal, .high].randomElement()!
-            let gained_point = Double.random(in: 10...100)
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case .thisWeekRecord(let userId):
+            return [
+                URLQueryItem(name: "userId", value: String(userId))
+            ]
+        case .fetchExerciesList:
+            return []
             
-            let record = ThisWeekTraining(
-                userID: 1,
-                exerciseName: trainingName,
-                avgBPM: avg_bpm,
-                maxBPM: max_bpm,
-                duration: duration,
-                endAt: date.addingTimeInterval(TimeInterval(duration * 60)).dateToString(includeDay: .fullDay),
-                exerciseIntensity: intensity,
-                earnedPoint: gained_point,
-                exerciseNote: "\(trainingName) for \(duration) minutes"
-            )
-            
-            records.append(record)
         }
-        return records
+    }
+}
+
+enum MyPageAPIEndPoint {
+    case getThisWeekRecords(_ environment: Environment2, _ userId: Int)
+    case get25WeekRecords(_ environment: Environment2, _ userId: Int)
+    
+    var path: String {
+        switch self {
+        case .getThisWeekRecords(let environment, _):
+            return "\(environment.baseURL)/api/exercise-logs/this-week"
+        case .get25WeekRecords(let environment, _):
+            return "\(environment.baseURL)/api/mypage/get-exercise-logs/25weeks"
+        }
     }
     
-    static func createEmptyRecord(for date: Date) -> ThisWeekTraining {
-        return ThisWeekTraining(
-            userID: 1,
-            exerciseName: "",
-            avgBPM: 0,
-            maxBPM: 0,
-            duration: 0,
-            endAt: Date().dateToString(includeDay: .fullDay),
-            exerciseIntensity: .verLow,
-            earnedPoint: 0,
-            exerciseNote: ""
-        )
+    var method: HTTPMethod {
+        return .get
+    }
+    
+    var headers: HTTPHeaders {
+        return ["Content-Type": "application/json"]
+    }
+    
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case .getThisWeekRecords(_, let userId),
+             .get25WeekRecords(_, let userId):
+            return [URLQueryItem(name: "user_id", value: "\(userId)")]
+        }
+    }
+    
+    func getURLRequest() throws -> URLRequest {
+        guard var urlComponents = URLComponents(string: self.path) else {
+            throw URLError(.badURL)
+        }
+        
+        urlComponents.queryItems = queryItems
+        
+        guard let url = urlComponents.url else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.method = self.method
+        request.headers = self.headers
+
+        return request
     }
 }
 
