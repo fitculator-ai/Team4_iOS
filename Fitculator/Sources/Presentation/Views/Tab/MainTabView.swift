@@ -51,7 +51,7 @@ struct MainTabView: View {
                             CommunityView()
                         }
                     }
-                    Tab("myPage".localized, systemImage: "person.fill") {
+                    Tab("my".localized, systemImage: "person.fill") {
                         BackgroundView {
                             MyPageView()
                         }

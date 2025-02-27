@@ -23,6 +23,9 @@ let project = Project(
                     ],
                     "NSCameraUsageDescription" : "NSCameraUsageDescription",
                     "NSPhotoLibraryUsageDescription" : "NSPhotoLibraryUsageDescription",
+                    "NSAppTransportSecurity": [
+                        "NSAllowsArbitraryLoads": true
+                    ]
                 ]
             ),
             sources: [

@@ -71,7 +71,7 @@
 "home" = "HOME";
 "feed" = "FEED";
 "community" = "COMMUNITY";
-"myPage" = "MY";
+"my" = "MY";
 
 //SettingViewModel
 "camera_permission_needed" = "Camera Permission Needed";
