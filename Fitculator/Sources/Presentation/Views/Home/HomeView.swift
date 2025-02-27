@@ -99,7 +99,6 @@ struct HomeView: View {
                 isDisplayHome = false
                 viewModel.fetchDataForDateHistory(newValue)
                 viewModel.updateDonutChartData()
-
             }
         }
     }
