@@ -14,10 +14,10 @@ struct FatigueChart: View {
     private var fatigueMessage: String {
         let intFatigue = Int(fatigueValue * 100)
         switch intFatigue {
-        case 0..<101: return "적정한 운동량 💪"
-        case 101..<201: return "운동 과다!🔥"
-        case 201..<301: return "너무 무리했어요! 🛑"
-        default: return "과로 상태 ⚠️"
+        case 0..<101: return "appropriate_exercise".localized + " 💪"
+        case 101..<201: return  "excessive_exercise".localized + "🔥"
+        case 201..<301: return "too_intense".localized + "! 🛑"
+        default: return "overwork".localized + "! ⚠️"
         }
     }
     
@@ -44,7 +44,7 @@ struct FatigueChart: View {
             HStack {
                 
                 // TODO: - 각 포인트별 멘트 다르게 바꾸기.
-                Text("\(Int(fatigueValue * 100))포인트 \(fatigueMessage)")
+                Text("\(Int(fatigueValue * 100))\(String("points").localized) \(fatigueMessage)")
                     .font(.title3)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
@@ -196,12 +196,17 @@ public struct CustomTriangleShape: Shape {
 }
 
 struct TooltipBody: View {
-    let tooltipText: String = """
-100 포인트: 권장 일주일 운동량
-100~200 포인트: 운동을 좋아하시는군요?
-200~300 포인트: 부상 조심~
-300 포인트 이상 : 운동 중독!
-"""
+//    let tooltipText: String = """
+//100 포인트: 권장 일주일 운동량
+//100~200 포인트: 운동을 좋아하시는군요?
+//200~300 포인트: 부상 조심~
+//300 포인트 이상 : 운동 중독!
+//"""
+    var tooltipText: String = "100 \("points".localized): \("recommended_weekly_exercise".localized)\n" +
+    "100~200 \("points".localized): \("love_exercising".localized)\n" +
+    "200~300 \("points".localized): \("beware_injury".localized)\n" +
+    "300 \("points".localized) \("over".localized): \("exercise_addiction".localized)"
+    
     
     var body: some View {
             VStack {

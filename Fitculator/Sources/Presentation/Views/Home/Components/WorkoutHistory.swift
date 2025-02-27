@@ -86,11 +86,11 @@ struct WorkoutHistory: View {
         case .low:
             return Color.green
         case .normal:
-            return Color.orange
+            return Color.yellow
         case .high:
-            return Color.red
+            return Color.orange
         case .veryHigh:
-            return Color.black
+            return Color.red
         }
     }
 }
@@ -144,16 +144,16 @@ struct WorkoutListCell: View {
             
             HStack {
                 WorkoutDetailView(
-                    title: "평균 심박",
+                    title: "record_avg_rate".localized,
                     value: "\(averageHeartRate) bpm"
                 )
 //                Spacer()
 //                WorkoutDetailView(title: "칼로리", value: "\(calories) kcal")
                 Spacer()
-                WorkoutDetailView(title: "시간", value: "\(duration) min")
+                WorkoutDetailView(title: "record_hour".localized, value: "\(duration) min")
                 Spacer()
                 WorkoutDetailView(
-                    title: "강도",
+                    title: "intensity".localized,
                     value: intensity,
                     textColor: intensityColor
                 )

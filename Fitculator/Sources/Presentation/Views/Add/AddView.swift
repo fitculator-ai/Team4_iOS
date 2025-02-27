@@ -263,13 +263,13 @@ struct TimeInputSection: View {
             }
             
             HStack(spacing: 15) {
-                TimeField(text: $hourText, unit: "시", width: 80)
+                TimeField(text: $hourText, unit: "hour".localized, width: 80)
                 
                 Text(":")
                     .foregroundColor(.gray)
                     .font(.system(size: 20, weight: .bold))
                 
-                TimeField(text: $minuteText, unit: "분", width: 80)
+                TimeField(text: $minuteText, unit: "minute".localized, width: 80)
                 
                 Spacer()
                 

@@ -111,6 +111,7 @@
 "love_exercising" = "운동을 좋아하시는군요?";
 "beware_injury" = "부상 조심";
 "exercise_addiction" = "운동 중독";
+"over" = "이상";
 
 "remaining_exercise" = "남은 운동량";
 "running" = "러닝";
@@ -128,3 +129,8 @@
 "my_page" = "마이페이지";
 "weekly_record" = "주간 운동량";
 "weekly_fatigue" = "주간 피로도";
+
+// Record Detail
+"record_hour" = "시간";
+"record_avg_rate" = "평균 심박수";
+

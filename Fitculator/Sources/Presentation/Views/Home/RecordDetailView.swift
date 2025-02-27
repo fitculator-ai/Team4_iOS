@@ -61,7 +61,7 @@ struct RecordDetailView: View {
                                     
                                     HStack(spacing: 30) {
                                         VStack(alignment: .leading, spacing: 5) {
-                                            Text("시간")
+                                            Text("record_hour".localized)
                                                 .foregroundStyle(Color(UIColor.lightGray))
                                                 .font(.headline)
                                                 .bold()
@@ -83,7 +83,7 @@ struct RecordDetailView: View {
                                         }
                                         
                                         VStack(alignment: .leading, spacing: 5) {
-                                            Text("평균 심박수")
+                                            Text("record_avg_rate".localized)
                                                 .foregroundStyle(Color(UIColor.lightGray))
                                                 .font(.headline)
                                                 .bold()
@@ -107,14 +107,14 @@ struct RecordDetailView: View {
                                     
                                     HStack {
                                         VStack(alignment: .leading) {
-                                            Text("운동 강도")
+                                            Text("intensity".localized)
                                                 .foregroundStyle(Color(UIColor.lightGray))
                                                 .font(.headline)
                                                 .bold()
                                             
                                             Text("\(record.training_intensity.rawValue)")
                                                 .foregroundStyle(
-                                                    record.training_intensity == .verLow ? Color.green : record.training_intensity == .low ? Color.blue : record.training_intensity == .normal ? Color.green : record.training_intensity == .high ? Color.red : Color.black
+                                                    record.training_intensity == .verLow ? Color.green : record.training_intensity == .low ? Color.blue : record.training_intensity == .normal ? Color.yellow : record.training_intensity == .high ? Color.orange : Color.red
                                                 )
                                                 .font(.largeTitle)
                                                 .bold()
@@ -136,7 +136,7 @@ struct RecordDetailView: View {
                                 .overlay(alignment: .top) {
                                     VStack {
                                         HStack {
-                                            Text("운동 노트")
+                                            Text("memo".localized)
                                                 .foregroundStyle(Color.white)
                                                 .font(.title3)
                                                 .bold()
