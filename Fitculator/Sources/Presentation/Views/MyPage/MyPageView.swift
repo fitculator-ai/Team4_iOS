@@ -3,6 +3,7 @@ import Charts
 
 struct MyPageView: View {
     @StateObject var viewModel = MyPageViewModel()
+    private var settingsService = SettingsService()
     
     init() {
         let appearance = UINavigationBarAppearance()
@@ -27,7 +28,8 @@ struct MyPageView: View {
                             // MARK: 프로필 사진
                             VStack(spacing: 0) {
                                 NavigationLink {
-                                    EditInfoView(viewModel: SettingViewModel())
+                                    EditInfoView(
+                                        viewModel: settingsService.createViewModel())
                                 } label: {
                                     ProfileImageView(viewModel: viewModel, width: width)
                                 }
@@ -66,9 +68,11 @@ struct MyPageView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink(destination: SettingView()) {
-                            Image(systemName: "gearshape.fill")
-                                .tint(.white)
+                        NavigationLink(destination: SettingView(
+                            viewModel: settingsService.createViewModel()
+                            )) {
+                                Image(systemName: "gearshape.fill")
+                                    .tint(.white)
                         }
                     }
                 }

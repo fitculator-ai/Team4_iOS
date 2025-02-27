@@ -3,12 +3,15 @@ import PhotosUI
 
 struct ProfileImageSection: View {
     @ObservedObject var viewModel: SettingViewModel
+    @State var showActionSheet: Bool = false
+    @Binding var isEditing: Bool
+    @Binding var tempUIImage: UIImage?
     
     var body: some View {
         Section {
             VStack {
                 ZStack {
-                    if let profileImage = viewModel.tempUIImage {
+                    if let profileImage = tempUIImage {
                         Image(uiImage: profileImage)
                             .resizable()
                             .scaledToFill()
@@ -16,7 +19,7 @@ struct ProfileImageSection: View {
                             .clipShape(Circle())
                             .overlay(Circle().stroke(Color.gray, lineWidth: 1))
                             .overlay(alignment: .bottomTrailing) {
-                                if viewModel.isEditing {
+                                if isEditing {
                                     Image(systemName: "camera.fill")
                                         .foregroundColor(.white)
                                         .padding(12)
@@ -33,7 +36,7 @@ struct ProfileImageSection: View {
                                     .font(.system(size: 40))
                             )
                             .overlay(alignment: .bottomTrailing) {
-                                if viewModel.isEditing {
+                                if isEditing {
                                     Image(systemName: "camera.fill")
                                         .foregroundColor(.white)
                                         .padding(12)
@@ -43,11 +46,11 @@ struct ProfileImageSection: View {
                     }
                 }
                 .onTapGesture {
-                    if viewModel.isEditing {
-                        viewModel.showActionSheet = true
+                    if isEditing {
+                        showActionSheet = true
                     }
                 }
-                .actionSheet(isPresented: $viewModel.showActionSheet) {
+                .actionSheet(isPresented: $showActionSheet) {
                     ActionSheet(title: Text("change_profile_picture".localized), buttons: [
                         .default(Text("take_photo".localized)) {
                             viewModel.checkPermissions(for: .camera)
@@ -56,7 +59,7 @@ struct ProfileImageSection: View {
                             viewModel.checkPermissions(for: .photoLibrary)
                         },
                         .destructive(Text("reset_default_image".localized)) {
-                            viewModel.tempUIImage = nil
+                            tempUIImage = nil
                         },
                         .cancel()
                     ])

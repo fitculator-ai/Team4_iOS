@@ -1,21 +1,12 @@
 import SwiftUI
 
 struct SettingView: View {
-    @StateObject private var viewModel = SettingViewModel()
-    @State private var selectedGoal: String = ""
+    @StateObject var viewModel: SettingViewModel
     
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    NavigationLink(destination: WorkoutGoalView(selectedGoal: $selectedGoal)) {
-                        HStack {
-                            Text("fitness_goal".localized)
-                            Spacer()
-                            Text(selectedGoal)
-                                .foregroundStyle(.gray)
-                        }
-                    }
                     NavigationLink("device".localized, destination: DeviceView())
                     NavigationLink(destination: LanguageSelectionView(viewModel: viewModel)) {
                         HStack {
@@ -48,7 +39,7 @@ struct SettingView: View {
                 // TODO: 유저의 구독 정보 연결 필요
                 Section {
                     VStack(alignment: .leading, spacing: 8, content: {
-                        Text("\(viewModel.user.subscriptionPlan.title)")
+                        Text("Basic")
                             .font(.title3)
                             .fontWeight(.semibold)
                         Text("2025.02.13 - 2025.03.13")
@@ -155,8 +146,8 @@ struct SubscriptionView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        SettingView()
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        SettingView()
+//    }
+//}

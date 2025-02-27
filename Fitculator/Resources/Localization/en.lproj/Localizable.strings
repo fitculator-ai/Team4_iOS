@@ -79,12 +79,49 @@
 "photo_permission_needed" = "Photo Access Permission Needed";
 "photo_permission_message" = "Please allow access in Settings to select a photo.";
 "go_to_settings" = "Go to Settings";
-
-
 "fitness_concern" = "Fitness Concern";
 "fitness_goal" = "Fitness Goal";
+
+// Add
+"date_time" = "Date and Time";
+"workout_start_time" = "Workout Start Time";
+"hour" = "Hour";
+"minute" = "Min";
+"am" = "AM";
+"pm" = "PM";
+"workout_type" = "Workout Type";
+"cardio" = "Cardio";
+"strength" = "Strength";
+"workout_duration" = "Workout Duration (min)";
+"heart_rate" = "Heart Rate";
+"min_heart_rate" = "Minimum Heart Rate";
+"max_heart_rate" = "Maximum Heart Rate";
+"memo" = "Memo";
+
+// Home
+"appropriate_exercise" = "Appropriate Exercise";
+"excessive_exercise" = "Excessive Exercise";
+"too_intense" = "Too Intense";
+"overwork" = "Overwork";
+"points" = "Points";
+"recommended_weekly_exercise" = "Recommended Weekly Exercise";
+"love_exercising" = "You Love Exercising?";
+"beware_injury" = "Beware of Injury";
+"exercise_addiction" = "Exercise Addiction";
+
+"remaining_exercise" = "Remainings";
+"running" = "Running";
+"cycling" = "Cycling";
+"swimming" = "Swimming";
+"strength_training" = "Strength Training";
+"average_heart_rate" = "Average Heart Rate";
+"time" = "Time";
+"intensity" = "Intensity";
 
 // My Page
 "my_page" = "My Page";
 "weekly_record" = "Week Record";
 "weekly_fatigue" = "Weekly Fatigue";
+
+"fatigue" = "Fatigue";
+"exercise_record" = "Exercise Record";
