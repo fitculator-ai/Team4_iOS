@@ -23,9 +23,26 @@ final class AddViewModel: ObservableObject {
     @Published var hourText: String = ""
     @Published var minuteText: String = ""
     @Published var isAM: Bool = true
+    @Published private(set) var isFormValid: Bool = false
+
     
     init(addUseCase: ExerciseListUseCaseProtocol) {
         self.addUseCase = addUseCase
+        
+        Publishers.CombineLatest4($exerciseId, $exerciseTime, $minHeartRate, $maxHeartRate)
+               .sink { [weak self] (_, _, _, _) in
+                   self?.validateForm()
+               }
+               .store(in: &cancellables)
+    }
+    
+    private func validateForm() {
+       
+        isFormValid = exerciseId > 0 &&
+                      exerciseTime > 0 &&
+                      minHeartRate > 0 &&
+                      maxHeartRate > 0 &&
+                      maxHeartRate >= minHeartRate
     }
 
     
@@ -56,7 +73,7 @@ final class AddViewModel: ObservableObject {
          
 
         let request = AddExerciseRequestDTO(
-             userId: 3,
+             userId: 24,
              exerciseId: exerciseId,
              avgBPM: minHeartRate,
              maxBPM: maxHeartRate,
@@ -84,7 +101,7 @@ final class AddViewModel: ObservableObject {
     
     
     private func calculatePoints() -> Int {
-        return 100000
+        return 10
     }
     
     private func determineIntensity() -> String {
