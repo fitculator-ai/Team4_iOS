@@ -2,7 +2,10 @@ import SwiftUI
 
 struct FeedView: View {
     var body: some View {
-        Text("Feed View")
+        Text("준비중입니다")
+            .font(.largeTitle)
+            .bold()
+            .foregroundStyle(Color.white)
     }
 }
 

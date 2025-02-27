@@ -77,7 +77,7 @@ class HomeViewModel: ObservableObject {
                 return
             }
             
-            let intensity: TrainingRecord.Intensity
+            let intensity: Intensity
             switch training.exerciseIntensity {
             case .high:
                 intensity = .high

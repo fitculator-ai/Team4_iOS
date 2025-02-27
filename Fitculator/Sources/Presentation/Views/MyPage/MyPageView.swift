@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+import Kingfisher
 
 struct MyPageView: View {
     @StateObject var viewModel = MyPageViewModel()
