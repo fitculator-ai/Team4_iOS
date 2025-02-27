@@ -23,14 +23,17 @@ class HomeViewModel: ObservableObject {
     
     private let fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase
     private let fetchWorkoutList: fetchWorkoutListUseCase
+    private let fetchWorkoutForDate: fetchDataForDateUseCase
     private var cancellables = Set<AnyCancellable>()
     
     init(
         fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase,
-        fetchWorkoutList: fetchWorkoutListUseCase
+        fetchWorkoutList: fetchWorkoutListUseCase,
+        fetchDataForDate: fetchDataForDateUseCase
     ) {
         self.fetchWorkoutThisWeekHistory = fetchWorkoutThisWeekHistory
         self.fetchWorkoutList = fetchWorkoutList
+        self.fetchWorkoutForDate = fetchDataForDate
 
         fetchWorkoutHistory()
         fetchWorkoutLists()
@@ -46,6 +49,27 @@ class HomeViewModel: ObservableObject {
             }, receiveValue: { [weak self] history in
                 self?.workoutThisWeekHistory = history
                 self?.updateDonutChartData()
+            })
+            .store(in: &cancellables)
+    }
+    
+    func fetchDataForDateHistory(_ selectedDate: Date) {
+
+        let date = formatDateToString(selectedDate)
+        print("fetchDataForDateHistory 실행됨, 선택된 날짜: \(date)")
+        
+        fetchWorkoutForDate.execute(selectedDate: date)
+            .sink(receiveCompletion: { [weak self] completion in
+                if case let .failure(error) = completion {
+                    print("데이터 가져오기 실패: \(error)")
+                    self?.error = error as? NetworkError
+                }
+            }, receiveValue: { [weak self] history in
+                DispatchQueue.main.async {
+                    print("새롭게 가져온 데이터: \(history)")
+                    self?.workoutThisWeekHistory = history
+                    self?.updateDonutChartData()
+                }
             })
             .store(in: &cancellables)
     }
@@ -183,5 +207,13 @@ class HomeViewModel: ObservableObject {
         )]
         : changedTraningRecordsData
         self.fatigueValue = originalTotal / 100
+    }
+    
+    /// Date to String (yyyy-MM-dd)
+    func formatDateToString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter.string(from: date)
     }
 }

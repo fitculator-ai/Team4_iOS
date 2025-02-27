@@ -31,7 +31,8 @@ struct MainTabView: View {
                             HomeView(
                                 viewModel: HomeViewModel(
                                     fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase(repository: RepositoryJImpl(dataSource: DataSource())),
-                                    fetchWorkoutList: fetchWorkoutListUseCase(repository: RepositoryJImpl(dataSource: DataSource()))
+                                    fetchWorkoutList: fetchWorkoutListUseCase(repository: RepositoryJImpl(dataSource: DataSource())),
+                                    fetchDataForDate: fetchDataForDateUseCase(repository: RepositoryJImpl(dataSource: DataSource()))
                                 )
                             )
                         }
@@ -102,7 +103,8 @@ struct MainTabView: View {
                         HomeView(
                             viewModel: HomeViewModel(
                                 fetchWorkoutThisWeekHistory: fetchWorkoutThisWeekHistoryUseCase(repository: RepositoryJImpl(dataSource: DataSource())),
-                                fetchWorkoutList: fetchWorkoutListUseCase(repository: RepositoryJImpl(dataSource: DataSource()))
+                                fetchWorkoutList: fetchWorkoutListUseCase(repository: RepositoryJImpl(dataSource: DataSource())),
+                                fetchDataForDate: fetchDataForDateUseCase(repository: RepositoryJImpl(dataSource: DataSource()))
                             )
                         )
                         .tabItem {

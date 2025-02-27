@@ -43,3 +43,15 @@ class fetchWorkoutListUseCase {
         return repository.fetchWorkoutList()
     }
 }
+
+class fetchDataForDateUseCase {
+    private let repository: RepositoryJ
+    
+    init(repository: RepositoryJ) {
+        self.repository = repository
+    }
+    
+    func execute(selectedDate date: String) -> AnyPublisher<[ThisWeekTraining], Error> {
+        return repository.fetchDataForDate(date)
+    }
+}
