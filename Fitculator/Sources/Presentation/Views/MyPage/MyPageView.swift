@@ -25,7 +25,7 @@ struct MyPageView: View {
             NavigationStack {
                 BackgroundView {
                     ScrollView {
-                        VStack(spacing: 0) {
+                        VStack(spacing: 10) {
                             // MARK: 프로필 사진
                             VStack(spacing: 0) {
                                 NavigationLink {
@@ -35,8 +35,8 @@ struct MyPageView: View {
                                     ProfileImageView(viewModel: viewModel, width: width)
                                 }
                                 
-                                Text("Lucy")
-                                    .font(.largeTitle)
+                                Text("\(UserService.shared.user.userNickname)")
+                                    .font(.title)
                                     .bold()
                                     .foregroundStyle(.white)
                             }

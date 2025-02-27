@@ -74,9 +74,9 @@ struct DropdownContent: View {
     
     var exerciseList: [ExerciseData] {
         switch selectedExerciseType {
-        case "유산소":
+        case "cardio".localized:
             return cardioExercises
-        case "근력":
+        case "strength".localized:
             return strengthExercises
         default:
             return []

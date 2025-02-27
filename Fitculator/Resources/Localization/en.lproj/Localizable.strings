@@ -83,8 +83,10 @@
 "fitness_goal" = "Fitness Goal";
 
 // Add
+"add" = "Add";
 "date_time" = "Date and Time";
 "workout_start_time" = "Workout Start Time";
+"workout_category" = "Category";
 "hour" = "Hour";
 "minute" = "Min";
 "am" = "AM";
@@ -97,6 +99,7 @@
 "min_heart_rate" = "Minimum Heart Rate";
 "max_heart_rate" = "Maximum Heart Rate";
 "memo" = "Memo";
+"workout_time" = "Workout Time";
 
 // Home
 "appropriate_exercise" = "Appropriate Exercise";

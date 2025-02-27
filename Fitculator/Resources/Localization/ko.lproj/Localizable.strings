@@ -83,8 +83,10 @@
 "fitness_goal" = "운동 목표";
 
 // Add
+"add" = "추가";
 "date_time" = "날짜 및 시간";
 "workout_start_time" = "운동 시작 시간";
+"workout_category" = "운동종류";
 "hour" = "시";
 "minute" = "분";
 "am" = "오전";
@@ -97,6 +99,7 @@
 "min_heart_rate" = "최저 심박수";
 "max_heart_rate" = "최대 심박수";
 "memo" = "메모";
+"workout_time" = "운동 시간";
 
 // Home
 "appropriate_exercise" = "적정한 운동량";
