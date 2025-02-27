@@ -17,23 +17,27 @@ struct WorkoutHistory: View {
                         if let records = weeklyRecords[date] {
                             ForEach(records, id: \.key) { record in
                                 if record.trainingName != "" {
-                                    WorkoutListCell(
-                                        workoutType: record.trainingName,
-                                        workoutDate: record.trainingDate
-                                            .formatted(),
-                                        workoutPoints: Double(
-                                            record.gained_point
-                                        ),
-                                        averageHeartRate: record.avg_bpm,
-//                                        calories: 150,
-                                        duration: record.duration,
-                                        intensity: String(
-                                            describing: record.training_intensity
-                                        ),
-                                        intensityColor: getIntensityColor(for: record.training_intensity),
-                                        iconName: getIconData(for: record.trainingName).iconName,
-                                        iconBackgroundColor: getIconData(for: record.trainingName).backgroundColor
-                                    )
+                                    NavigationLink {
+                                        RecordDetailView(record: record)
+                                    } label: {
+                                        WorkoutListCell(
+                                            workoutType: record.trainingName,
+                                            workoutDate: record.trainingDate
+                                                .formatted(),
+                                            workoutPoints: Double(
+                                                record.gained_point
+                                            ),
+                                            averageHeartRate: record.avg_bpm,
+//                                            calories: 150,
+                                            duration: record.duration,
+                                            intensity: String(
+                                                describing: record.training_intensity
+                                            ),
+                                            intensityColor: getIntensityColor(for: record.training_intensity),
+                                            iconName: getIconData(for: record.trainingName).iconName,
+                                            iconBackgroundColor: getIconData(for: record.trainingName).backgroundColor
+                                        )
+                                    }
                                 }
                             }
                         }
