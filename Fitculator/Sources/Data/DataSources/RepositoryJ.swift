@@ -13,6 +13,8 @@ protocol RepositoryJ {
     func fetchWorkoutThisWeekHistory() -> AnyPublisher<[ThisWeekTraining], Error>
     
     func fetchWorkoutList() -> AnyPublisher<WorkoutList, Error>
+    
+    func fetchDataForDate(_ date: String) -> AnyPublisher<[ThisWeekTraining], Error>
 }
 
 class RepositoryJImpl: RepositoryJ {
@@ -29,5 +31,9 @@ class RepositoryJImpl: RepositoryJ {
     
     func fetchWorkoutList() -> AnyPublisher<WorkoutList, Error> {
         return dataSource.fetchWorkoutList()
+    }
+    
+    func fetchDataForDate(_ date: String) -> AnyPublisher<[ThisWeekTraining], any Error> {
+        return dataSource.fetchDataForDate(date: date)
     }
 }

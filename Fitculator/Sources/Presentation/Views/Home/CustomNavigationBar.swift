@@ -3,13 +3,16 @@ import SwiftUI
 struct CustomNavigationBar: View {
     let isDisplayHome: Bool // true는 Home false는 지난주 데이터.
     let homeBtnAction: () -> Void
-    let calendarBtnAction: () -> Void
+    let calendarBtnAction: (_ selectedDate: Date) -> Void
     let notificationBtnAction: () -> Void
+    @State private var date = Date()
+    @State var test: Bool = false
+    @Environment(\.dismiss) private var dismiss
     
     init(
         isDisplayHome: Bool,
         homeBtnAction: @escaping () -> Void,
-        calendarBtnAction: @escaping () -> Void,
+        calendarBtnAction: @escaping (_ selectedDate: Date) -> Void,
         notificationBtnAction: @escaping () -> Void
     ) {
         self.isDisplayHome = isDisplayHome
@@ -28,31 +31,32 @@ struct CustomNavigationBar: View {
           
             Spacer()
           
-            if isDisplayHome {
-                Button {
-                    calendarBtnAction()
-                } label: {
-                    Image(systemName: "calendar")
-                        .frame(width: 16, height: 16)
-                        .foregroundStyle(.white)
+            Image(systemName: "calendar")
+                .font(.title3)
+                .overlay{
+                    
+                    DatePicker(
+                        "",
+                        selection: $date,
+                        displayedComponents: [.date]
+                    )
+                    .blendMode(
+                        .destinationOver
+                    )
+                    .onChange(of: date) {
+                        calendarBtnAction(date)
+                    }
                 }
+                .foregroundStyle(.white)
                 .padding(.trailing, 10)
-                Button {
-                    notificationBtnAction()
-                } label: {
-                    Image(systemName: "bell.fill")
-                        .frame(width: 16, height: 16)
-                        .foregroundStyle(.white)
-                }
-                .padding(.trailing, 20)
-            } else {
-                Button {
-                    homeBtnAction()
-                } label: {
-                    Image(systemName: "house.fill")
-                }
-                .padding(.trailing, 20)
+            Button {
+                notificationBtnAction()
+            } label: {
+                Image(systemName: "bell.fill")
+                    .frame(width: 16, height: 16)
+                    .foregroundStyle(.white)
             }
+            .padding(.trailing, 20)
             
         }
         .background(Color.fitculatorBackgroundColor)
@@ -60,8 +64,8 @@ struct CustomNavigationBar: View {
     }
 }
 
-struct CustomNavigationBar_Previews: PreviewProvider {
-    static var previews: some View {
-        CustomNavigationBar(isDisplayHome: true, homeBtnAction: {}, calendarBtnAction: {}, notificationBtnAction: {})
-    }
-}
+//struct CustomNavigationBar_Previews: PreviewProvider {
+//    static var previews: some View {
+//        CustomNavigationBar(isDisplayHome: true, homeBtnAction: {}, calendarBtnAction: {selectedDate in }, notificationBtnAction: {})
+//    }
+//}
