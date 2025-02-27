@@ -91,10 +91,18 @@ struct ProfileImageView: View {
             .frame(width: width, height: width)
             .padding()
             .overlay {
-                Image(systemName: "person")
-                    .resizable()
-                    .frame(width: width / 3, height: width / 3)
-                    .aspectRatio(contentMode: .fit)
+                if let profileImage = viewModel.tempUIImage {
+                    Image(uiImage: profileImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: width, height: width)
+                        .clipShape(Circle())
+                } else {
+                    Image(systemName: "person")
+                        .resizable()
+                        .frame(width: width / 3, height: width / 3)
+                        .aspectRatio(contentMode: .fit)
+                }
             }
             .overlay(alignment: .bottomTrailing) {
                 Circle()
@@ -105,6 +113,9 @@ struct ProfileImageView: View {
                             .foregroundStyle(Color.white)
                     }
                     .padding([.bottom, .trailing], 15)
+            }
+            .onAppear {
+                viewModel.loadProfileImage(from: "https://fitculator4.s3.ap-northeast-2.amazonaws.com/image.jpg")
             }
     }
 }
