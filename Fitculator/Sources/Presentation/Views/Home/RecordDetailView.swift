@@ -156,7 +156,8 @@ struct RecordDetailView: View {
                                             TextEditor(text: $trainingNote)
                                                 .scrollContentBackground(.hidden)
                                                 .background(Color.textFieldBackgrounColor)
-                                                .frame(minHeight: textFieldHeight, maxHeight: geo.size.height / 6)
+//                                                .frame(minHeight: textFieldHeight, maxHeight: geo.size.height / 6)
+                                                .frame(height: textFieldHeight)
                                                 .padding(.vertical, 8)
                                                 .foregroundStyle(Color.white)
                                                 .bold()
@@ -179,37 +180,37 @@ struct RecordDetailView: View {
                     }
                 }
                 .toolbar {
-                    if editMode {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button {
-                                editMode = false
-                                // TODO: 만약 수정사항 있으면 원래 상태로 돌려야함
-                            } label : {
-                                Text("취소")
-                                    .foregroundStyle(Color.white)
-                            }
-                        }
-                        
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button {
-                                editMode = false
-                                // TODO: 운동 수정 API 실행
-                            } label: {
-                                Text("저장")
-                                    .foregroundStyle(Color.white)
-                            }
-                            .tint(Color.white)
-                        }
-                    } else {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button {
-                                showEditSheet = true
-                            } label: {
-                                Image(systemName: "ellipsis")
-                            }
-                            .tint(Color.white)
-                        }
-                    }
+//                    if editMode {
+//                        ToolbarItem(placement: .topBarLeading) {
+//                            Button {
+//                                editMode = false
+//                                // TODO: 만약 수정사항 있으면 원래 상태로 돌려야함
+//                            } label : {
+//                                Text("취소")
+//                                    .foregroundStyle(Color.white)
+//                            }
+//                        }
+//                        
+//                        ToolbarItem(placement: .topBarTrailing) {
+//                            Button {
+//                                editMode = false
+//                                // TODO: 운동 수정 API 실행
+//                            } label: {
+//                                Text("저장")
+//                                    .foregroundStyle(Color.white)
+//                            }
+//                            .tint(Color.white)
+//                        }
+//                    } else {
+//                        ToolbarItem(placement: .topBarTrailing) {
+//                            Button {
+//                                showEditSheet = true
+//                            } label: {
+//                                Image(systemName: "ellipsis")
+//                            }
+//                            .tint(Color.white)
+//                        }
+//                    }
                 }
                 .confirmationDialog("TEST", isPresented: $showEditSheet, titleVisibility: .hidden) {
                     Button {
