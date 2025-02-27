@@ -52,4 +52,21 @@ class DataSource {
             }
             .eraseToAnyPublisher()
     }
+    
+    func fetchDataForDate(date: String) -> AnyPublisher<[ThisWeekTraining], Error> {
+        let urlString = EndpointJ.selectedWeek + "\(date)"
+        guard URL(string: urlString) != nil else {
+            return Fail(error: URLError(.badURL))
+                .eraseToAnyPublisher()
+        }
+        
+        return AF.request(urlString)
+            .publishDecodable(type: [ThisWeekTraining].self)
+            .value()
+            .receive(on: DispatchQueue.main)
+            .mapError { (afterError: AFError)  in
+                return afterError as Error
+            }
+            .eraseToAnyPublisher()
+    }
 }

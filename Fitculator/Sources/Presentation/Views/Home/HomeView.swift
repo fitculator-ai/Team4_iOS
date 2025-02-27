@@ -18,7 +18,8 @@ struct WorkoutData: Identifiable, Equatable {
 
 struct HomeView: View {
     @StateObject var viewModel: HomeViewModel
-    @State var isDisplayHome: Bool = false
+    @State var isDisplayHome: Bool = true
+    @State private var selectedDate = Date()
     
     var horizontalPadding: CGFloat = 10
     var verticalPadding: CGFloat = 10
@@ -33,7 +34,15 @@ struct HomeView: View {
                 ZStack(alignment: .top) {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 8) {
-                            CustomNavigationBar(isDisplayHome: true, homeBtnAction: {}, calendarBtnAction: {}, notificationBtnAction: {})
+                            CustomNavigationBar(
+                            isDisplayHome: true,
+                            homeBtnAction: {
+                            
+                            }, calendarBtnAction: { date in
+                                print("보고싶은 날자는 \(date)")
+                                
+                                viewModel.fetchDataForDateHistory(date)
+                            }, notificationBtnAction: {})
                                 .zIndex(1)
                                 .frame(height: 44)
                             
@@ -84,6 +93,12 @@ struct HomeView: View {
                     viewModel.fetchWorkoutHistory()
                     viewModel.updateDonutChartData()
                 }
+            }
+            .onChange(of: selectedDate) { newValue, oldValue in
+                print("선택된 날짜 변경됨: \(newValue)")
+                isDisplayHome = false
+                viewModel.fetchDataForDateHistory(newValue)
+                viewModel.updateDonutChartData()
             }
         }
     }

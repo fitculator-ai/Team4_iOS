@@ -141,10 +141,7 @@ struct ThisWeekTraining: Codable, Equatable {
         return "\(endAt)-\(exerciseName)-\(earnedPoint)"
     }
     var endDate: Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        return formatter.date(from: endAt)
+        return parseDate(endAt)
     }
     
     enum CodingKeys: String, CodingKey {
@@ -157,6 +154,23 @@ struct ThisWeekTraining: Codable, Equatable {
         case exerciseIntensity = "exercise_intensity"
         case earnedPoint = "earned_point"
         case exerciseNote = "exercise_note"
+    }
+    func parseDate(_ dateString: String) -> Date? {
+        let formats = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSS", // 밀리초 포함
+            "yyyy-MM-dd'T'HH:mm:ss"         // 초 단위까지
+        ]
+        
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(identifier: "UTC")
+
+        for format in formats {
+            formatter.dateFormat = format
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+        }
+        return nil
     }
 }
 
