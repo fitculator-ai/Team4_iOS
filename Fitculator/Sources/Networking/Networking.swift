@@ -186,7 +186,11 @@ enum APIEndPoint {
     case thisWeekRecord(_ userId: Int)
     case fetchExerciesList
     case addExerciseRecord(_ request: AddExerciseRequestDTO)
-   
+    case getUserAccountInfo(email: String)
+    case getUserDetails(userId: Int)
+    case editUserDetails(userId: Int, userInfo: UserProfileInfo)
+    case uploadProfileImage(userId: Int)
+
     var path: String {
         switch self {
         case .thisWeekRecord:
@@ -195,6 +199,14 @@ enum APIEndPoint {
             return "/api/exercise"
         case .addExerciseRecord:
             return "/api/exercise-logs/"
+        case .getUserAccountInfo:
+            return "/api/mypage/get-user"
+        case .getUserDetails:
+            return "/api/mypage/get-user-details"
+        case .editUserDetails(let userId, _):
+            return "/api/mypage/edit-user/\(userId)"
+        case .uploadProfileImage:
+            return "/api/mypage/edit-user/profile-image"
         }
     }
     
@@ -203,6 +215,14 @@ enum APIEndPoint {
         case .thisWeekRecord, .fetchExerciesList:
             return "GET"
         case .addExerciseRecord:
+            return "POST"
+        case .getUserAccountInfo:
+            return "GET"
+        case .getUserDetails:
+            return "GET"
+        case .editUserDetails:
+            return "PUT"
+        case .uploadProfileImage:
             return "POST"
         }
     }
@@ -215,7 +235,16 @@ enum APIEndPoint {
             ]
         case .fetchExerciesList,.addExerciseRecord:
             return []
-            
+        case .getUserAccountInfo(let email):
+            return [URLQueryItem(name: "email", value: email)]
+        case .getUserDetails(let userId):
+            return [URLQueryItem(name: "user_id", value: String(userId))
+            ]
+        case .editUserDetails:
+            return []
+        case .uploadProfileImage(let userId):
+            return [URLQueryItem(name: "user_id", value: String(userId))
+            ]
         }
     }
     

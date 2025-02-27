@@ -39,6 +39,7 @@ enum NetworkError: LocalizedError {
     case userSuspended
     
     case decodingError(Error)
+    case encodingError(Error)
     case networkError(Error)
     case unknown(statusCode: Int, message: String?)
     
@@ -106,6 +107,8 @@ enum NetworkError: LocalizedError {
                 return "Unknown error occurred (Status: \(statusCode)): \(message ?? "No additional information")"
             case .invalidURL(let url):
                 return "Invalid URL: \(url ?? "unknown URL")"
+            case .encodingError(let error):
+                return "Failed to encode request: \(error.localizedDescription)"
             }
         }
     
