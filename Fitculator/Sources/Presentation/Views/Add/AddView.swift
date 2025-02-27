@@ -56,35 +56,64 @@ struct AddView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 20) {
                             DateTimeSection(
-                                selectedDate: $selectedDate,
+                                selectedDate: $viewModel.selectedDate,
                                 showDatePicker: $showDatePicker
                             )
                             .padding(.top, 20)
                             
-                            TimeInputSection()
-                                .padding(.top, 16)
+                            TimeInputSection(
+                                hourText: $viewModel.hourText,
+                                minuteText: $viewModel.minuteText,
+                                isAM: $viewModel.isAM,
+                                onTimeChange: {
+                                    updateStartTime()
+                                }
+                            )
+                            .padding(.top, 16)
                             
                             ExerciseTypeSection(
                                 selectedExerciseType: $selectedExerciseType,
-                                showDropdown: $showDropdown
+                                showDropdown: $showDropdown,
+                                onExerciseSelected: { exerciseId in
+                                    viewModel.exerciseId = exerciseId
+                                }
                             )
                             .zIndex(1)
                             
-                            ExerciseTimeSection(currentField: $currentField)
-                                .onChange(of: currentField) { field in
-                                    focusedField = field
-                                }
-                                .padding(.top, showDropdown ? -4: 8)
-                                .onChange(of: focusedField) { field in
-                                    currentField = field
-                                }
-                                .zIndex(0)
-                                .padding(.top, -25)
+                            ExerciseTimeSection(
+                                exerciseTime: Binding(
+                                    get: { viewModel.exerciseTime == 0 ? "" : "\(viewModel.exerciseTime)" },
+                                    set: { viewModel.exerciseTime = Int($0) ?? 0 }
+                                ),
+                                currentField: $currentField
+                            )
+                            .onChange(of: currentField) { field in
+                                focusedField = field
+                            }
+                            .padding(.top, showDropdown ? -4: 8)
+                            .onChange(of: focusedField) { field in
+                                currentField = field
+                            }
+                            .zIndex(0)
+                            .padding(.top, -25)
                             
-                            HeartRateSection(currentField: $currentField)
+                            HeartRateSection(
+                                minHeartRate: Binding(
+                                    get: { viewModel.minHeartRate == 0 ? "" : "\(viewModel.minHeartRate)" },
+                                    set: { viewModel.minHeartRate = Int($0) ?? 0 }
+                                ),
+                                maxHeartRate: Binding(
+                                    get: { viewModel.maxHeartRate == 0 ? "" : "\(viewModel.maxHeartRate)" },
+                                    set: { viewModel.maxHeartRate = Int($0) ?? 0 }
+                                ),
+                                currentField: $currentField
+                            )
                                 .zIndex(0)
                             
-                            MemoSection(currentField: $currentField)
+                            MemoSection(
+                                memoText: $viewModel.memo,
+                                currentField: $currentField
+                            )
                             
                             ButtonSection(viewModel: viewModel)
                                 .padding(.bottom, 30)
@@ -125,6 +154,23 @@ struct AddView: View {
 
     private func removeKeyboardNotifications() {
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func updateStartTime() {
+        // 시간과 분을 Date로 변환
+        let hour = Int(viewModel.hourText) ?? 0
+        let minute = Int(viewModel.minuteText) ?? 0
+        
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: viewModel.selectedDate)
+        
+        // AM/PM 적용
+        components.hour = viewModel.isAM ? hour : hour + 12
+        components.minute = minute
+        
+        if let date = calendar.date(from: components) {
+            viewModel.startTime = date
+        }
     }
 }
 
@@ -204,9 +250,10 @@ struct DatePickerSheet: View {
 }
 
 struct TimeInputSection: View {
-    @State private var hourText: String = ""
-    @State private var minuteText: String = ""
-    @State private var isAM: Bool = true
+    @Binding var hourText: String
+    @Binding var minuteText: String
+    @Binding var isAM: Bool
+    var onTimeChange: () -> Void
     
     var body: some View {
         VStack(spacing: 10) {
@@ -291,6 +338,7 @@ struct ExerciseTypeSection: View {
     @Binding var selectedExerciseType: String?
     @Binding var showDropdown: Bool
     @State private var selectedItem: String = "운동 선택"
+    var onExerciseSelected: ((Int) -> Void)? = nil
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -309,6 +357,7 @@ struct ExerciseTypeSection: View {
                         withAnimation(.spring()) {
                             selectedExerciseType = "유산소"
                             showDropdown = true
+                            onExerciseSelected?(1) // 유산소는 ID 1로 가정
                         }
                     } label: {
                         Text("유산소")
@@ -326,6 +375,7 @@ struct ExerciseTypeSection: View {
                         withAnimation(.spring()) {
                             selectedExerciseType = "근력"
                             showDropdown = true
+                            onExerciseSelected?(2) // 근력은 ID 2로 가정
                         }
                     } label: {
                         Text("근력")
@@ -363,7 +413,10 @@ struct ExerciseTypeSection: View {
                 DropdownContent(
                     selectedExerciseType: selectedExerciseType,
                     selectedItem: $selectedItem,
-                    isExpanded: $showDropdown
+                    isExpanded: $showDropdown,
+                    onItemSelected: { itemId in
+                        onExerciseSelected?(itemId)
+                    }
                 )
                 .background(Color.fitculatorBackgroundColor)
                 .cornerRadius(10)
@@ -401,7 +454,7 @@ struct ExerciseTypeButton: View {
 }
 
 struct ExerciseTimeSection: View {
-    @State private var exerciseTime: String = ""
+    @Binding var exerciseTime: String
     @Binding var currentField: Field?
     @FocusState private var focused: Bool
     
@@ -442,8 +495,8 @@ struct ExerciseTimeSection: View {
 }
 
 struct HeartRateSection: View {
-    @State private var minHeartRate: String = ""
-    @State private var maxHeartRate: String = ""
+    @Binding var minHeartRate: String
+    @Binding var maxHeartRate: String
     @Binding var currentField: Field?
     @FocusState private var focusedField: Field?
     
@@ -516,7 +569,7 @@ struct HeartRateField: View {
 }
 
 struct MemoSection: View {
-    @State private var memoText: String = ""
+    @Binding var memoText: String
     @Binding var currentField: Field?
     @FocusState private var focused: Bool
     
