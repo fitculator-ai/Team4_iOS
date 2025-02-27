@@ -31,41 +31,32 @@ struct CustomNavigationBar: View {
           
             Spacer()
           
-            if isDisplayHome {
-                Image(systemName: "calendar")
-                    .font(.title3)
-                    .overlay{
-                        
-                        DatePicker(
-                            "",
-                            selection: $date,
-                            displayedComponents: [.date]
-                        )
-                        .blendMode(
-                            .destinationOver
-                        )
-                        .onChange(of: date) {
-                            calendarBtnAction(date)
-                        }
+            Image(systemName: "calendar")
+                .font(.title3)
+                .overlay{
+                    
+                    DatePicker(
+                        "",
+                        selection: $date,
+                        displayedComponents: [.date]
+                    )
+                    .blendMode(
+                        .destinationOver
+                    )
+                    .onChange(of: date) {
+                        calendarBtnAction(date)
                     }
+                }
+                .foregroundStyle(.white)
+                .padding(.trailing, 10)
+            Button {
+                notificationBtnAction()
+            } label: {
+                Image(systemName: "bell.fill")
+                    .frame(width: 16, height: 16)
                     .foregroundStyle(.white)
-                    .padding(.trailing, 10)
-                Button {
-                    notificationBtnAction()
-                } label: {
-                    Image(systemName: "bell.fill")
-                        .frame(width: 16, height: 16)
-                        .foregroundStyle(.white)
-                }
-                .padding(.trailing, 20)
-            } else {
-                Button {
-                    homeBtnAction()
-                } label: {
-                    Image(systemName: "house.fill")
-                }
-                .padding(.trailing, 20)
             }
+            .padding(.trailing, 20)
             
         }
         .background(Color.fitculatorBackgroundColor)

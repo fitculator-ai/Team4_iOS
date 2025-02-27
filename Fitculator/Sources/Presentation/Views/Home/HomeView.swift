@@ -19,7 +19,6 @@ struct WorkoutData: Identifiable, Equatable {
 struct HomeView: View {
     @StateObject var viewModel: HomeViewModel
     @State var isDisplayHome: Bool = true
-    @State private var selectedDate = Date()
     
     var horizontalPadding: CGFloat = 10
     var verticalPadding: CGFloat = 10
@@ -35,12 +34,12 @@ struct HomeView: View {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 8) {
                             CustomNavigationBar(
-                            isDisplayHome: true,
+                                isDisplayHome: isDisplayHome,
                             homeBtnAction: {
                             
                             }, calendarBtnAction: { date in
                                 print("보고싶은 날자는 \(date)")
-                                
+                                viewModel.selectedDate = date
                                 viewModel.fetchDataForDateHistory(date)
                             }, notificationBtnAction: {})
                                 .zIndex(1)
@@ -90,17 +89,48 @@ struct HomeView: View {
                 }
                 .background(Color.fitculatorBackgroundColor)
                 .onAppear {
-                    viewModel.fetchWorkoutHistory()
+                    isDisplayHome = isDateInCurrentWeek(viewModel.selectedDate)
+
+                    if isDateInCurrentWeek(viewModel.selectedDate) {
+                        viewModel.fetchWorkoutHistory()
+                    } else {
+                        viewModel
+                            .fetchDataForDateHistory(viewModel.selectedDate)
+                    }
                     viewModel.updateDonutChartData()
                 }
             }
-            .onChange(of: selectedDate) { newValue, oldValue in
+            .onChange(of: viewModel.selectedDate) { newValue, oldValue in
                 print("선택된 날짜 변경됨: \(newValue)")
-                isDisplayHome = false
-                viewModel.fetchDataForDateHistory(newValue)
+                isDisplayHome = isDateInCurrentWeek(newValue)
+                                
+                if isDisplayHome {
+                    viewModel.fetchWorkoutHistory()
+                } else {
+                    viewModel.fetchDataForDateHistory(newValue)
+                }
+
                 viewModel.updateDonutChartData()
             }
         }
+    }
+    
+    /// 선택한 날짜가 이번 주 월~일 사이인지 확인
+    private func isDateInCurrentWeek(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        if let weekInterval = calendar.dateInterval(
+            of: .weekOfYear,
+            for: Date()
+        ) {
+            let startOfWeek = weekInterval.start
+            let endOfWeek = calendar.date(
+                byAdding: .day,
+                value: 6,
+                to: startOfWeek
+            )!
+            return date >= startOfWeek && date <= endOfWeek
+        }
+        return false
     }
 }
 

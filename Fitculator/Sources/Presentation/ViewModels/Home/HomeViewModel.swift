@@ -6,6 +6,7 @@ class HomeViewModel: ObservableObject {
     @Published var workoutThisWeekHistory: [ThisWeekTraining] = []
     @Published private var isLoading = false
     @Published private var error: NetworkError?
+    @Published var selectedDate: Date = Date()
 
     // DonutChart Data
     @Published var originalTotal: Double = 0.0 // 전체 운동량 저장 변수
