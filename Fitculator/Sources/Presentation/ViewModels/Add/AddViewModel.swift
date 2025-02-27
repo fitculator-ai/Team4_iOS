@@ -11,6 +11,19 @@ final class AddViewModel: ObservableObject {
     @Published private(set) var exerciseList: ExerciseListDomain?
     @Published private(set) var isRecordSubmitted = false
     
+    @Published var selectedDate = Date()
+    @Published var exerciseId: Int = 1
+    @Published var exerciseTime: Int = 0
+    @Published var minHeartRate: Int = 0
+    @Published var maxHeartRate: Int = 0
+    @Published var memo: String = ""
+    @Published var startTime: Date = Date()
+    
+    
+    @Published var hourText: String = ""
+    @Published var minuteText: String = ""
+    @Published var isAM: Bool = true
+    
     init(addUseCase: ExerciseListUseCaseProtocol) {
         self.addUseCase = addUseCase
     }
@@ -41,19 +54,18 @@ final class AddViewModel: ObservableObject {
          isLoading = true
          error = nil
          
-         // AddExerciseRequestDTO 생성
-         let request = AddExerciseRequestDTO(
+
+        let request = AddExerciseRequestDTO(
              userId: 3,
-             exerciseId: 1,
-             avgBPM: 1,
-             maxBPM: 1,
-             duration: 1,
-             endAt: Date(),
-             earnedPoint: 1,
-             intensity: "힘들어",
-             note: "으아아아아아아아아아아아아으아아ㅏ아아아아아아아아아아아아"
+             exerciseId: exerciseId,
+             avgBPM: minHeartRate,
+             maxBPM: maxHeartRate,
+             duration: exerciseTime,
+             endAt: selectedDate,
+             earnedPoint: calculatePoints(),
+             intensity: determineIntensity(),
+             note: memo
          )
-         
          addUseCase.executeRecord(request: request)
              .receive(on: DispatchQueue.main)
              .sink { [weak self] completion in
@@ -69,5 +81,20 @@ final class AddViewModel: ObservableObject {
              }
              .store(in: &cancellables)
      }
+    
+    
+    private func calculatePoints() -> Int {
+        return 100000
+    }
+    
+    private func determineIntensity() -> String {
+        if maxHeartRate > 160 {
+            return "힘들어"
+        } else if maxHeartRate > 130 {
+            return "보통"
+        } else {
+            return "쉬움"
+        }
+    }
     
 }
