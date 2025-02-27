@@ -5,13 +5,12 @@ struct ProfileImageSection: View {
     @ObservedObject var viewModel: SettingViewModel
     @State var showActionSheet: Bool = false
     @Binding var isEditing: Bool
-    @Binding var tempUIImage: UIImage?
     
     var body: some View {
         Section {
             VStack {
                 ZStack {
-                    if let profileImage = tempUIImage {
+                    if let profileImage = viewModel.tempUIImage {
                         Image(uiImage: profileImage)
                             .resizable()
                             .scaledToFill()
@@ -59,7 +58,7 @@ struct ProfileImageSection: View {
                             viewModel.checkPermissions(for: .photoLibrary)
                         },
                         .destructive(Text("reset_default_image".localized)) {
-                            tempUIImage = nil
+                            viewModel.tempUIImage = nil
                         },
                         .cancel()
                     ])

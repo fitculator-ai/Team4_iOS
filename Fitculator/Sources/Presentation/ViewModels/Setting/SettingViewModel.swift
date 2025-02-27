@@ -65,7 +65,6 @@ class SettingViewModel: ObservableObject {
         getUserAccountInfo(email: "qwer@naver.com")
     }
     
-    // 이미지 로드 안됨
     func loadProfileImage(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         

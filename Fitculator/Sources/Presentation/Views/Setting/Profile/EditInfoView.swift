@@ -10,7 +10,7 @@ struct EditInfoView: View {
     var body: some View {
         List {
             // MARK: 프로필 이미지
-            ProfileImageSection(viewModel: viewModel, isEditing: $isEditing, tempUIImage: $viewModel.tempUIImage)
+            ProfileImageSection(viewModel: viewModel, isEditing: $isEditing)
             
             // MARK: 유저 정보
             UserInfoView(userAccount: viewModel.userAccount, userDetails: $viewModel.tempUserDetails, isEditing: $isEditing)
