@@ -40,7 +40,10 @@ let project = Project(
             dependencies: [
                 .external(name: "Alamofire"),
                 .external(name: "Kingfisher")
-            ]
+            ],
+            settings: .settings(base: [
+                "RUN_EXECUTABLE_PATH": "$(BUILT_PRODUCTS_DIR)/Fitculator.app"
+            ])
         ),
         .target(
             name: "FitculatorTests",
