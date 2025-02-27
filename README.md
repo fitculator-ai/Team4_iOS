@@ -43,3 +43,4 @@ brew install tuist
 export PATH="$HOME/.tuist/bin:$PATH"
 tuist version
 ```
+5. 만약 시뮬레이터를 실행해도 아무 반응이 없을 경우 Cmd + Shift + , -> Info -> Executable을 Fitculator.app으로 설정하면 시뮬레이터가 실행됩니다.
