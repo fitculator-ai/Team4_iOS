@@ -9,31 +9,9 @@ import Foundation
 import Combine
 import Alamofire
 
-protocol UserInfoNetworkingProtocol {
-    func fetchUser(key: String) -> AnyPublisher<User, Error>
-    func addUser(user: User)
-    func deleteUser(key: String)
-    func editUser(user: User)
-}
-
 protocol TrainingNetworkingProtocol {
     func getThisWeekRecord(userId: Int) -> AnyPublisher<[Record], Error>
-    func thisWeekMuscleRecordCount(userId: Int) -> AnyPublisher<Int, Error>
-    func thisWeekPoints(userId: Int) -> Int
-    
-    func getExerciseList(type: ExerciseType) -> AnyPublisher<[String], Error>
-}
-
-/// url String 값들
-/// - thisWeekRecord: 이번주 운동 기록
-/// - thisWeekMuscleRecordCount: 이번주 운동 기록 횟수
-/// - thisWeekPoint: 이번주 운동 포인트 합
-/// - exerciseList: 운동추가 할 때 유산소 / 근력 String 리스트
-enum EndPoint: String {
-    case thisWeekRecord = "http://13.209.96.25:8000/api/exercise-logs/this-week?user_id="
-    case thisWeekMuscleRecordCount = "http://13.209.96.25:8000/api/exercise-logs/strength/count?user_id="
-    case thisWeekPoint = "http://13.209.96.25:8000/api/points/weekly?user_id="
-    case exerciseList = "http://13.209.96.25:8000/api/exercise/?exercise_type="
+    func get25WeeksRecords(userId: Int) -> AnyPublisher<[RecordWithPeriod], Error>
 }
 
 class TrainingNetworking: TrainingNetworkingProtocol {
@@ -78,54 +56,6 @@ class TrainingNetworking: TrainingNetworkingProtocol {
         } catch {
             return Fail(error: error).eraseToAnyPublisher()
         }
-    }
-    
-    func thisWeekMuscleRecordCount(userId: Int) -> AnyPublisher<Int, Error> {
-        let url = EndPoint.thisWeekPoint.rawValue + "\(userId)"
-        
-        return Future<Int, Error> { promise in
-            AF.request(url)
-                .validate(statusCode: 200..<300)
-                .responseDecodable(of: [String: Int].self) { res in
-                    switch res.result {
-                    case .success(let dic):
-                        if let count = dic["count"] {
-                            promise(.success(count))
-                        } else {
-                            promise(.success(-1))
-                        }
-                    case .failure(let error):
-                        promise(.failure(error))
-                    }
-                }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func thisWeekPoints(userId: Int) -> Int {
-        return 10
-    }
-    
-    func getExerciseList(type: ExerciseType) -> AnyPublisher<[String], Error> {
-        let url = EndPoint.exerciseList.rawValue + type.rawValue
-        
-        return Future<[String], Error> { promise in
-            AF.request(url)
-                .validate(statusCode: 200..<300)
-                .responseDecodable(of: [String: [String]].self) { res in
-                    switch res.result {
-                    case .success(let dic):
-                        if let list = dic["list"] {
-                            promise(.success(list))
-                        } else {
-                            promise(.success([]))
-                        }
-                    case .failure(let error):
-                        promise(.failure(error))
-                    }
-                }
-        }
-        .eraseToAnyPublisher()
     }
 }
 

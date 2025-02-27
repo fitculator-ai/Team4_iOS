@@ -24,7 +24,7 @@ struct WeeklyStrengthReps: View {
        
         ZStack {
             HStack {
-                Text("근력")
+                Text("strength".localized)
                     .font(.title3)
                     .fontWeight(.bold)
                     .foregroundColor(.white)

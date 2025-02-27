@@ -15,7 +15,8 @@ struct WorkoutHistory: View {
                 if let weeklyRecords = traningRecords.first {
                     ForEach(weeklyRecords.keys.sorted(), id: \.self) { date in
                         if let records = weeklyRecords[date] {
-                            ForEach(records, id: \.key) { record in
+                            ForEach(records.indices, id: \.self) { index in
+                                let record = records[index]
                                 if record.trainingName != "" {
                                     NavigationLink {
                                         RecordDetailView(record: record)
@@ -78,7 +79,7 @@ struct WorkoutHistory: View {
         return iconData[trainingName] ?? ("questionmark.circle", Color.gray)
     }
     
-    private func getIntensityColor(for intensity: TrainingRecord.Intensity) -> Color {
+    private func getIntensityColor(for intensity: Intensity) -> Color {
         switch intensity {
         case .verLow:
             return Color.blue

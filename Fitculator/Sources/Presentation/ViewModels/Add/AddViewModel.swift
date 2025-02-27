@@ -73,7 +73,7 @@ final class AddViewModel: ObservableObject {
          
 
         let request = AddExerciseRequestDTO(
-             userId: 24,
+             userId: 1,
              exerciseId: exerciseId,
              avgBPM: minHeartRate,
              maxBPM: maxHeartRate,
@@ -83,6 +83,7 @@ final class AddViewModel: ObservableObject {
              intensity: determineIntensity(),
              note: memo
          )
+        
          addUseCase.executeRecord(request: request)
              .receive(on: DispatchQueue.main)
              .sink { [weak self] completion in

@@ -32,7 +32,7 @@ struct AddView: View {
                             .padding()
                     }
                     Spacer()
-                    Text("추가")
+                    Text("add".localized)
                         .foregroundColor(.white)
                         .font(.headline)
                     Spacer()
@@ -179,7 +179,7 @@ struct DateTimeSection: View {
     var body: some View {
         VStack {
             HStack {
-                Text("날짜 및 시간")
+                Text("date_time".localized)
                     .font(.system(size: 16))
                     .foregroundStyle(.white)
                 Spacer()
@@ -256,7 +256,7 @@ struct TimeInputSection: View {
     var body: some View {
         VStack(spacing: 10) {
             HStack {
-                Text("운동 시작 시간")
+                Text("workout_start_time".localized)
                     .font(.system(size: 16))
                     .foregroundStyle(.white)
                 Spacer()
@@ -312,7 +312,7 @@ struct AMPMToggle: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            Text("오전")
+            Text("am".localized)
                 .frame(width: 45, height: 35)
                 .foregroundColor(isAM ? .blue : .gray)
                 .background(Color.gray.opacity(0.2))
@@ -321,7 +321,7 @@ struct AMPMToggle: View {
                     isAM = true
                 }
             
-            Text("오후")
+            Text("pm".localized)
                 .frame(width: 45, height: 35)
                 .foregroundColor(!isAM ? .blue : .gray)
                 .background(Color.gray.opacity(0.2))
@@ -343,7 +343,7 @@ struct ExerciseTypeSection: View {
             // 메인 컨텐츠
             VStack(spacing: 0) {
                 HStack {
-                    Text("운동종류")
+                    Text("workout_category".localized)
                         .font(.system(size: 16))
                         .foregroundStyle(.white)
                     Spacer()
@@ -353,37 +353,37 @@ struct ExerciseTypeSection: View {
                 HStack {
                     Button {
                         withAnimation(.spring()) {
-                            selectedExerciseType = "유산소"
+                            selectedExerciseType = "cardio".localized
                             showDropdown = true
                             onExerciseSelected?(1) // 유산소는 ID 1로 가정
                         }
                     } label: {
-                        Text("유산소")
+                        Text("cardio".localized)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .foregroundStyle(selectedExerciseType == "유산소" ? .blue : .white)
-                            .background(selectedExerciseType == "유산소" ? Color.blue.opacity(0.2) : Color.clear)
+                            .foregroundStyle(selectedExerciseType == "cardio".localized ? .blue : .white)
+                            .background(selectedExerciseType == "cardio".localized ? Color.blue.opacity(0.2) : Color.clear)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .stroke(selectedExerciseType == "유산소" ? .blue : .gray, lineWidth: 2)
+                                    .stroke(selectedExerciseType == "cardio".localized ? .blue : .gray, lineWidth: 2)
                             )
                     }
                     
                     Button {
                         withAnimation(.spring()) {
-                            selectedExerciseType = "근력"
+                            selectedExerciseType = "strength".localized
                             showDropdown = true
                             onExerciseSelected?(2) // 근력은 ID 2로 가정
                         }
                     } label: {
-                        Text("근력")
+                        Text("strength".localized)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .foregroundStyle(selectedExerciseType == "근력" ? .blue : .white)
-                            .background(selectedExerciseType == "근력" ? Color.blue.opacity(0.2) : Color.clear)
+                            .foregroundStyle(selectedExerciseType == "strength".localized ? .blue : .white)
+                            .background(selectedExerciseType == "strength".localized ? Color.blue.opacity(0.2) : Color.clear)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .stroke(selectedExerciseType == "근력" ? .blue : .gray, lineWidth: 2)
+                                    .stroke(selectedExerciseType == "strength".localized ? .blue : .gray, lineWidth: 2)
                             )
                     }
                 }
@@ -459,7 +459,7 @@ struct ExerciseTimeSection: View {
     var body: some View {
         VStack {
             HStack {
-                Text("운동시간 (분)")
+                Text("workout_duration".localized)
                     .font(.system(size: 16))
                     .foregroundStyle(.white)
                 Spacer()
@@ -467,7 +467,7 @@ struct ExerciseTimeSection: View {
             
             TextField("", text: $exerciseTime)
                 .placeholder(when: exerciseTime.isEmpty) {
-                    Text("운동시간")
+                    Text("workout_time".localized)
                         .foregroundStyle(Color.gray)
                 }
                 .keyboardType(.numberPad)
@@ -501,7 +501,7 @@ struct HeartRateSection: View {
     var body: some View {
         VStack {
             HStack {
-                Text("심박수")
+                Text("heart_rate".localized)
                     .font(.system(size: 16))
                     .foregroundStyle(.white)
                 Spacer()
@@ -510,14 +510,14 @@ struct HeartRateSection: View {
             HStack(spacing: 20) {
                 HeartRateField(
                     text: $minHeartRate,
-                    placeholder: "최저 심박수",
+                    placeholder: "min_heart_rate".localized,
                     currentField: $currentField,
                     field: .minHeartRate
                 )
                 
                 HeartRateField(
                     text: $maxHeartRate,
-                    placeholder: "최대 심박수",
+                    placeholder: "max_heart_rate".localized,
                     currentField: $currentField,
                     field: .maxHeartRate
                 )
@@ -574,7 +574,7 @@ struct MemoSection: View {
     var body: some View {
         VStack {
             HStack {
-                Text("메모")
+                Text("memo".localized)
                     .font(.system(size: 16))
                     .foregroundStyle(.white)
                 Spacer()
@@ -606,7 +606,7 @@ struct ButtonSection: View {
                 presentationMode.wrappedValue.dismiss()
                 
             } label: {
-                Text("메모")
+                Text("memo".localized)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

@@ -254,7 +254,7 @@ struct RecordDetailView: View {
                     .offset(x: -180, y: -100)
                 }
                 .onAppear {
-                    self.trainingNote = record.training_detail ?? ""
+                    self.trainingNote = record.training_detail
                 }
             }
         }
