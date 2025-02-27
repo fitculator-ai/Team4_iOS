@@ -126,18 +126,16 @@ struct AddView: View {
                 }
             }
             .offset(y: offset)
-            .setupKeyboardHandling(geometry: geometry, offset: $offset, focusField: focusedField)
+            .setupKeyboardHandling(geometry: geometry, offset: $offset)
             .ignoresSafeArea(.all, edges: .top)
             .onTapGesture {
                 hideKeyboard()
             }
-//            .setupKeyboardHandling(geometry: geometry, offset: $offset, focusField: focusedField)
+
             .onAppear {
                 viewModel.fetchExerciesList()
-//                setupKeyboardNotifications()
             }
             .onDisappear {
-//                removeKeyboardNotifications()
             }
         }
 
@@ -600,21 +598,57 @@ struct MemoSection: View {
 
 struct ButtonSection: View {
     @ObservedObject var viewModel: AddViewModel
+    @Environment(\.presentationMode) var presentationMode
     var body: some View {
         HStack {
             Button {
                 viewModel.submitExerciseRecord()
+                presentationMode.wrappedValue.dismiss()
+                
             } label: {
                 Text("메모")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(Color.gray)
+                    .background(viewModel.isFormValid ? Color.blue : Color.gray)
                     .clipShape(.capsule)
             }
+            .disabled(!viewModel.isFormValid)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
+    }
+}
+
+
+struct KeyboardHandlingModifier: ViewModifier {
+    let geometry: GeometryProxy
+    @Binding var offset: CGFloat
+    
+    func body(content: Content) -> some View {
+        content.onAppear {
+            setupKeyboardNotifications()
+        }
+    }
+    
+    private func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
+            let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect ?? .zero
+            let textFieldPosition = geometry.size.height * 0.7
+            let overlap = textFieldPosition + keyboardFrame.height - geometry.size.height
+            
+            if overlap > 0 {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    offset = -overlap - 20
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
+            withAnimation(.easeOut(duration: 0.3)) {
+                offset = 0
+            }
+        }
     }
 }

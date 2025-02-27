@@ -26,7 +26,13 @@ extension View {
             placeholder().opacity(shouldShow ? 1 : 0)
             self
         }
-    }}
+    }
+    
+    func setupKeyboardHandling(geometry: GeometryProxy, offset: Binding<CGFloat>) -> some View {
+        modifier(KeyboardHandlingModifier(geometry: geometry, offset: offset))
+    }
+    
+}
 
 extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
