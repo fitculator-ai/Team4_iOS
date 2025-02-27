@@ -5,25 +5,25 @@ struct FitculatorApp: App {
     @AppStorage("hasLaunched") private var hasLaunched = false
     @StateObject private var languageManager = LanguageManager()
     @State private var languageUpdate = false
-    @State var isSplashView = true
+//    @State var isSplashView = true
     
     var body: some Scene {
         WindowGroup {
             Group {
-                if isSplashView{
-                    LaunchScreenView()
-                        .ignoresSafeArea()
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(
-                                deadline: DispatchTime.now() + 1) {
-                                    isSplashView = false
-                            }
-                        }
-                       
-               
-                } else {
+//                if isSplashView{
+//                    LaunchScreenView()
+//                        .ignoresSafeArea()
+//                        .onAppear {
+//                            DispatchQueue.main.asyncAfter(
+//                                deadline: DispatchTime.now() + 1) {
+//                                    isSplashView = false
+//                            }
+//                        }
+//                       
+//               
+//                } else {
                     MainTabView()
-                }
+//                }
             }
             .id(languageUpdate)
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LanguageChanged"))) { _ in

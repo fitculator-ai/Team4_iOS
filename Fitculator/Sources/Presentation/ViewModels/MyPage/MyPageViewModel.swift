@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 import Combine
 
 class MyPageViewModel: ObservableObject {
@@ -25,6 +25,7 @@ class MyPageViewModel: ObservableObject {
     @Published var user = UserService.shared.user
     @Published var selectedWeek: Int? = nil
     @Published var muscleTrainingCount: [Int] = []
+    @Published var tempUIImage: UIImage?
     
     init() {
         
@@ -164,5 +165,28 @@ class MyPageViewModel: ObservableObject {
     
     func setWeekDateStr() {
         weekDateStr = "\(thisWeekRecords.first?.first?.end_at.components(separatedBy: "T").first ?? "") ~ \(thisWeekRecords.last?.last?.end_at.components(separatedBy: "T").first ?? "")"
+    }
+    
+    func loadProfileImage(from urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            
+            guard let data = data, let image = UIImage(data: data) else {
+                DispatchQueue.main.async {
+//                    self.error = NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to load image"])
+                    print("Failed to load image, \(String(describing: error?.localizedDescription))")
+                }
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.tempUIImage = image
+            }
+        }.resume()
     }
 }
