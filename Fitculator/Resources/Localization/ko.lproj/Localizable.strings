@@ -70,7 +70,7 @@
 "home" = "홈";
 "feed" = "피드";
 "community" = "커뮤니티";
-"myPage" = "마이페이지";
+"my" = "마이페이지";
 
 //SettingViewModel
 "camera_permission_needed" = "카메라 권한 필요";
