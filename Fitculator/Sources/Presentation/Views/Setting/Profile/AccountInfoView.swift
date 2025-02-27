@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AccountInfoView: View {
-    @StateObject var viewModel = AccountInfoViewModel(userAccountUseCase: UserAccountUseCase(repository: SettingRepository(networkService: NetworkService(session: .shared))))
+    @StateObject var viewModel = AccountInfoViewModel(userAccountUseCase: UserAccountUseCase(repository: SettingRepository(dataSource: SettingDataSource(networkService: NetworkService(session: .shared)))))
     
     var body: some View {
         VStack {
