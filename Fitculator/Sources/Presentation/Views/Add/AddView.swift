@@ -9,6 +9,7 @@ enum Field: Hashable {
 
 struct AddView: View {
     @StateObject var viewModel: AddViewModel = AddViewModel(addUseCase: ExerciseListUseCase(repository: ExerciseListRepository(networkService: NetworkService(session: .shared))))
+    @Environment(\.presentationMode) var presentationMode
     @State private var selectedDate = Date()
     @State private var showDatePicker = false
     @State private var keyboardHeight: CGFloat = 0
@@ -19,66 +20,125 @@ struct AddView: View {
     @State private var showDropdown: Bool = false
     
     var body: some View {
-        ZStack(alignment: .top) {
-            Color.clear
-                .ignoresSafeArea()
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    hideKeyboard()
-                }
+        GeometryReader { geometry in
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 20) {
-                    DateTimeSection(
-                        selectedDate: $selectedDate,
-                        showDatePicker: $showDatePicker
-                    )
-                    .padding(.top, 100)
+            VStack(spacing: 0) {
+                HStack {
+                    Button {
+                        presentationMode.wrappedValue.dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .padding()
+                    }
+                    Spacer()
+                    Text("추가")
+                        .foregroundColor(.white)
+                        .font(.headline)
+                    Spacer()
                     
-                    TimeInputSection()
-                        .padding(.top, 16)
-                    
-                    ExerciseTypeSection(
-                        selectedExerciseType: $selectedExerciseType,
-                        showDropdown: $showDropdown
-                    )
-                    .zIndex(1)
-                    
-                    ExerciseTimeSection(currentField: $currentField)
-                        .onChange(of: currentField) { field in
-                            focusedField = field
-                        }
-                        .padding(.top, showDropdown ? -4: 8)
-                        .onChange(of: focusedField) { field in
-                            currentField = field
-                        }
-                        .zIndex(0)
-                        .padding(.top, -25)
-                    
-                    HeartRateSection(currentField: $currentField)
-                        .zIndex(0)
-                    
-                    MemoSection(currentField: $currentField)
-                    
-                    ButtonSection(viewModel: viewModel)
-                        .padding(.bottom, 30)
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(width: 44, height: 44)
                 }
-                .frame(maxWidth: .infinity)
+
+                .frame(height: 44)
+                .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0)
                 .background(Color.fitculatorBackgroundColor)
+                ZStack(alignment: .top) {
+                    Color.clear
+                        .ignoresSafeArea()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            hideKeyboard()
+                        }
+                    
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 20) {
+                            DateTimeSection(
+                                selectedDate: $viewModel.selectedDate,
+                                showDatePicker: $showDatePicker
+                            )
+                            .padding(.top, 20)
+                            
+                            TimeInputSection(
+                                hourText: $viewModel.hourText,
+                                minuteText: $viewModel.minuteText,
+                                isAM: $viewModel.isAM,
+                                onTimeChange: {
+                                    updateStartTime()
+                                }
+                            )
+                            .padding(.top, 16)
+                            
+                            ExerciseTypeSection(
+                                selectedExerciseType: $selectedExerciseType,
+                                showDropdown: $showDropdown,
+                                onExerciseSelected: { exerciseId in
+                                    viewModel.exerciseId = exerciseId
+                                }
+                            )
+                            .zIndex(1)
+                            
+                            ExerciseTimeSection(
+                                exerciseTime: Binding(
+                                    get: { viewModel.exerciseTime == 0 ? "" : "\(viewModel.exerciseTime)" },
+                                    set: { viewModel.exerciseTime = Int($0) ?? 0 }
+                                ),
+                                currentField: $currentField
+                            )
+                            .onChange(of: currentField) { field in
+                                focusedField = field
+                            }
+                            .padding(.top, showDropdown ? -4: 8)
+                            .onChange(of: focusedField) { field in
+                                currentField = field
+                            }
+                            .zIndex(0)
+                            .padding(.top, -25)
+                            
+                            HeartRateSection(
+                                minHeartRate: Binding(
+                                    get: { viewModel.minHeartRate == 0 ? "" : "\(viewModel.minHeartRate)" },
+                                    set: { viewModel.minHeartRate = Int($0) ?? 0 }
+                                ),
+                                maxHeartRate: Binding(
+                                    get: { viewModel.maxHeartRate == 0 ? "" : "\(viewModel.maxHeartRate)" },
+                                    set: { viewModel.maxHeartRate = Int($0) ?? 0 }
+                                ),
+                                currentField: $currentField
+                            )
+                                .zIndex(0)
+                            
+                            MemoSection(
+                                memoText: $viewModel.memo,
+                                currentField: $currentField
+                            )
+                            
+                            ButtonSection(viewModel: viewModel)
+                                .padding(.bottom, 30)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .background(Color.fitculatorBackgroundColor)
+                    }
+                    .background(Color.fitculatorBackgroundColor)
+               
+                }
             }
-            .background(Color.fitculatorBackgroundColor)
-            .offset(y: -offset)
+            .offset(y: offset)
+            .setupKeyboardHandling(geometry: geometry, offset: $offset)
+            .ignoresSafeArea(.all, edges: .top)
+            .onTapGesture {
+                hideKeyboard()
+            }
+
+            .onAppear {
+                viewModel.fetchExerciesList()
+            }
+            .onDisappear {
+            }
         }
-        .onTapGesture {
-            hideKeyboard()
-        }
-        .onAppear {
-            viewModel.fetchExerciesList()
-            setupKeyboardNotifications()
-        }
-        .onDisappear {
-            removeKeyboardNotifications()
-        }
+
     }
     
     private func hideKeyboard() {
@@ -89,41 +149,26 @@ struct AddView: View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
-    private func setupKeyboardNotifications() {
-        NotificationCenter.default.addObserver(
-            forName: UIResponder.keyboardWillShowNotification,
-            object: nil,
-            queue: .main
-        ) { notification in
-            guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-                  let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-            
-            let keyboardHeight = keyboardFrame.height
-            
-            if focusedField == .memo {
-                withAnimation(.easeOut(duration: duration)) {
-                    // ScrollView를 키보드 높이만큼 위로 올립니다
-                    self.offset = keyboardHeight + 600  // 100은 추가 여백입니다
-                }
-            } else {
-                withAnimation(.easeOut(duration: duration)) {
-                    self.offset = 0
-                }
-            }
-        }
-        
-        NotificationCenter.default.addObserver(
-            forName: UIResponder.keyboardWillHideNotification,
-            object: nil,
-            queue: .main
-        ) { _ in
-            withAnimation {
-                offset = 0
-            }
-        }
-    }
+
     private func removeKeyboardNotifications() {
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func updateStartTime() {
+        // 시간과 분을 Date로 변환
+        let hour = Int(viewModel.hourText) ?? 0
+        let minute = Int(viewModel.minuteText) ?? 0
+        
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: viewModel.selectedDate)
+        
+        // AM/PM 적용
+        components.hour = viewModel.isAM ? hour : hour + 12
+        components.minute = minute
+        
+        if let date = calendar.date(from: components) {
+            viewModel.startTime = date
+        }
     }
 }
 
@@ -203,9 +248,10 @@ struct DatePickerSheet: View {
 }
 
 struct TimeInputSection: View {
-    @State private var hourText: String = ""
-    @State private var minuteText: String = ""
-    @State private var isAM: Bool = true
+    @Binding var hourText: String
+    @Binding var minuteText: String
+    @Binding var isAM: Bool
+    var onTimeChange: () -> Void
     
     var body: some View {
         VStack(spacing: 10) {
@@ -290,6 +336,7 @@ struct ExerciseTypeSection: View {
     @Binding var selectedExerciseType: String?
     @Binding var showDropdown: Bool
     @State private var selectedItem: String = "운동 선택"
+    var onExerciseSelected: ((Int) -> Void)? = nil
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -308,6 +355,7 @@ struct ExerciseTypeSection: View {
                         withAnimation(.spring()) {
                             selectedExerciseType = "유산소"
                             showDropdown = true
+                            onExerciseSelected?(1) // 유산소는 ID 1로 가정
                         }
                     } label: {
                         Text("유산소")
@@ -325,6 +373,7 @@ struct ExerciseTypeSection: View {
                         withAnimation(.spring()) {
                             selectedExerciseType = "근력"
                             showDropdown = true
+                            onExerciseSelected?(2) // 근력은 ID 2로 가정
                         }
                     } label: {
                         Text("근력")
@@ -362,7 +411,10 @@ struct ExerciseTypeSection: View {
                 DropdownContent(
                     selectedExerciseType: selectedExerciseType,
                     selectedItem: $selectedItem,
-                    isExpanded: $showDropdown
+                    isExpanded: $showDropdown,
+                    onItemSelected: { itemId in
+                        onExerciseSelected?(itemId)
+                    }
                 )
                 .background(Color.fitculatorBackgroundColor)
                 .cornerRadius(10)
@@ -400,7 +452,7 @@ struct ExerciseTypeButton: View {
 }
 
 struct ExerciseTimeSection: View {
-    @State private var exerciseTime: String = ""
+    @Binding var exerciseTime: String
     @Binding var currentField: Field?
     @FocusState private var focused: Bool
     
@@ -441,8 +493,8 @@ struct ExerciseTimeSection: View {
 }
 
 struct HeartRateSection: View {
-    @State private var minHeartRate: String = ""
-    @State private var maxHeartRate: String = ""
+    @Binding var minHeartRate: String
+    @Binding var maxHeartRate: String
     @Binding var currentField: Field?
     @FocusState private var focusedField: Field?
     
@@ -515,7 +567,7 @@ struct HeartRateField: View {
 }
 
 struct MemoSection: View {
-    @State private var memoText: String = ""
+    @Binding var memoText: String
     @Binding var currentField: Field?
     @FocusState private var focused: Bool
     
@@ -529,12 +581,16 @@ struct MemoSection: View {
             }
             
             CustomTextView(text: $memoText, onFocus: { isFocused in
-                currentField = isFocused ? .memo : nil
+                // 포커스 상태 변경 시 currentField 업데이트
+                withAnimation {
+                    currentField = isFocused ? .memo : nil
+                }
+                print("메모 포커스: \(isFocused), 현재 필드: \(String(describing: currentField))")
             })
-                .frame(height: 200)
-                .padding()
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(8)
+            .frame(height: 200)
+            .padding()
+            .background(Color.gray.opacity(0.2))
+            .cornerRadius(8)
         }
         .padding(.horizontal, 20)
     }
@@ -542,22 +598,57 @@ struct MemoSection: View {
 
 struct ButtonSection: View {
     @ObservedObject var viewModel: AddViewModel
+    @Environment(\.presentationMode) var presentationMode
     var body: some View {
         HStack {
             Button {
                 viewModel.submitExerciseRecord()
+                presentationMode.wrappedValue.dismiss()
+                
             } label: {
                 Text("메모")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(Color.gray)
+                    .background(viewModel.isFormValid ? Color.blue : Color.gray)
                     .clipShape(.capsule)
             }
+            .disabled(!viewModel.isFormValid)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
     }
 }
 
+
+struct KeyboardHandlingModifier: ViewModifier {
+    let geometry: GeometryProxy
+    @Binding var offset: CGFloat
+    
+    func body(content: Content) -> some View {
+        content.onAppear {
+            setupKeyboardNotifications()
+        }
+    }
+    
+    private func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
+            let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect ?? .zero
+            let textFieldPosition = geometry.size.height * 0.7
+            let overlap = textFieldPosition + keyboardFrame.height - geometry.size.height
+            
+            if overlap > 0 {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    offset = -overlap - 20
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
+            withAnimation(.easeOut(duration: 0.3)) {
+                offset = 0
+            }
+        }
+    }
+}
