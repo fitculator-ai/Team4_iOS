@@ -120,6 +120,7 @@
 "average_heart_rate" = "Average Heart Rate";
 "time" = "Time";
 "intensity" = "Intensity";
+"over" = "over";
 
 // My Page
 "my_page" = "My Page";
@@ -128,3 +129,7 @@
 
 "fatigue" = "Fatigue";
 "exercise_record" = "Exercise Record";
+
+// Record Detail
+"record_hour" = "Hour";
+"record_avg_rate" = "Avg BPM";

@@ -38,7 +38,6 @@ struct HomeView: View {
                             homeBtnAction: {
                             
                             }, calendarBtnAction: { date in
-                                print("보고싶은 날자는 \(date)")
                                 viewModel.selectedDate = date
                                 viewModel.fetchDataForDateHistory(date)
                             }, notificationBtnAction: {})
